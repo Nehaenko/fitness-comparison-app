@@ -244,23 +244,3 @@ src/app/
 ```
 
 Route groups such as `(auth)` and `(protected)` organise the application without appearing in its URLs.
-
-## Important data decisions
-
-- Store structured application data in PostgreSQL.
-- Store progress-photo files in object storage and keep only their URLs and metadata in PostgreSQL.
-- Preserve completed workout history when routines are edited or deleted.
-- Store a local exercise snapshot with routines and completed workouts so external API changes do not corrupt existing data.
-- Treat measurement history as the canonical source for body measurements. A progress entry may optionally reference or snapshot the user’s weight for that date.
-- Apply ownership and authorization checks in the data-access layer for every query and mutation.
-
-## implementation order
-
-1. Authentication and protected application layout
-2. User profile and unit preferences
-3. Routine and workout builder
-4. Active workout logging
-5. Completed workout history
-6. Measurements and charts
-7. Progress-photo upload and gallery
-8. Before-and-after photo comparison
