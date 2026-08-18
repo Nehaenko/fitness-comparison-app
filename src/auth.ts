@@ -5,6 +5,7 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { db } from "@/db";
 import {
     accounts,
+    profiles,
     sessions,
     users,
     verificationTokens,
@@ -20,5 +21,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     providers: [Google],
     session: {
         strategy: "database",
+    },
+    events: {
+        createUser: async ({ user }) => {
+            if (!user.id) return;
+
+            await db
+                .insert(profiles)
+                .values({
+                    userId: user.id,
+                    displayName: user.name?.trim() || "Forma user",
+                })
+                .onConflictDoNothing({ target: profiles.userId });
+        },
     },
 });

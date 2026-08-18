@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 
-import Header from "../components/layout/header/header";
-
 export const metadata: Metadata = {
   title: "Forma — Private fitness companion",
   description: "Plan workouts, track progress, and compare your results.",
