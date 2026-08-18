@@ -4,8 +4,16 @@ import {
     pgTable,
     primaryKey,
     text,
+    pgEnum,
     timestamp,
 } from "drizzle-orm/pg-core";
+
+export const weightUnitEnum = pgEnum("weight_unit", ["kg", "lb"]);
+
+export const measurementUnitEnum = pgEnum(
+    "measurement_unit",
+    ["cm", "in"],
+);
 
 export const users = pgTable("users", {
     id: text("id")
@@ -15,6 +23,31 @@ export const users = pgTable("users", {
     email: text("email").unique(),
     emailVerified: timestamp("email_verified", { mode: "date" }),
     image: text("image"),
+});
+
+export const profiles = pgTable("profiles", {
+    userId: text("user_id")
+        .primaryKey()
+        .references(() => users.id, { onDelete: "cascade" }),
+    displayName: text("display_name").notNull(),
+    weightUnit: weightUnitEnum("weight_unit")
+        .notNull()
+        .default("kg"),
+    measurementUnit: measurementUnitEnum("measurement_unit")
+        .notNull()
+        .default("cm"),
+    createdAt: timestamp("created_at", {
+        withTimezone: true,
+        mode: "date",
+    })
+        .defaultNow()
+        .notNull(),
+    updatedAt: timestamp("updated_at", {
+        withTimezone: true,
+        mode: "date",
+    })
+        .defaultNow()
+        .notNull(),
 });
 
 export const accounts = pgTable(

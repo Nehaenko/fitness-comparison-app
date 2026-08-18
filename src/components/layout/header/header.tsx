@@ -1,5 +1,7 @@
-import {auth, signOut} from "@/auth";
+import {auth} from "@/auth";
+import {logoutAction} from "@/helpers/authActions";
 import Menu from "@/components/layout/header/menu";
+import {getAuthenticatedUserProfile} from "@/app/(protected)/profile/data";
 
 import Logo from "./logo";
 
@@ -8,13 +10,10 @@ export default async function Header() {
 
     if (!session?.user) return null;
 
-    const logoutAction = async () => {
-        "use server";
-        await signOut({redirectTo: "/"});
-    };
+    const profile = await getAuthenticatedUserProfile();
+    const displayName = profile.displayName;
 
     const hour = new Date().getHours();
-
     const result =
         hour < 12 ? "morning" :
             hour < 18 ? "afternoon" :
@@ -28,12 +27,18 @@ export default async function Header() {
 
                 <div className="hidden text-center md:block">
                     <p className="font-semibold text-primary">
-                        Good {result}, {session.user.name || "Forma user"}
+                        Good {result}, {displayName}
                     </p>
                 </div>
 
                 <div className="justify-self-end">
-                    <Menu user={session.user} logoutAction={logoutAction}/>
+                    <Menu
+                        user={{
+                            name: displayName,
+                            email: session.user.email,
+                        }}
+                        logoutAction={logoutAction}
+                    />
                 </div>
             </div>
         </header>
