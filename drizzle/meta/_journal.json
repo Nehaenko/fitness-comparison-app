@@ -15,6 +15,13 @@
       "when": 1787063961548,
       "tag": "0001_add_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788273943472,
+      "tag": "0002_goofy_wraith",
+      "breakpoints": true
     }
   ]
 }
