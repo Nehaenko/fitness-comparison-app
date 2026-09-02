@@ -27,7 +27,7 @@ export default async function ProfilePage() {
 
                     <div className="mt-4 flex items-center gap-5 md:mt-5 md:gap-8">
                         <div
-                            className="flex size-15 shrink-0 items-center justify-center rounded-3xl bg-brand font-display text-[2rem] text-inverse"
+                            className="flex size-15 shrink-0 items-center justify-center rounded-3xl bg-brand font-display text-3xl text-inverse"
                             aria-hidden="true"
                         >
                             {firstNameLetter}
@@ -51,11 +51,11 @@ export default async function ProfilePage() {
 
                         <form action={updateUserName} className="space-y-5 px-7 py-6">
                             <label className="block">
-                                <span className="text-small font-semibold uppercase tracking-[0.04em] text-secondary">
+                                <span className="form-label">
                                     Name
                                 </span>
                                 <input
-                                    className="mt-2.5 h-14 w-full rounded-control border border-border bg-surface-subtle px-5 text-base text-primary transition"
+                                    className="form-control"
                                     name="account-name"
                                     defaultValue={userName}
                                     autoComplete="name"
@@ -66,11 +66,11 @@ export default async function ProfilePage() {
                             </label>
 
                             <label className="block">
-                                <span className="text-small font-semibold uppercase tracking-[0.04em] text-secondary">
+                                <span className="form-label">
                                     Email
                                 </span>
                                 <input
-                                    className="mt-2.5 h-14 w-full cursor-not-allowed rounded-control border border-border bg-surface-subtle px-5 text-base text-primary"
+                                    className="form-control cursor-not-allowed"
                                     type="email"
                                     value={userEmail}
                                     readOnly

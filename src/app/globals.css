@@ -166,7 +166,43 @@ textarea {
   color: var(--forma-text-primary);
 }
 
-:focus-visible {
-  outline: 2px solid var(--forma-focus);
-  outline-offset: 2px;
+/*Inputs*/
+
+.form-label {
+  color: var(--forma-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  height: 3rem;
+  margin-top: 0.625rem;
+  padding: 0 1.25rem;
+  border: 1px solid var(--forma-border);
+  border-radius: var(--forma-radius-control);
+  outline: none;
+  background: var(--forma-surface-subtle);
+  box-shadow: none;
+  color: var(--forma-text-primary);
+}
+
+.form-control::placeholder {
+  color: var(--forma-text-secondary);
+}
+
+.form-control:is(:hover, :focus, :focus-visible, :active) {
+  border-color: var(--forma-border);
+  outline: none;
+  background: var(--forma-surface-subtle);
+  box-shadow: none;
+}
+
+textarea.form-control {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  resize: none;
 }
