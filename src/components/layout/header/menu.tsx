@@ -121,7 +121,7 @@ export default function Menu({ user, logoutAction }: MenuProps) {
                     href={item.href}
                     aria-current={isActive ? "page" : undefined}
                     onClick={() => setIsOpen(false)}
-                    className={`flex min-h-14 items-center gap-4 rounded-control px-4 text-[17px] font-semibold transition ${
+                    className={`flex min-h-14 items-center gap-4 rounded-control px-4 text-base font-semibold transition ${
                       isActive
                         ? "bg-brand-soft text-brand"
                         : "text-primary hover:bg-surface-subtle"
