@@ -1,8 +1,16 @@
-import {createRoutineAction} from "../actions";
+"use client";
+
+import { useState } from "react";
+
 import Link from "next/link";
 import PrimaryButton from "@/components/layout/actionComponents/primaryButton";
+import WorkoutsBuilder from "@/components/routines/workoutsBuilder";
+import type { Workout } from "@/components/routines/sortableWorkout";
+import { createRoutineAction } from "../actions";
 
 export default function RoutineNewPage() {
+    const [workouts, setWorkouts] = useState<Workout[]>([]);
+
     return (
         <main className="flex-1 px-5 py-7 md:px-12 md:py-14">
             <div className="max-w-5xl">
@@ -31,7 +39,7 @@ export default function RoutineNewPage() {
                             New Routine
                         </h1>
                         <p className="mt-1 text-base text-secondary">
-                            0 workouts
+                            {workouts.length} {workouts.length === 1 ? "workout" : "workouts"}
                         </p>
                     </div>
                 </header>
@@ -67,6 +75,11 @@ export default function RoutineNewPage() {
                             className="form-control"
                         />
                     </label>
+
+                    <WorkoutsBuilder
+                        workouts={workouts}
+                        setWorkouts={setWorkouts}
+                    />
 
                     <PrimaryButton
                         type="submit"

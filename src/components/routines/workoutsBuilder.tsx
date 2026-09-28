@@ -1,0 +1,106 @@
+import { DragDropProvider, type DragEndEvent } from "@dnd-kit/react";
+import { isSortableOperation } from "@dnd-kit/react/sortable";
+import type { Dispatch, SetStateAction } from "react";
+
+import SortableWorkout, { type Workout } from "./sortableWorkout";
+
+type WorkoutsBuilderProps = {
+    workouts: Workout[];
+    setWorkouts: Dispatch<SetStateAction<Workout[]>>;
+};
+
+function moveWorkout(workouts: Workout[], from: number, to: number) {
+    const reorderedWorkouts = [...workouts];
+    const [movedWorkout] = reorderedWorkouts.splice(from, 1);
+
+    if (!movedWorkout) {
+        return workouts;
+    }
+
+    reorderedWorkouts.splice(to, 0, movedWorkout);
+
+    return reorderedWorkouts;
+}
+
+export default function WorkoutsBuilder({
+    workouts,
+    setWorkouts,
+}: WorkoutsBuilderProps) {
+    const addWorkout = () => {
+        setWorkouts((currentWorkouts) => [
+            ...currentWorkouts,
+            {
+                id: crypto.randomUUID(),
+                name: `Workout ${currentWorkouts.length + 1}`,
+            },
+        ]);
+    };
+
+    const removeWorkout = (id: string) => {
+        setWorkouts((currentWorkouts) =>
+            currentWorkouts.filter((workout) => workout.id !== id),
+        );
+    };
+
+    const renameWorkout = (id: string, name: string) => {
+        setWorkouts((currentWorkouts) =>
+            currentWorkouts.map((workout) =>
+                workout.id === id ? { ...workout, name } : workout,
+            ),
+        );
+    };
+
+    const reorderWorkouts = (event: DragEndEvent) => {
+        if (event.canceled || !isSortableOperation(event.operation)) {
+            return;
+        }
+
+        const source = event.operation.source;
+
+        if (!source) {
+            return;
+        }
+
+        const { initialIndex, index } = source;
+
+        if (initialIndex === index) {
+            return;
+        }
+
+        setWorkouts((currentWorkouts) =>
+            moveWorkout(currentWorkouts, initialIndex, index),
+        );
+    };
+
+    return (
+        <>
+            <button
+                type="button"
+                onClick={addWorkout}
+                className="w-full rounded-control border border-dashed border-border py-4 font-semibold text-secondary"
+            >
+                + Add workout
+            </button>
+
+            <input
+                type="hidden"
+                name="workouts"
+                value={JSON.stringify(workouts)}
+            />
+
+            <DragDropProvider onDragEnd={reorderWorkouts}>
+                <div className="space-y-3">
+                    {workouts.map((workout, index) => (
+                        <SortableWorkout
+                            key={workout.id}
+                            workout={workout}
+                            index={index}
+                            onRename={renameWorkout}
+                            onRemove={removeWorkout}
+                        />
+                    ))}
+                </div>
+            </DragDropProvider>
+        </>
+    );
+}

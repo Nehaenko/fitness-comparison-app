@@ -1,14 +1,15 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
-import {
-    activateRoutineForUser,
-    createRoutineForUser,
-    deleteRoutineForUser,
-    updateRoutineForUser,
-} from "@/db/routines";
+import {revalidatePath} from "next/cache";
+import {redirect} from "next/navigation";
+import {auth} from "@/auth";
+import {activateRoutineForUser, createRoutineWithWorkoutsForUser, deleteRoutineForUser, updateRoutineWithWorkoutsForUser,} from "@/db/routines";
+
+type Workout = {
+    id: string;
+    name: string;
+    position: number;
+};
 
 const uuidPattern =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -50,11 +51,40 @@ function getRoutineValues(formData: FormData) {
     };
 }
 
+function getRoutineWorkoutsData(formData: FormData): Workout[] {
+    const rawWorkouts = formData.get("workouts");
+
+    if (typeof rawWorkouts !== "string") {
+        throw new Error("Routine workouts are missing or invalid");
+    }
+    const parsed: unknown = JSON.parse(rawWorkouts);
+
+    if (
+        !Array.isArray(parsed) ||
+        !parsed.every(
+            (item) =>
+                typeof item === "object" &&
+                item !== null &&
+                typeof item.id === "string" &&
+                typeof item.name === "string"
+        )
+    ) {
+        throw new Error("Invalid workout data");
+    }
+
+    return parsed.map((workout, index) => ({
+        id: workout.id,
+        name: workout.name,
+        position: index,
+    }));
+}
+
 export async function createRoutineAction(formData: FormData) {
     const userId = await requireAuthenticatedUserId();
     const values = getRoutineValues(formData);
+    const workouts = getRoutineWorkoutsData(formData);
 
-    const routine = await createRoutineForUser(userId, values);
+    const routine = await createRoutineWithWorkoutsForUser(userId, values, workouts);
 
     if (!routine) {
         throw new Error("Unable to create routine");
@@ -74,10 +104,12 @@ export async function updateRoutineAction(
     validateRoutineId(routineId);
 
     const values = getRoutineValues(formData);
-    const routine = await updateRoutineForUser(
+    const workouts = getRoutineWorkoutsData(formData);
+    const routine = await updateRoutineWithWorkoutsForUser(
         routineId,
         userId,
         values,
+        workouts,
     );
 
     if (!routine) {
