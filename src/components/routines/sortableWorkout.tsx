@@ -20,14 +20,13 @@ export default function SortableWorkout({
     onRename,
 }: SortableWorkoutProps) {
     const [isEditing, setIsEditing] = useState(false);
-    const [name, setName] = useState(workout.name);
     const { ref, handleRef, isDragging } = useSortable({
         id: workout.id,
         index,
     });
 
     const saveName = () => {
-        const trimmedName = name.trim();
+        const trimmedName = workout.name.trim();
 
         if (!trimmedName) {
             return;
@@ -71,8 +70,10 @@ export default function SortableWorkout({
                 <input
                     id={`workout-${workout.id}-name`}
                     type="text"
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
+                    value={workout.name}
+                    onChange={(event) =>
+                        onRename(workout.id, event.target.value)
+                    }
                     aria-label="Workout name"
                     className="min-w-0 flex-1 rounded-control border border-border bg-surface px-3 py-2 outline-none"
                     autoFocus

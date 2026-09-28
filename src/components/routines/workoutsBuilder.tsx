@@ -82,6 +82,12 @@ export default function WorkoutsBuilder({
                 + Add workout
             </button>
 
+            <input
+                type="hidden"
+                name="workouts"
+                value={JSON.stringify(workouts)}
+            />
+
             <DragDropProvider onDragEnd={reorderWorkouts}>
                 <div className="space-y-3">
                     {workouts.map((workout, index) => (

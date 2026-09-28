@@ -76,7 +76,8 @@ export default async function RoutinesPage() {
                                 )}
 
                                 <p className="mt-4 text-small text-secondary">
-                                    0 workouts
+                                    {routine.workoutCount}{" "}
+                                    {routine.workoutCount === 1 ? "workout" : "workouts"}
                                 </p>
 
                                 <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-divider pt-5">
