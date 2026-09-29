@@ -3,10 +3,12 @@ import { isSortableOperation } from "@dnd-kit/react/sortable";
 import type { Dispatch, SetStateAction } from "react";
 
 import SortableWorkout, { type Workout } from "./sortableWorkout";
+import {Exercise} from "@/db/schema";
 
 type WorkoutsBuilderProps = {
     workouts: Workout[];
     setWorkouts: Dispatch<SetStateAction<Workout[]>>;
+    exercises: Exercise[];
 };
 
 function moveWorkout(workouts: Workout[], from: number, to: number) {
@@ -23,9 +25,7 @@ function moveWorkout(workouts: Workout[], from: number, to: number) {
 }
 
 export default function WorkoutsBuilder({
-    workouts,
-    setWorkouts,
-}: WorkoutsBuilderProps) {
+    workouts, setWorkouts, exercises}: WorkoutsBuilderProps) {
     const addWorkout = () => {
         setWorkouts((currentWorkouts) => [
             ...currentWorkouts,
@@ -97,6 +97,7 @@ export default function WorkoutsBuilder({
                             index={index}
                             onRename={renameWorkout}
                             onRemove={removeWorkout}
+                            exercises={exercises}
                         />
                     ))}
                 </div>
