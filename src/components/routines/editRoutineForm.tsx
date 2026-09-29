@@ -7,6 +7,7 @@ import PrimaryButton from "@/components/layout/actionComponents/primaryButton";
 import WorkoutsBuilder from "@/components/routines/workoutsBuilder";
 import type {Workout} from "@/components/routines/sortableWorkout";
 import {updateRoutineAction} from "@/app/(protected)/routines/actions";
+import {Exercise} from "@/db/schema";
 
 type EditRoutineFormProps = {
     routine: {
@@ -15,11 +16,13 @@ type EditRoutineFormProps = {
         description: string | null;
     };
     initialWorkouts: Workout[];
+    exercises: Exercise[];
 };
 
 export default function EditRoutineForm({
                                             routine,
                                             initialWorkouts,
+                                            exercises
                                         }: EditRoutineFormProps) {
     const [workouts, setWorkouts] =
         useState<Workout[]>(initialWorkouts);
@@ -91,6 +94,7 @@ export default function EditRoutineForm({
                     <WorkoutsBuilder
                         workouts={workouts}
                         setWorkouts={setWorkouts}
+                        exercises={exercises}
                     />
 
                     <PrimaryButton
