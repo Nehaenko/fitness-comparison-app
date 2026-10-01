@@ -31,6 +31,7 @@ export default async function EditRoutine({
             initialWorkouts={workouts.map((workout) => ({
                 id: workout.id,
                 name: workout.name,
+                exercises: [],
             }))}
             exercises={exercises}
         />
