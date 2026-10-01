@@ -1,11 +1,13 @@
 import {useState} from "react";
 
+import Icon from "@/components/layout/actionComponents/iconComponent";
 import type {Exercise} from "@/db/schema";
 import formatExerciseDetail from "@/helpers/exercise-formatting";
 
 type ExercisesFormData = {
     exercises: Exercise[];
     handleExerciseModalVisibility: () => void;
+    onAddExercise: (exercise: Exercise) => void;
 };
 
 const exerciseCategories = [
@@ -26,9 +28,10 @@ const exerciseCategories = [
 ];
 
 export default function ExercisesForm({
-    exercises,
-    handleExerciseModalVisibility,
-}: ExercisesFormData) {
+                                          exercises,
+                                          handleExerciseModalVisibility,
+                                          onAddExercise
+                                      }: ExercisesFormData) {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState("all");
@@ -70,7 +73,8 @@ export default function ExercisesForm({
             aria-modal="true"
             aria-labelledby="exercise-modal-title"
         >
-            <div className="flex h-[min(58rem,calc(100dvh-2rem))] w-full flex-col overflow-hidden rounded-panel bg-surface shadow-floating">
+            <div
+                className="flex h-[min(58rem,calc(100dvh-2rem))] w-full flex-col overflow-hidden rounded-panel bg-surface shadow-floating">
                 <header className="flex items-center justify-between border-b border-divider px-5 py-4">
                     <h2 id="exercise-modal-title" className="font-semibold text-primary">
                         Add Exercise
@@ -82,17 +86,7 @@ export default function ExercisesForm({
                         aria-label="Close exercise selection"
                         className="grid size-8 cursor-pointer place-items-center rounded-full text-primary"
                     >
-                        <svg
-                            aria-hidden="true"
-                            viewBox="0 0 24 24"
-                            className="size-5"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                        >
-                            <path d="M6 6l12 12M18 6 6 18"/>
-                        </svg>
+                        <Icon name="close" className="size-5"/>
                     </button>
                 </header>
 
@@ -149,10 +143,14 @@ export default function ExercisesForm({
                                     </p>
                                 </div>
 
-                                <span aria-hidden="true"
-                                    className="shrink-0 text-xl leading-none text-brand">
+                                <button type="button"
+                                        onClick={() => {
+                                            onAddExercise(exercise);
+                                            handleExerciseModalVisibility();
+                                        }}
+                                        className="shrink-0 text-xl leading-none text-brand">
                                     +
-                                </span>
+                                </button>
                             </div>
                         ))
                     ) : (
@@ -172,7 +170,7 @@ export default function ExercisesForm({
                             type="button"
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage((page) => page - 1)}
-                            className="rounded-control border border-border px-3 py-2 text-label font-semibold text-primary disabled:cursor-not-allowed disabled:text-tertiary"
+                            className="rounded-control border border-border px-3 py-2 text-label font-semibold text-primary disabled:cursor-not-allowed"
                         >
                             Previous
                         </button>
@@ -180,7 +178,7 @@ export default function ExercisesForm({
                             type="button"
                             disabled={currentPage >= totalPages}
                             onClick={() => setCurrentPage((page) => page + 1)}
-                            className="rounded-control border border-border px-3 py-2 text-label font-semibold text-primary disabled:cursor-not-allowed disabled:text-tertiary"
+                            className="rounded-control border border-border px-3 py-2 text-label font-semibold text-primary disabled:cursor-not-allowed"
                         >
                             Next
                         </button>

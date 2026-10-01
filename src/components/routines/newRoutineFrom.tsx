@@ -4,9 +4,10 @@ import Link from "next/link";
 import {createRoutineAction} from "@/app/(protected)/routines/actions";
 import WorkoutsBuilder from "@/components/routines/workoutsBuilder";
 import PrimaryButton from "@/components/layout/actionComponents/primaryButton";
+import Icon from "@/components/layout/actionComponents/iconComponent";
 import {useState} from "react";
 import type {Workout} from "@/components/routines/sortableWorkout";
-import {Exercise} from "@/db/schema";
+import type {Exercise} from "@/db/schema";
 
 type NewRoutineProps = {
     exercises: Exercise[];
@@ -24,18 +25,7 @@ export default function NewRoutineFrom({exercises}: NewRoutineProps) {
                         aria-label="Back to routines"
                         className="mt-2 text-secondary"
                     >
-                        <svg
-                            aria-hidden="true"
-                            viewBox="0 0 24 24"
-                            className="size-5"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <path d="M19 12H5M10 7l-5 5 5 5"/>
-                        </svg>
+                        <Icon name="arrow-left" className="size-5"/>
                     </Link>
 
                     <div>

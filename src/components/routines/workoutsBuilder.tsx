@@ -1,9 +1,11 @@
-import { DragDropProvider, type DragEndEvent } from "@dnd-kit/react";
-import { isSortableOperation } from "@dnd-kit/react/sortable";
-import type { Dispatch, SetStateAction } from "react";
+import {DragDropProvider, type DragEndEvent} from "@dnd-kit/react";
+import {isSortableOperation} from "@dnd-kit/react/sortable";
+import type {Dispatch, SetStateAction} from "react";
 
-import SortableWorkout, { type Workout } from "./sortableWorkout";
+import SortableWorkout from "./sortableWorkout";
+
 import type {Exercise} from "@/db/schema";
+import type {ConfiguredExercise, Workout} from "@/types/routine-builder";
 
 type WorkoutsBuilderProps = {
     workouts: Workout[];
@@ -25,16 +27,55 @@ function moveWorkout(workouts: Workout[], from: number, to: number) {
 }
 
 export default function WorkoutsBuilder({
-    workouts, setWorkouts, exercises}: WorkoutsBuilderProps) {
+                                            workouts, setWorkouts, exercises,
+                                        }: WorkoutsBuilderProps) {
     const addWorkout = () => {
-        setWorkouts((currentWorkouts) => [
-            ...currentWorkouts,
-            {
-                id: crypto.randomUUID(),
-                name: `Workout ${currentWorkouts.length + 1}`,
-            },
-        ]);
+        setWorkouts((currentWorkouts) => {
+            if (currentWorkouts.length >= 10) {
+                return currentWorkouts;
+            }
+
+            return [...currentWorkouts,
+                {
+                    id: crypto.randomUUID(),
+                    name: `Workout ${currentWorkouts.length + 1}`,
+                    exercises: [],
+                },
+            ]
+        });
     };
+
+    const addExerciseToWorkout = (
+        workoutId: string,
+        exercise: Exercise,
+    )=> {
+        const configuredExercise: ConfiguredExercise = {
+            id: crypto.randomUUID(),
+            exerciseId: exercise.id,
+            name: exercise.name,
+            muscleGroup: exercise.muscleGroup,
+            equipment: exercise.equipment,
+            sets: 3,
+            targetReps: 10,
+            restSeconds: 90,
+        }
+
+        setWorkouts((currentWorkouts) =>
+            currentWorkouts.map((currentWorkout) => {
+                if (currentWorkout.id !== workoutId) {
+                    return currentWorkout;
+                }
+
+                return {
+                    ...currentWorkout,
+                    exercises: [
+                        ...currentWorkout.exercises,
+                        configuredExercise,
+                    ],
+                };
+            }),
+        );
+    }
 
     const removeWorkout = (id: string) => {
         setWorkouts((currentWorkouts) =>
@@ -45,7 +86,7 @@ export default function WorkoutsBuilder({
     const renameWorkout = (id: string, name: string) => {
         setWorkouts((currentWorkouts) =>
             currentWorkouts.map((workout) =>
-                workout.id === id ? { ...workout, name } : workout,
+                workout.id === id ? {...workout, name} : workout,
             ),
         );
     };
@@ -61,7 +102,7 @@ export default function WorkoutsBuilder({
             return;
         }
 
-        const { initialIndex, index } = source;
+        const {initialIndex, index} = source;
 
         if (initialIndex === index) {
             return;
@@ -90,6 +131,7 @@ export default function WorkoutsBuilder({
                                 index={index}
                                 onRename={renameWorkout}
                                 onRemove={removeWorkout}
+                                onAddExercise={addExerciseToWorkout}
                                 exercises={exercises}
                             />
                         ))}

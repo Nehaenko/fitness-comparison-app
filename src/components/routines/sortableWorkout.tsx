@@ -1,18 +1,16 @@
 import {useState} from "react";
 import {useSortable} from "@dnd-kit/react/sortable";
+import Icon from "@/components/layout/actionComponents/iconComponent";
 import ExercisesForm from "@/components/routines/exercisesForm";
 import type {Exercise} from "@/db/schema";
-
-export type Workout = {
-    id: string;
-    name: string;
-};
+import type {Workout} from "@/types/routine-builder";
 
 type SortableWorkoutProps = {
     workout: Workout;
     index: number;
     onRemove: (id: string) => void;
     onRename: (id: string, name: string) => void;
+    onAddExercise: (workoutId: string, exercise: Exercise) => void;
     exercises: Exercise[];
 };
 
@@ -21,10 +19,11 @@ export default function SortableWorkout({
                                             index,
                                             onRemove,
                                             onRename,
+                                            onAddExercise,
                                             exercises,
                                         }: SortableWorkoutProps) {
     const [isEditing, setIsEditing] = useState(false);
-    const [showExerciseModal , setShowExerciseModal] = useState(false);
+    const [showExerciseModal, setShowExerciseModal] = useState(false);
     const [exerciseDropdownOpened, setExerciseDropdownOpened] = useState(false);
     const {ref, handleRef, isDragging} = useSortable({
         id: workout.id,
@@ -71,22 +70,11 @@ export default function SortableWorkout({
                         onClick={(event) => event.stopPropagation()}
                         className="cursor-grab touch-none text-tertiary"
                     >
-                        <svg
-                            aria-hidden="true"
-                            viewBox="0 0 24 24"
-                            className="size-4"
-                            fill="currentColor"
-                        >
-                            <circle cx="8" cy="7" r="1.25"/>
-                            <circle cx="16" cy="7" r="1.25"/>
-                            <circle cx="8" cy="12" r="1.25"/>
-                            <circle cx="16" cy="12" r="1.25"/>
-                            <circle cx="8" cy="17" r="1.25"/>
-                            <circle cx="16" cy="17" r="1.25"/>
-                        </svg>
+                        <Icon name="reorder" className="size-4"/>
                     </button>
 
-                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-surface-subtle text-label text-secondary">
+                    <span
+                        className="grid size-6 shrink-0 place-items-center rounded-full bg-surface-subtle text-label text-secondary">
                         {index + 1}
                     </span>
 
@@ -147,18 +135,7 @@ export default function SortableWorkout({
                         aria-label={`Remove ${workout.name}`}
                         className="grid size-8 place-items-center text-secondary"
                     >
-                        <svg
-                            aria-hidden="true"
-                            viewBox="0 0 24 24"
-                            className="size-4"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/>
-                        </svg>
+                        <Icon name="delete" className="size-4"/>
                     </button>
 
                     <button
@@ -170,48 +147,65 @@ export default function SortableWorkout({
                         aria-label={`${exerciseDropdownOpened ? "Collapse" : "Expand"} ${workout.name}`}
                         className="grid size-8 place-items-center text-secondary"
                     >
-                        <svg
-                            aria-hidden="true"
-                            viewBox="0 0 24 24"
+                        <Icon
+                            name="chevron-down"
                             className={`size-4 transition-transform ${
                                 exerciseDropdownOpened ? "rotate-180" : ""
                             }`}
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <path d="m8 10 4 4 4-4"/>
-                        </svg>
+                        />
                     </button>
                 </div>
 
-                {/*//TODO: when no exercises for routine show this button and text but if ther are - hide*/}
                 {exerciseDropdownOpened && (
-                    <div>
-                        <p className="border-t border-divider px-5 py-5 text-center text-small text-secondary">
-                            No exercises yet. Add your first exercise.
-                        </p>
+                    <>
 
-                        <button
-                            type="button"
-                            onClick={handleExerciseModalVisibility}
-                            className="flex w-full items-center gap-2 border-t border-divider px-5 py-4 text-left text-small font-semibold text-brand"
-                        >
-                            <span className="text-lg font-normal leading-none">+</span>
-                            Add exercise
-                        </button>
+                        <div>
+                            {workout.exercises.length === 0 && (
+                                <p className="border-t border-divider px-5 py-5 text-center text-small text-secondary">
+                                    No exercises yet. Add your first exercise.
+                                </p>
+                            )}
+                            {workout.exercises.length > 0 && (
+                                <div>
+                                    {workout.exercises.map((exercise) => (
+                                        <div key={exercise.id}>
+                                            <div className="flex">
+                                                <Icon name="reorder" className="size-4"/>
+                                                <p>{exercise.name}</p>
+                                                <button type="button">Edit</button>
+                                                <Icon name="delete" className="size-4"/>
+                                            </div>
+                                            <div>
+                                                <p>{exercise.sets} sets</p>
+                                                <p>{exercise.targetReps} reps</p>
+                                                <p>{exercise.restSeconds} rest</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            <button
+                                type="button"
+                                onClick={handleExerciseModalVisibility}
+                                className="flex w-full items-center gap-2 border-t border-divider px-5 py-4 text-left text-small font-semibold text-brand"
+                            >
+                                <span className="text-lg font-normal leading-none">+</span>
+                                Add exercise
+                            </button>
 
-                        {showExerciseModal && (
-                            <ExercisesForm
-                                exercises={exercises}
-                                handleExerciseModalVisibility={
-                                    handleExerciseModalVisibility
-                                }
-                            />
-                        )}
-                    </div>
+                            {showExerciseModal && (
+                                <ExercisesForm
+                                    exercises={exercises}
+                                    handleExerciseModalVisibility={
+                                        handleExerciseModalVisibility
+                                    }
+                                    onAddExercise={(exercise) =>
+                                        onAddExercise(workout.id, exercise)
+                                    }
+                                />
+                            )}
+                        </div>
+                    </>
                 )}
             </div>
         </>
