@@ -1,6 +1,6 @@
 "use client";
 
-import Icon from "@/components/layout/actionComponents/icon";
+import Icon from "@/components/layout/actionComponents/iconComponent";
 import type { ComponentProps } from "react";
 import { useFormStatus } from "react-dom";
 
@@ -12,7 +12,7 @@ type PrimaryButtonProps = {
     label: string;
     pendingLabel?: string;
     fullWidth?: boolean;
-    onClick?: () => void;
+    onClickAction?: () => void;
     ariaLabel?: string;
     iconName?: ComponentProps<typeof Icon>["name"];
 }
@@ -29,8 +29,7 @@ export default function PrimaryButton({
     variant,
     label,
     pendingLabel = "Please wait...",
-    fullWidth = true,
-    onClick,
+    fullWidth = true, onClickAction,
     ariaLabel,
     iconName,
 }: PrimaryButtonProps) {
@@ -42,7 +41,7 @@ export default function PrimaryButton({
         <button
             type={type}
             aria-label={ariaLabel}
-            onClick={onClick}
+            onClick={onClickAction}
             disabled={pending}
             aria-busy={pending}
             className={className}

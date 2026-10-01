@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import Icon from "@/components/layout/actionComponents/icon";
+import Icon from "@/components/layout/actionComponents/iconComponent";
 
 type MenuProps = {
   user: {
