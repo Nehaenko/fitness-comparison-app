@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {useSortable} from "@dnd-kit/react/sortable";
 import ExercisesForm from "@/components/routines/exercisesForm";
-import {Exercise} from "@/db/schema";
+import type {Exercise} from "@/db/schema";
 
 export type Workout = {
     id: string;
@@ -52,21 +52,29 @@ export default function SortableWorkout({
 
     return (
         <>
-            <div  ref={ref}
-                  className={`rounded-control border border-border bg-surface-subtle p-3 ${isDragging ? "opacity-60" : ""
-            }`}>
-                <div className="flex items-center gap-3"
-                    onClick={handleExerciseDropdownOpen}>
+            <div
+                ref={ref}
+                className={`overflow-hidden rounded-card border bg-surface ${
+                    exerciseDropdownOpened
+                        ? "border-brand"
+                        : "border-border"
+                } ${isDragging ? "opacity-60" : ""}`}
+            >
+                <div
+                    className="flex min-h-14 items-center gap-2 px-4"
+                    onClick={handleExerciseDropdownOpen}
+                >
                     <button
                         ref={handleRef}
                         type="button"
                         aria-label={`Reorder ${workout.name}`}
-                        className="cursor-grab touch-none text-secondary"
+                        onClick={(event) => event.stopPropagation()}
+                        className="cursor-grab touch-none text-tertiary"
                     >
                         <svg
                             aria-hidden="true"
                             viewBox="0 0 24 24"
-                            className="size-5"
+                            className="size-4"
                             fill="currentColor"
                         >
                             <circle cx="8" cy="7" r="1.25"/>
@@ -78,7 +86,9 @@ export default function SortableWorkout({
                         </svg>
                     </button>
 
-                    <span className="text-small text-secondary">{index + 1}.</span>
+                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-surface-subtle text-label text-secondary">
+                        {index + 1}
+                    </span>
 
                     {isEditing ? (
                         <input
@@ -88,27 +98,41 @@ export default function SortableWorkout({
                             onChange={(event) =>
                                 onRename(workout.id, event.target.value)
                             }
+                            onClick={(event) => event.stopPropagation()}
                             aria-label="Workout name"
-                            className="min-w-0 flex-1 rounded-control border border-border bg-surface px-3 py-2 outline-none"
+                            className="min-w-0 flex-1 rounded-control border border-border bg-surface px-3 py-1.5 outline-none"
                             autoFocus
                         />
                     ) : (
-                        <p className="min-w-0 flex-1 font-semibold">{workout.name}</p>
+                        <div className="flex min-w-0 flex-1 items-baseline gap-1.5">
+                            <p className="truncate text-small font-semibold text-primary">
+                                {workout.name}
+                            </p>
+                            <span className="shrink-0 text-label text-secondary">
+                                0 exercises
+                            </span>
+                        </div>
                     )}
 
                     {isEditing ? (
                         <button
                             type="button"
-                            onClick={saveName}
-                            className="font-semibold text-brand"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                saveName();
+                            }}
+                            className="text-label font-semibold text-brand"
                         >
                             Save
                         </button>
                     ) : (
                         <button
                             type="button"
-                            onClick={() => setIsEditing(true)}
-                            className="text-small font-semibold"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                setIsEditing(true);
+                            }}
+                            className="px-1 text-label text-secondary"
                         >
                             Rename
                         </button>
@@ -116,20 +140,67 @@ export default function SortableWorkout({
 
                     <button
                         type="button"
-                        onClick={() => onRemove(workout.id)}
-                        className="text-small text-danger"
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            onRemove(workout.id);
+                        }}
+                        aria-label={`Remove ${workout.name}`}
+                        className="grid size-8 place-items-center text-secondary"
                     >
-                        Remove
+                        <svg
+                            aria-hidden="true"
+                            viewBox="0 0 24 24"
+                            className="size-4"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/>
+                        </svg>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            handleExerciseDropdownOpen();
+                        }}
+                        aria-label={`${exerciseDropdownOpened ? "Collapse" : "Expand"} ${workout.name}`}
+                        className="grid size-8 place-items-center text-secondary"
+                    >
+                        <svg
+                            aria-hidden="true"
+                            viewBox="0 0 24 24"
+                            className={`size-4 transition-transform ${
+                                exerciseDropdownOpened ? "rotate-180" : ""
+                            }`}
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="m8 10 4 4 4-4"/>
+                        </svg>
                     </button>
                 </div>
 
+                {/*//TODO: when no exercises for routine show this button and text but if ther are - hide*/}
                 {exerciseDropdownOpened && (
-                    <div className="p-5">
+                    <div>
+                        <p className="border-t border-divider px-5 py-5 text-center text-small text-secondary">
+                            No exercises yet. Add your first exercise.
+                        </p>
+
                         <button
                             type="button"
                             onClick={handleExerciseModalVisibility}
+                            className="flex w-full items-center gap-2 border-t border-divider px-5 py-4 text-left text-small font-semibold text-brand"
                         >
-                            + Add Exercise
+                            <span className="text-lg font-normal leading-none">+</span>
+                            Add exercise
                         </button>
 
                         {showExerciseModal && (

@@ -3,7 +3,7 @@ import { isSortableOperation } from "@dnd-kit/react/sortable";
 import type { Dispatch, SetStateAction } from "react";
 
 import SortableWorkout, { type Workout } from "./sortableWorkout";
-import {Exercise} from "@/db/schema";
+import type {Exercise} from "@/db/schema";
 
 type WorkoutsBuilderProps = {
     workouts: Workout[];
@@ -74,14 +74,6 @@ export default function WorkoutsBuilder({
 
     return (
         <>
-            <button
-                type="button"
-                onClick={addWorkout}
-                className="w-full rounded-control border border-dashed border-border py-4 font-semibold text-secondary"
-            >
-                + Add workout
-            </button>
-
             <input
                 type="hidden"
                 name="workouts"
@@ -89,17 +81,28 @@ export default function WorkoutsBuilder({
             />
 
             <DragDropProvider onDragEnd={reorderWorkouts}>
-                <div className="space-y-3">
-                    {workouts.map((workout, index) => (
-                        <SortableWorkout
-                            key={workout.id}
-                            workout={workout}
-                            index={index}
-                            onRename={renameWorkout}
-                            onRemove={removeWorkout}
-                            exercises={exercises}
-                        />
-                    ))}
+                <div className="space-y-4">
+                    <div className="space-y-3">
+                        {workouts.map((workout, index) => (
+                            <SortableWorkout
+                                key={workout.id}
+                                workout={workout}
+                                index={index}
+                                onRename={renameWorkout}
+                                onRemove={removeWorkout}
+                                exercises={exercises}
+                            />
+                        ))}
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={addWorkout}
+                        className="flex w-full items-center justify-center gap-2 rounded-control border border-dashed border-border-strong py-4 text-small font-semibold text-primary"
+                    >
+                        <span className="text-lg font-normal leading-none">+</span>
+                        Add workout
+                    </button>
                 </div>
             </DragDropProvider>
         </>
