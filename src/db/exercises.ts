@@ -10,12 +10,12 @@ import {exercises} from "@/db/schema";
 // searchExercises(searchText)
 // getExerciseById(exerciseId)
 
-type Exercise = {
-    externalId: string;
-    name: string;
-    muscleGroup: string;
-    equipment: string;
-}
+// type Exercise = {
+//     externalId: string;
+//     name: string;
+//     muscleGroup: string;
+//     equipment: string;
+// }
 
 export async function getExercises() {
     return db
