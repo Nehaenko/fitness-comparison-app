@@ -6,7 +6,7 @@ import WorkoutsBuilder from "@/components/routines/workoutsBuilder";
 import PrimaryButton from "@/components/layout/actionComponents/primaryButton";
 import Icon from "@/components/layout/actionComponents/iconComponent";
 import {useState} from "react";
-import type {Workout} from "@/components/routines/sortableWorkout";
+import type {Workout} from "@/types/routine-builder";
 import type {Exercise} from "@/db/schema";
 
 type NewRoutineProps = {
