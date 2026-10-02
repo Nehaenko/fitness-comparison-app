@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
+import Icon from "@/components/layout/actionComponents/iconComponent";
 
 export type AuthMode = "login" | "create-account";
 
@@ -28,7 +29,7 @@ export function AuthCard({ mode }: { mode: AuthMode }) {
     <section className="w-full max-w-95 rounded-2xl bg-white px-8 py-8 shadow-[0_24px_70px_rgba(16,24,20,0.18)] sm:px-9 sm:py-9">
       <div className="mb-8 flex items-center gap-2.5">
         <span className="grid size-7 place-items-center rounded-lg bg-[#287052] text-white">
-          <BrandIcon />
+          <Icon name="brand" className="size-4" />
         </span>
         <span className="font-serif text-lg font-bold tracking-tight text-[#181a19]">
           Forma
@@ -60,19 +61,5 @@ export function AuthCard({ mode }: { mode: AuthMode }) {
         </Link>
       </p>
     </section>
-  );
-}
-
-function BrandIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4">
-      <path
-        d="M7 8.25v7.5M4.5 9.75v4.5M17 8.25v7.5m2.5-6v4.5M7 12h10M10 5.5v2.75m4-2.75v2.75"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.8"
-      />
-    </svg>
   );
 }
