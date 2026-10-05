@@ -11,9 +11,10 @@ import type {Exercise} from "@/db/schema";
 
 type NewRoutineProps = {
     exercises: Exercise[];
+    weightUnit: string;
 };
 
-export default function NewRoutineFrom({exercises}: NewRoutineProps) {
+export default function NewRoutineFrom({exercises, weightUnit}: NewRoutineProps) {
     const [workouts, setWorkouts] = useState<Workout[]>([]);
 
     return (
@@ -74,6 +75,7 @@ export default function NewRoutineFrom({exercises}: NewRoutineProps) {
                         workouts={workouts}
                         setWorkouts={setWorkouts}
                         exercises={exercises}
+                        weightUnit={weightUnit}
                     />
 
                     <PrimaryButton

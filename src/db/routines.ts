@@ -1,8 +1,9 @@
 import "server-only";
 
-import {and, eq, inArray, sql, count, getTableColumns} from "drizzle-orm";
+import {and, eq, inArray, sql, asc, desc} from "drizzle-orm";
 import type {BatchItem} from "drizzle-orm/batch";
 import {db} from "@/db";
+import {WorkoutTemplate} from "@/db/schema";
 
 import {routines, workoutTemplates, type Routine} from "@/db/schema";
 import {randomUUID} from "node:crypto";
@@ -18,7 +19,13 @@ type WorkoutValues = {
     position: number;
 }
 
-export type RoutineWithWorkoutCount = Routine & {
+type WorkoutSummary = Pick<
+    WorkoutTemplate,
+    "id" | "name" | "position"
+>;
+
+export type RoutineWithWorkouts = Routine & {
+    workouts: WorkoutSummary[];
     workoutCount: number;
 }
 
@@ -58,21 +65,56 @@ function normalizeWorkoutValues(workouts: WorkoutValues[]) {
     });
 }
 
-export async function getRoutinesWithWorkoutCountByUserId(userId: string): Promise<RoutineWithWorkoutCount[]> {
-    return db
-        .select({
-            ...getTableColumns(routines),
-            workoutCount: count(workoutTemplates.id),
-        })
+export async function getRoutinesWithWorkoutsByUserId(
+    userId: string,
+): Promise<RoutineWithWorkouts[]> {
+    const userRoutines = await db
+        .select()
         .from(routines)
-        .leftJoin(
-            workoutTemplates,
-            eq(workoutTemplates.routineId, routines.id),
-        )
+        .where(eq(routines.userId, userId))
+        .orderBy(
+            desc(routines.isActive),
+            desc(routines.createdAt),
+        );
+
+    if (userRoutines.length === 0) {
+        return [];
+    }
+
+    const routineIds = userRoutines.map(
+        (routine) => routine.id,
+    );
+
+    const workouts = await db
+        .select({
+            id: workoutTemplates.id,
+            routineId: workoutTemplates.routineId,
+            name: workoutTemplates.name,
+            position: workoutTemplates.position,
+        })
+        .from(workoutTemplates)
         .where(
-            eq(routines.userId, userId),
+            inArray(
+                workoutTemplates.routineId,
+                routineIds,
+            ),
         )
-        .groupBy(routines.id);
+        .orderBy(
+            asc(workoutTemplates.position),
+        );
+
+    return userRoutines.map((routine) => {
+        const routineWorkouts = workouts.filter(
+            (workout) =>
+                workout.routineId === routine.id,
+        );
+
+        return {
+            ...routine,
+            workouts: routineWorkouts,
+            workoutCount: routineWorkouts.length,
+        };
+    });
 }
 
 export async function getRoutinesByUserId(

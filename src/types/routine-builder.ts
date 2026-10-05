@@ -7,6 +7,7 @@ export type ConfiguredExercise = {
     sets: number;
     targetReps: number;
     restSeconds: number;
+    targetWeight?: number | null;
 };
 
 export type Workout = {
@@ -14,3 +15,11 @@ export type Workout = {
     name: string;
     exercises: ConfiguredExercise[];
 };
+
+export type ExerciseChanges = Pick<
+    ConfiguredExercise,
+    | "sets"
+    | "targetReps"
+    | "targetWeight"
+    | "restSeconds"
+>;

@@ -133,6 +133,10 @@ export default function ExercisesForm({
                             <div
                                 key={exercise.id}
                                 className="flex min-h-16 items-center justify-between gap-4 py-2"
+                                onClick={() => {
+                                    onAddExercise(exercise);
+                                    handleExerciseModalVisibility();
+                                }}
                             >
                                 <div className="min-w-0">
                                     <p className="truncate text-small font-semibold text-primary">
@@ -144,10 +148,6 @@ export default function ExercisesForm({
                                 </div>
 
                                 <button type="button"
-                                        onClick={() => {
-                                            onAddExercise(exercise);
-                                            handleExerciseModalVisibility();
-                                        }}
                                         className="shrink-0 text-xl leading-none text-brand">
                                     +
                                 </button>

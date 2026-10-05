@@ -1,9 +1,11 @@
 import {useState} from "react";
-import {useSortable} from "@dnd-kit/react/sortable";
+import {isSortableOperation, useSortable} from "@dnd-kit/react/sortable";
+import {DragDropProvider, type DragEndEvent} from "@dnd-kit/react";
 import Icon from "@/components/layout/actionComponents/iconComponent";
 import ExercisesForm from "@/components/routines/exercisesForm";
+import SortableExercise from "@/components/routines/sortableExercise";
 import type {Exercise} from "@/db/schema";
-import type {Workout} from "@/types/routine-builder";
+import type {Workout, ExerciseChanges} from "@/types/routine-builder";
 
 type SortableWorkoutProps = {
     workout: Workout;
@@ -11,7 +13,11 @@ type SortableWorkoutProps = {
     onRemove: (id: string) => void;
     onRename: (id: string, name: string) => void;
     onAddExercise: (workoutId: string, exercise: Exercise) => void;
+    onReorderExercise: (workoutId: string, from: number, to: number) => void;
+    onRemoveExercise: (id: string) => void;
+    onUpdateExercise: (id: string, configuredExerciseId: string, changes: ExerciseChanges) => void;
     exercises: Exercise[];
+    weightUnit: string;
 };
 
 export default function SortableWorkout({
@@ -20,7 +26,11 @@ export default function SortableWorkout({
                                             onRemove,
                                             onRename,
                                             onAddExercise,
+                                            onReorderExercise,
+                                            onRemoveExercise,
+                                            onUpdateExercise,
                                             exercises,
+                                            weightUnit,
                                         }: SortableWorkoutProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [showExerciseModal, setShowExerciseModal] = useState(false);
@@ -47,6 +57,26 @@ export default function SortableWorkout({
 
         onRename(workout.id, trimmedName);
         setIsEditing(false);
+    };
+
+    const reorderExercise = (event: DragEndEvent) => {
+        if (event.canceled || !isSortableOperation(event.operation)) {
+            return;
+        }
+
+        const source = event.operation.source;
+
+        if (!source) {
+            return;
+        }
+
+        const {initialIndex, index} = source;
+
+        if (initialIndex === index) {
+            return;
+        }
+
+        onReorderExercise(workout.id, initialIndex, index);
     };
 
     return (
@@ -97,7 +127,7 @@ export default function SortableWorkout({
                                 {workout.name}
                             </p>
                             <span className="shrink-0 text-label text-secondary">
-                                0 exercises
+                                {workout.exercises.length} {workout.exercises.length === 1 ? "exercise" : "exercises"}
                             </span>
                         </div>
                     )}
@@ -166,23 +196,26 @@ export default function SortableWorkout({
                                 </p>
                             )}
                             {workout.exercises.length > 0 && (
-                                <div>
-                                    {workout.exercises.map((exercise) => (
-                                        <div key={exercise.id}>
-                                            <div className="flex">
-                                                <Icon name="reorder" className="size-4"/>
-                                                <p>{exercise.name}</p>
-                                                <button type="button">Edit</button>
-                                                <Icon name="delete" className="size-4"/>
-                                            </div>
-                                            <div>
-                                                <p>{exercise.sets} sets</p>
-                                                <p>{exercise.targetReps} reps</p>
-                                                <p>{exercise.restSeconds} rest</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
+                                <DragDropProvider onDragEnd={reorderExercise}>
+                                    <div>
+                                        {workout.exercises.map((exercise, exerciseIndex) => (
+                                            <SortableExercise
+                                                key={exercise.id}
+                                                exercise={exercise}
+                                                index={exerciseIndex}
+                                                onRemoveExercise={onRemoveExercise}
+                                                weightUnit={weightUnit}
+                                                onUpdateExercise={(configuredExerciseId, changes) =>
+                                                    onUpdateExercise(
+                                                        workout.id,
+                                                        configuredExerciseId,
+                                                        changes,
+                                                    )
+                                                }
+                                            />
+                                        ))}
+                                    </div>
+                                </DragDropProvider>
                             )}
                             <button
                                 type="button"
