@@ -18,12 +18,14 @@ type EditRoutineFormProps = {
     };
     initialWorkouts: Workout[];
     exercises: Exercise[];
+    weightUnit: string;
 };
 
 export default function EditRoutineForm({
                                             routine,
                                             initialWorkouts,
-                                            exercises
+                                            exercises,
+                                            weightUnit
                                         }: EditRoutineFormProps) {
     const [workouts, setWorkouts] =
         useState<Workout[]>(initialWorkouts);
@@ -85,6 +87,7 @@ export default function EditRoutineForm({
                         workouts={workouts}
                         setWorkouts={setWorkouts}
                         exercises={exercises}
+                        weightUnit={weightUnit}
                     />
 
                     <PrimaryButton

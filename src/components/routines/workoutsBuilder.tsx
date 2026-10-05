@@ -1,33 +1,22 @@
 import {DragDropProvider, type DragEndEvent} from "@dnd-kit/react";
 import {isSortableOperation} from "@dnd-kit/react/sortable";
 import type {Dispatch, SetStateAction} from "react";
+import {moveExercise, moveWorkout} from "@/helpers/drag-drop-helpers";
 
 import SortableWorkout from "./sortableWorkout";
 
 import type {Exercise} from "@/db/schema";
-import type {ConfiguredExercise, Workout} from "@/types/routine-builder";
+import type {ConfiguredExercise, Workout, ExerciseChanges} from "@/types/routine-builder";
 
 type WorkoutsBuilderProps = {
     workouts: Workout[];
     setWorkouts: Dispatch<SetStateAction<Workout[]>>;
     exercises: Exercise[];
+    weightUnit: string;
 };
 
-function moveWorkout(workouts: Workout[], from: number, to: number) {
-    const reorderedWorkouts = [...workouts];
-    const [movedWorkout] = reorderedWorkouts.splice(from, 1);
-
-    if (!movedWorkout) {
-        return workouts;
-    }
-
-    reorderedWorkouts.splice(to, 0, movedWorkout);
-
-    return reorderedWorkouts;
-}
-
 export default function WorkoutsBuilder({
-                                            workouts, setWorkouts, exercises,
+                                            workouts, setWorkouts, exercises, weightUnit
                                         }: WorkoutsBuilderProps) {
     const addWorkout = () => {
         setWorkouts((currentWorkouts) => {
@@ -113,6 +102,62 @@ export default function WorkoutsBuilder({
         );
     };
 
+    const reorderExercises = (
+        workoutId: string,
+        from: number,
+        to: number,
+    ) => {
+        setWorkouts((currentWorkouts) =>
+            currentWorkouts.map((currentWorkout) => {
+                if (currentWorkout.id !== workoutId) {
+                    return currentWorkout;
+                }
+
+                return {
+                    ...currentWorkout,
+                    exercises: moveExercise(
+                        currentWorkout.exercises,
+                        from,
+                        to,
+                    ),
+                };
+            }),
+        );
+    };
+
+    const removeExercise = (id: string) => {
+        setWorkouts((currentWorkouts) =>
+            currentWorkouts.map((workout) => ({
+                ...workout,
+                exercises: workout.exercises.filter(
+                    (exercise) => exercise.id !== id
+                ),
+            }))
+        );
+    };
+
+    const updateExercise = (workoutId: string, configuredExerciseId: string, changes: ExerciseChanges) => {
+        setWorkouts((currentWorkouts) =>
+            currentWorkouts.map((currentWorkout) => {
+                if (currentWorkout.id !== workoutId) {
+                    return currentWorkout;
+                }
+
+                return {
+                    ...currentWorkout,
+                    exercises: currentWorkout.exercises.map(
+                        (currentExercise) =>
+                            currentExercise.id === configuredExerciseId ? {
+                                ...currentExercise,
+                                ...changes
+                            }
+                            : currentExercise,
+                    ),
+                };
+            }),
+        );
+    };
+
     return (
         <>
             <input
@@ -132,7 +177,11 @@ export default function WorkoutsBuilder({
                                 onRename={renameWorkout}
                                 onRemove={removeWorkout}
                                 onAddExercise={addExerciseToWorkout}
+                                onReorderExercise={reorderExercises}
+                                onRemoveExercise={removeExercise}
+                                onUpdateExercise={updateExercise}
                                 exercises={exercises}
+                                weightUnit={weightUnit}
                             />
                         ))}
                     </div>

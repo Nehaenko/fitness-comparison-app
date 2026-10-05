@@ -1,13 +1,14 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import {redirect} from "next/navigation";
 
 import PrimaryButton from "@/components/layout/actionComponents/primaryButton";
+import Icon from "@/components/layout/actionComponents/iconComponent";
 
 import {
     activateRoutineAction,
     deleteRoutineAction,
 } from "./actions";
-import { getAuthenticatedRoutines } from "./data";
+import {getAuthenticatedRoutines} from "./data";
 
 export default async function RoutinesPage() {
     const routines = await getAuthenticatedRoutines();
@@ -32,13 +33,13 @@ export default async function RoutinesPage() {
                     <Link
                         href="/routines/new"
                         aria-label="Create a new routine"
-                        className="grid size-12 shrink-0 place-items-center rounded-control bg-surface-inverse text-2xl text-inverse"
+                        className="grid size-11 shrink-0 place-items-center rounded-control bg-surface-inverse text-xl text-inverse"
                     >
                         +
                     </Link>
                 </header>
 
-                <div className="mt-7 space-y-5">
+                <div className="mt-7 space-y-4">
                     {routines.map((routine) => {
                         const activateAction = activateRoutineAction.bind(
                             null,
@@ -52,39 +53,51 @@ export default async function RoutinesPage() {
                         return (
                             <article
                                 key={routine.id}
-                                className={`rounded-card border bg-surface p-6 shadow-card ${
+                                className={`rounded-card border bg-surface p-5 shadow-card ${
                                     routine.isActive
                                         ? "border-brand"
                                         : "border-border"
                                 }`}
                             >
-                                <div className="flex flex-wrap items-center gap-3">
+                                <div className="flex flex-wrap items-center gap-2">
                                     {routine.isActive && (
-                                        <span className="rounded-pill bg-brand-soft px-3 py-1 text-small font-semibold text-brand">
+                                        <span
+                                            className="rounded-pill bg-brand-soft px-3 py-1 text-label font-semibold text-brand">
                                             Active
                                         </span>
                                     )}
-                                    <h2 className="text-lg font-semibold">
+                                    <h2 className="text-base font-semibold">
                                         {routine.name}
                                     </h2>
                                 </div>
 
                                 {routine.description && (
-                                    <p className="mt-2 text-secondary">
+                                    <p className="mt-2 text-small text-secondary">
                                         {routine.description}
                                     </p>
                                 )}
 
-                                <p className="mt-4 text-small text-secondary">
+                                <div className="mt-4 flex flex-wrap gap-2">
+                                    {routine.workouts.map((workout, index) => (
+                                        <span key={workout.id}
+                                            className="rounded-pill bg-surface-subtle px-3 py-1 text-label font-semibold"
+                                        >
+                                            {index + 1}. {workout.name}
+                                        </span>
+                                    ))}
+                                </div>
+
+                                <p className="mt-3 text-small text-secondary">
                                     {routine.workoutCount}{" "}
                                     {routine.workoutCount === 1 ? "workout" : "workouts"}
                                 </p>
 
-                                <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-divider pt-5">
+                                <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-divider pt-4">
                                     <Link
                                         href={`/routines/${routine.id}/edit`}
-                                        className="flex h-12 items-center rounded-control bg-surface-subtle px-4 font-semibold"
+                                        className="flex h-10 items-center gap-2 rounded-control bg-surface-subtle px-4 text-small font-semibold"
                                     >
+                                        <Icon name="edit" className="size-4"/>
                                         Edit
                                     </Link>
 
@@ -96,6 +109,8 @@ export default async function RoutinesPage() {
                                                 label="Set active"
                                                 pendingLabel="Activating..."
                                                 fullWidth={false}
+                                                compact
+                                                iconName="star"
                                             />
                                         </form>
                                     )}
@@ -103,11 +118,14 @@ export default async function RoutinesPage() {
                                     <form action={deleteAction} className="ml-auto">
                                         <PrimaryButton
                                             type="submit"
-                                            variant="danger"
+                                            variant="ghost"
                                             label="Delete"
-                                            pendingLabel="Deleting..."
+                                            pendingLabel="Deleting routine..."
                                             fullWidth={false}
                                             iconName="delete"
+                                            ariaLabel={`Delete ${routine.name}`}
+                                            compact
+                                            iconOnly
                                         />
                                     </form>
                                 </div>

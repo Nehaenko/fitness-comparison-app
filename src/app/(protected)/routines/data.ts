@@ -3,8 +3,8 @@ import "server-only";
 import { auth } from "@/auth";
 import {
     getRoutineByIdForUser,
-    getRoutinesWithWorkoutCountByUserId,
-    RoutineWithWorkoutCount,
+    getRoutinesWithWorkoutsByUserId,
+    RoutineWithWorkouts,
 } from "@/db/routines";
 import {getWorkoutTemplatesByRoutineId} from "@/db/workoutTemplates";
 
@@ -18,12 +18,13 @@ async function requireAuthenticatedUserId() {
     return session.user.id;
 }
 
-export async function getAuthenticatedRoutines(): Promise<RoutineWithWorkoutCount[]> {
-    const userId = await requireAuthenticatedUserId();
+export async function getAuthenticatedRoutines():
+    Promise<RoutineWithWorkouts[]> {
+    const userId =
+        await requireAuthenticatedUserId();
 
-    return getRoutinesWithWorkoutCountByUserId(userId);
+    return getRoutinesWithWorkoutsByUserId(userId);
 }
-
 export async function getAuthenticatedRoutineById(
     routineId: string,
 ) {

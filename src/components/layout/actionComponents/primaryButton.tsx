@@ -4,7 +4,7 @@ import Icon from "@/components/layout/actionComponents/iconComponent";
 import type { ComponentProps } from "react";
 import { useFormStatus } from "react-dom";
 
-type ButtonVariant = "primary" | "secondary" | "brand" | "danger";
+type ButtonVariant = "primary" | "secondary" | "brand" | "danger" | "ghost";
 
 type PrimaryButtonProps = {
     type?: "button" | "submit" | "reset";
@@ -15,6 +15,8 @@ type PrimaryButtonProps = {
     onClickAction?: () => void;
     ariaLabel?: string;
     iconName?: ComponentProps<typeof Icon>["name"];
+    compact?: boolean;
+    iconOnly?: boolean;
 }
 
 const variantClassNames: Record<ButtonVariant, string> = {
@@ -22,6 +24,7 @@ const variantClassNames: Record<ButtonVariant, string> = {
     secondary: "border-border text-primary hover:bg-surface-subtle",
     brand: "border-brand-soft bg-brand-soft text-brand hover:bg-brand-soft-hover",
     danger: "border-danger-soft bg-danger-soft text-danger hover:border-danger",
+    ghost: "border-transparent bg-transparent text-secondary hover:bg-surface-subtle hover:text-primary",
 };
 
 export default function PrimaryButton({
@@ -32,10 +35,15 @@ export default function PrimaryButton({
     fullWidth = true, onClickAction,
     ariaLabel,
     iconName,
+    compact = false,
+    iconOnly = false,
 }: PrimaryButtonProps) {
     const { pending } = useFormStatus();
-    const widthClassName = fullWidth ? "w-full" : "w-auto px-4";
-    const className = `flex h-12 items-center justify-center gap-2 rounded-control border font-semibold transition disabled:cursor-wait disabled:opacity-60 ${widthClassName} ${variantClassNames[variant]}`;
+    const widthClassName = iconOnly
+        ? compact ? "size-10" : "size-12"
+        : fullWidth ? "w-full" : "w-auto px-4";
+    const heightClassName = iconOnly ? "" : compact ? "h-10" : "h-12";
+    const className = `flex items-center justify-center gap-2 rounded-control border font-semibold transition disabled:cursor-wait disabled:opacity-60 ${heightClassName} ${widthClassName} ${variantClassNames[variant]}`;
 
     return (
         <button
@@ -54,7 +62,9 @@ export default function PrimaryButton({
             ) : (
                 iconName && <Icon name={iconName} className="size-5" />
             )}
-            {pending ? pendingLabel : label}
+            <span className={iconOnly ? "sr-only" : undefined}>
+                {pending ? pendingLabel : label}
+            </span>
         </button>
     );
 }
