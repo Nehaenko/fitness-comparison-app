@@ -22,6 +22,20 @@
       "when": 1788273943472,
       "tag": "0002_goofy_wraith",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791305415412,
+      "tag": "0003_classy_zarda",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791305480928,
+      "tag": "0004_canonicalize_target_weights",
+      "breakpoints": true
     }
   ]
 }

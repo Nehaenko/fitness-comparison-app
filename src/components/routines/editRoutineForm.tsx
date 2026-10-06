@@ -6,9 +6,9 @@ import Link from "next/link";
 import PrimaryButton from "@/components/layout/actionComponents/primaryButton";
 import Icon from "@/components/layout/actionComponents/iconComponent";
 import WorkoutsBuilder from "@/components/routines/workoutsBuilder";
-import type {Workout} from "@/types/routine-builder";
+import type {ExerciseOption, Workout} from "@/types/routine-builder";
 import {updateRoutineAction} from "@/app/(protected)/routines/actions";
-import type {Exercise} from "@/db/schema";
+import type {WeightUnit} from "@/types/profile";
 
 type EditRoutineFormProps = {
     routine: {
@@ -17,8 +17,8 @@ type EditRoutineFormProps = {
         description: string | null;
     };
     initialWorkouts: Workout[];
-    exercises: Exercise[];
-    weightUnit: string;
+    exercises: ExerciseOption[];
+    weightUnit: WeightUnit;
 };
 
 export default function EditRoutineForm({

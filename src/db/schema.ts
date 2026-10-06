@@ -85,7 +85,6 @@ export const routines = pgTable("routines", {
 );
 
 export type Routine = typeof routines.$inferSelect;
-export type NewRoutine = typeof routines.$inferInsert;
 
 export const workoutTemplates = pgTable("workout_templates", {
         id: uuid("id").defaultRandom().primaryKey(),
@@ -94,7 +93,6 @@ export const workoutTemplates = pgTable("workout_templates", {
         }),
         name: text("name").notNull(),
         position: integer("position").notNull(),
-        notes: text("notes"),
         createdAt: timestamp("created_at", {
             withTimezone: true,
             mode: "date",
@@ -117,7 +115,6 @@ export const workoutTemplates = pgTable("workout_templates", {
 );
 
 export type WorkoutTemplate = typeof workoutTemplates.$inferSelect;
-export type NewWorkoutTemplate = typeof workoutTemplates.$inferInsert;
 
 export const exercises = pgTable("exercises", {
         id: uuid("id").defaultRandom().primaryKey(),
@@ -144,7 +141,6 @@ export const exercises = pgTable("exercises", {
 );
 
 export type Exercise = typeof exercises.$inferSelect;
-export type NewExercise = typeof exercises.$inferInsert;
 
 export const workoutTemplateExercises = pgTable("workout_template_exercises", {
         id: uuid("id").defaultRandom().primaryKey(),
@@ -163,7 +159,6 @@ export const workoutTemplateExercises = pgTable("workout_template_exercises", {
             scale: 2,
         }),
         restSeconds: integer("rest_seconds").notNull().default(90),
-        notes: text("notes"),
         createdAt: timestamp("created_at", {
             withTimezone: true,
             mode: "date",
@@ -204,9 +199,6 @@ export const workoutTemplateExercises = pgTable("workout_template_exercises", {
         ),
     ],
 );
-
-export type WorkoutTemplateExercise = typeof workoutTemplateExercises.$inferSelect;
-export type NewWorkoutTemplateExercise = typeof workoutTemplateExercises.$inferInsert;
 
 export const accounts = pgTable(
     "accounts",

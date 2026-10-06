@@ -3,26 +3,9 @@ import "server-only";
 import {and, eq, inArray, sql, asc, desc} from "drizzle-orm";
 import type {BatchItem} from "drizzle-orm/batch";
 import {db} from "@/db";
-import {WorkoutTemplate} from "@/db/schema";
-
-import {routines, workoutTemplates, type Routine} from "@/db/schema";
+import {routines, workoutTemplates, workoutTemplateExercises, type Routine} from "@/db/schema";
 import {randomUUID} from "node:crypto";
-
-type RoutineValues = {
-    name: string;
-    description?: string | null;
-};
-
-type WorkoutValues = {
-    id: string;
-    name: string;
-    position: number;
-}
-
-type WorkoutSummary = Pick<
-    WorkoutTemplate,
-    "id" | "name" | "position"
->;
+import type {RoutineValues, WorkoutValues, WorkoutSummary, ExerciseValues} from "@/types/routine-builder";
 
 export type RoutineWithWorkouts = Routine & {
     workouts: WorkoutSummary[];
@@ -40,6 +23,21 @@ function normalizeRoutineValues(values: RoutineValues) {
     return {
         name,
         description,
+    };
+}
+
+function normalizeExerciseValues(
+    exercise: ExerciseValues,
+    position: number,
+) {
+    return {
+        id: exercise.id,
+        exerciseId: exercise.exerciseId,
+        sets: exercise.sets,
+        targetReps: exercise.targetReps,
+        targetWeight: exercise.targetWeight,
+        restSeconds: exercise.restSeconds,
+        position,
     };
 }
 
@@ -61,6 +59,7 @@ function normalizeWorkoutValues(workouts: WorkoutValues[]) {
             id: workout.id,
             name,
             position: index,
+            exercises: workout.exercises.map((normalizeExerciseValues)),
         };
     });
 }
@@ -103,11 +102,16 @@ export async function getRoutinesWithWorkoutsByUserId(
             asc(workoutTemplates.position),
         );
 
+    const workoutsByRoutineId = new Map<string, WorkoutSummary[]>();
+
+    for (const {routineId, ...workout} of workouts) {
+        const routineWorkouts = workoutsByRoutineId.get(routineId) ?? [];
+        routineWorkouts.push(workout);
+        workoutsByRoutineId.set(routineId, routineWorkouts);
+    }
+
     return userRoutines.map((routine) => {
-        const routineWorkouts = workouts.filter(
-            (workout) =>
-                workout.routineId === routine.id,
-        );
+        const routineWorkouts = workoutsByRoutineId.get(routine.id) ?? [];
 
         return {
             ...routine,
@@ -115,15 +119,6 @@ export async function getRoutinesWithWorkoutsByUserId(
             workoutCount: routineWorkouts.length,
         };
     });
-}
-
-export async function getRoutinesByUserId(
-    userId: string,
-): Promise<Routine[]> {
-    return db
-        .select()
-        .from(routines)
-        .where(eq(routines.userId, userId));
 }
 
 export async function getRoutineByIdForUser(routineId: string, userId: string) {
@@ -143,8 +138,10 @@ export async function getRoutineByIdForUser(routineId: string, userId: string) {
 
 export async function createRoutineWithWorkoutsForUser(userId: string, values: RoutineValues, workouts: WorkoutValues[]) {
     const normalisedValues = normalizeRoutineValues(values);
+    const normalisedWorkouts = normalizeWorkoutValues(workouts);
     const routineId = randomUUID();
 
+    // Query 1: create the routine
     const routineInsert = db
         .insert(routines)
         .values({
@@ -154,25 +151,56 @@ export async function createRoutineWithWorkoutsForUser(userId: string, values: R
         })
         .returning();
 
-    const workoutRows = normalizeWorkoutValues(workouts).map(
-        (workout) => ({
-            routineId,
-            name: workout.name,
-            position: workout.position,
-        }),
+    // Query 2 data: create the workouts
+    const workoutRows = normalisedWorkouts.map((workout) => ({
+        id: workout.id,
+        routineId,
+        name: workout.name,
+        position: workout.position,
+    }));
+
+    // Query 3 data: create the configured exercises
+    const configuredExerciseRows = normalisedWorkouts.flatMap(
+        (workout) =>
+            workout.exercises.map((exercise) => ({
+                ...exercise,
+                workoutTemplateId: workout.id,
+                targetWeight:
+                    exercise.targetWeight === null
+                        ? null
+                        : exercise.targetWeight.toString(),
+            })),
     );
 
+    // A routine is allowed to have no workouts
     if (workoutRows.length === 0) {
         const [routine] = await routineInsert;
         return routine ?? null;
     }
 
-    const [createdRoutines] = await db.batch([
+    const queries: [
+        typeof routineInsert,
+        ...BatchItem<"pg">[],
+    ] = [
         routineInsert,
+
         db
             .insert(workoutTemplates)
-            .values(workoutRows)
-    ]);
+            .values(workoutRows),
+    ];
+
+    // Drizzle cannot insert an empty array, so only add this
+    // query when at least one configured exercise exists.
+    if (configuredExerciseRows.length > 0) {
+        queries.push(
+            db
+                .insert(workoutTemplateExercises)
+                .values(configuredExerciseRows),
+        );
+    }
+
+    const results = await db.batch(queries);
+    const createdRoutines = results[0] as Routine[];
 
     return createdRoutines[0] ?? null;
 }
@@ -202,6 +230,18 @@ export async function updateRoutineWithWorkoutsForUser(
             eq(workoutTemplates.routineId, routineId),
         );
 
+    const existingConfiguredExercises = existingWorkouts.length === 0
+        ? []
+        : await db
+            .select()
+            .from(workoutTemplateExercises)
+            .where(
+                inArray(
+                    workoutTemplateExercises.workoutTemplateId,
+                    existingWorkouts.map((workout) => workout.id),
+                ),
+            );
+
     const existingWorkoutsById = new Map(
         existingWorkouts.map((workout) => [workout.id, workout]),
     );
@@ -209,15 +249,96 @@ export async function updateRoutineWithWorkoutsForUser(
         normalisedWorkouts.map((workout) => workout.id),
     );
 
-    const workoutsToUpdate = normalisedWorkouts.filter((workout) =>
+    const submittedExistingWorkouts = normalisedWorkouts.filter((workout) =>
         existingWorkoutsById.has(workout.id),
     );
+    const workoutPositionsChanged = submittedExistingWorkouts.some(
+        (workout) =>
+            existingWorkoutsById.get(workout.id)?.position !== workout.position,
+    );
+    const workoutsToUpdate = workoutPositionsChanged
+        ? submittedExistingWorkouts
+        : submittedExistingWorkouts.filter(
+            (workout) =>
+                existingWorkoutsById.get(workout.id)?.name !== workout.name,
+        );
     const workoutsToInsert = normalisedWorkouts.filter((workout) =>
         !existingWorkoutsById.has(workout.id),
     );
     const workoutIdsToDelete = existingWorkouts
         .filter((workout) => !submittedWorkoutIds.has(workout.id))
         .map((workout) => workout.id);
+    const configuredExerciseRows = normalisedWorkouts.flatMap(
+        (workout) =>
+            workout.exercises.map((exercise) => ({
+                ...exercise,
+                workoutTemplateId: workout.id,
+                targetWeight:
+                    exercise.targetWeight === null
+                        ? null
+                        : exercise.targetWeight.toString(),
+            })),
+    );
+    const existingConfiguredExercisesById = new Map(
+        existingConfiguredExercises.map((exercise) => [exercise.id, exercise]),
+    );
+    const submittedConfiguredExerciseIds = new Set(
+        configuredExerciseRows.map((exercise) => exercise.id),
+    );
+
+    for (const exercise of configuredExerciseRows) {
+        const existingExercise = existingConfiguredExercisesById.get(
+            exercise.id,
+        );
+
+        if (
+            existingExercise &&
+            existingExercise.workoutTemplateId !== exercise.workoutTemplateId
+        ) {
+            throw new Error("Configured exercises cannot move between workouts");
+        }
+    }
+
+    const submittedExistingExercises = configuredExerciseRows.filter(
+        (exercise) => existingConfiguredExercisesById.has(exercise.id),
+    );
+    const configuredExercisePositionsChanged =
+        submittedExistingExercises.some(
+            (exercise) =>
+                existingConfiguredExercisesById.get(exercise.id)?.position !==
+                exercise.position,
+        );
+    const configuredExercisesToUpdate = configuredExercisePositionsChanged
+        ? submittedExistingExercises
+        : submittedExistingExercises.filter((exercise) => {
+            const existingExercise = existingConfiguredExercisesById.get(
+                exercise.id,
+            );
+
+            return (
+                existingExercise?.exerciseId !== exercise.exerciseId ||
+                existingExercise.sets !== exercise.sets ||
+                existingExercise.targetReps !== exercise.targetReps ||
+                (
+                    existingExercise.targetWeight === null
+                        ? null
+                        : Number(existingExercise.targetWeight)
+                ) !== (
+                    exercise.targetWeight === null
+                        ? null
+                        : Number(exercise.targetWeight)
+                ) ||
+                existingExercise.restSeconds !== exercise.restSeconds
+            );
+        });
+    const configuredExercisesToInsert = configuredExerciseRows.filter(
+        (exercise) => !existingConfiguredExercisesById.has(exercise.id),
+    );
+    const configuredExerciseIdsToDelete = existingConfiguredExercises
+        .filter(
+            (exercise) => !submittedConfiguredExerciseIds.has(exercise.id),
+        )
+        .map((exercise) => exercise.id);
 
     const updatedAt = new Date();
     const routineUpdate = db
@@ -240,7 +361,7 @@ export async function updateRoutineWithWorkoutsForUser(
 
     // Move saved workouts out of the final position range first. This avoids
     // unique-position conflicts when two workouts swap places.
-    if (existingWorkouts.length > 0) {
+    if (workoutPositionsChanged) {
         const highestPosition = Math.max(
             ...existingWorkouts.map((workout) => workout.position),
         );
@@ -255,6 +376,42 @@ export async function updateRoutineWithWorkoutsForUser(
                     updatedAt,
                 })
                 .where(eq(workoutTemplates.routineId, routineId)),
+        );
+    }
+
+    if (configuredExercisePositionsChanged) {
+        const highestExercisePosition = Math.max(
+            ...existingConfiguredExercises.map((exercise) => exercise.position),
+        );
+        const temporaryExercisePositionOffset =
+            highestExercisePosition + configuredExerciseRows.length + 1;
+
+        queries.push(
+            db
+                .update(workoutTemplateExercises)
+                .set({
+                    position: sql`${workoutTemplateExercises.position} + ${temporaryExercisePositionOffset}`,
+                    updatedAt,
+                })
+                .where(
+                    inArray(
+                        workoutTemplateExercises.workoutTemplateId,
+                        existingWorkouts.map((workout) => workout.id),
+                    ),
+                ),
+        );
+    }
+
+    if (configuredExerciseIdsToDelete.length > 0) {
+        queries.push(
+            db
+                .delete(workoutTemplateExercises)
+                .where(
+                    inArray(
+                        workoutTemplateExercises.id,
+                        configuredExerciseIdsToDelete,
+                    ),
+                ),
         );
     }
 
@@ -295,11 +452,45 @@ export async function updateRoutineWithWorkoutsForUser(
                 .insert(workoutTemplates)
                 .values(
                     workoutsToInsert.map((workout) => ({
+                        id: workout.id,
                         routineId,
                         name: workout.name,
                         position: workout.position,
                     })),
                 ),
+        );
+    }
+
+    for (const exercise of configuredExercisesToUpdate) {
+        queries.push(
+            db
+                .update(workoutTemplateExercises)
+                .set({
+                    exerciseId: exercise.exerciseId,
+                    position: exercise.position,
+                    sets: exercise.sets,
+                    targetReps: exercise.targetReps,
+                    targetWeight: exercise.targetWeight,
+                    restSeconds: exercise.restSeconds,
+                    updatedAt,
+                })
+                .where(
+                    and(
+                        eq(workoutTemplateExercises.id, exercise.id),
+                        inArray(
+                            workoutTemplateExercises.workoutTemplateId,
+                            existingWorkouts.map((workout) => workout.id),
+                        ),
+                    ),
+                ),
+        );
+    }
+
+    if (configuredExercisesToInsert.length > 0) {
+        queries.push(
+            db
+                .insert(workoutTemplateExercises)
+                .values(configuredExercisesToInsert),
         );
     }
 

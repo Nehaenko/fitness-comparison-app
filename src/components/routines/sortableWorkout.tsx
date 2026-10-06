@@ -4,20 +4,24 @@ import {DragDropProvider, type DragEndEvent} from "@dnd-kit/react";
 import Icon from "@/components/layout/actionComponents/iconComponent";
 import ExercisesForm from "@/components/routines/exercisesForm";
 import SortableExercise from "@/components/routines/sortableExercise";
-import type {Exercise} from "@/db/schema";
-import type {Workout, ExerciseChanges} from "@/types/routine-builder";
+import type {
+    ExerciseChanges,
+    ExerciseOption,
+    Workout,
+} from "@/types/routine-builder";
+import type {WeightUnit} from "@/types/profile";
 
 type SortableWorkoutProps = {
     workout: Workout;
     index: number;
     onRemove: (id: string) => void;
     onRename: (id: string, name: string) => void;
-    onAddExercise: (workoutId: string, exercise: Exercise) => void;
+    onAddExercise: (workoutId: string, exercise: ExerciseOption) => void;
     onReorderExercise: (workoutId: string, from: number, to: number) => void;
     onRemoveExercise: (id: string) => void;
     onUpdateExercise: (id: string, configuredExerciseId: string, changes: ExerciseChanges) => void;
-    exercises: Exercise[];
-    weightUnit: string;
+    exercises: ExerciseOption[];
+    weightUnit: WeightUnit;
 };
 
 export default function SortableWorkout({

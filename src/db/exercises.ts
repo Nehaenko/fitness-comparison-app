@@ -5,21 +5,14 @@ import {asc} from "drizzle-orm";
 import {db} from "@/db";
 import {exercises} from "@/db/schema";
 
-
-// getExercises()
-// searchExercises(searchText)
-// getExerciseById(exerciseId)
-
-// type Exercise = {
-//     externalId: string;
-//     name: string;
-//     muscleGroup: string;
-//     equipment: string;
-// }
-
 export async function getExercises() {
     return db
-        .select()
+        .select({
+            id: exercises.id,
+            name: exercises.name,
+            muscleGroup: exercises.muscleGroup,
+            equipment: exercises.equipment,
+        })
         .from(exercises)
         .orderBy(asc(exercises.name));
 }

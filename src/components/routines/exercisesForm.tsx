@@ -1,13 +1,13 @@
 import {useState} from "react";
 
 import Icon from "@/components/layout/actionComponents/iconComponent";
-import type {Exercise} from "@/db/schema";
 import formatExerciseDetail from "@/helpers/exercise-formatting";
+import type {ExerciseOption} from "@/types/routine-builder";
 
 type ExercisesFormData = {
-    exercises: Exercise[];
+    exercises: ExerciseOption[];
     handleExerciseModalVisibility: () => void;
-    onAddExercise: (exercise: Exercise) => void;
+    onAddExercise: (exercise: ExerciseOption) => void;
 };
 
 const exerciseCategories = [

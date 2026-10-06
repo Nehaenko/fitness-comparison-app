@@ -5,14 +5,19 @@ import {moveExercise, moveWorkout} from "@/helpers/drag-drop-helpers";
 
 import SortableWorkout from "./sortableWorkout";
 
-import type {Exercise} from "@/db/schema";
-import type {ConfiguredExercise, Workout, ExerciseChanges} from "@/types/routine-builder";
+import type {
+    ConfiguredExercise,
+    ExerciseChanges,
+    ExerciseOption,
+    Workout,
+} from "@/types/routine-builder";
+import type {WeightUnit} from "@/types/profile";
 
 type WorkoutsBuilderProps = {
     workouts: Workout[];
     setWorkouts: Dispatch<SetStateAction<Workout[]>>;
-    exercises: Exercise[];
-    weightUnit: string;
+    exercises: ExerciseOption[];
+    weightUnit: WeightUnit;
 };
 
 export default function WorkoutsBuilder({
@@ -36,7 +41,7 @@ export default function WorkoutsBuilder({
 
     const addExerciseToWorkout = (
         workoutId: string,
-        exercise: Exercise,
+        exercise: ExerciseOption,
     )=> {
         const configuredExercise: ConfiguredExercise = {
             id: crypto.randomUUID(),
@@ -47,6 +52,7 @@ export default function WorkoutsBuilder({
             sets: 3,
             targetReps: 10,
             restSeconds: 90,
+            targetWeight: null,
         }
 
         setWorkouts((currentWorkouts) =>

@@ -3,6 +3,7 @@ import {useState} from "react";
 
 import Icon from "@/components/layout/actionComponents/iconComponent";
 import type {ConfiguredExercise, ExerciseChanges} from "@/types/routine-builder";
+import type {WeightUnit} from "@/types/profile";
 
 type SortableExerciseProps = {
     exercise: ConfiguredExercise;
@@ -12,7 +13,7 @@ type SortableExerciseProps = {
         configuredExerciseId: string,
         changes: ExerciseChanges,
     ) => void;
-    weightUnit: string;
+    weightUnit: WeightUnit;
 };
 
 export default function SortableExercise({
@@ -36,7 +37,9 @@ export default function SortableExercise({
     const [draft, setDraft] = useState({
         sets: String(exercise.sets),
         targetReps: String(exercise.targetReps),
-        targetWeight: exercise.targetWeight?.toString() ?? "",
+        targetWeight: exercise.targetWeight === null
+            ? ""
+            : exercise.targetWeight.toString(),
         restSeconds: String(exercise.restSeconds),
     });
 

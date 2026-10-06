@@ -1,3 +1,37 @@
+import type {Exercise, WorkoutTemplate} from "@/db/schema";
+
+export type RoutineValues = {
+    name: string;
+    description?: string | null;
+};
+
+export type ExerciseValues = {
+    id: string;
+    exerciseId: string;
+    sets: number;
+    targetReps: number;
+    targetWeight: number | null;
+    restSeconds: number;
+    position: number;
+};
+
+export type WorkoutValues = {
+    id: string;
+    name: string;
+    position: number;
+    exercises: ExerciseValues[];
+}
+
+export type WorkoutSummary = Pick<
+    WorkoutTemplate,
+    "id" | "name" | "position"
+>;
+
+export type ExerciseOption = Pick<
+    Exercise,
+    "id" | "name" | "muscleGroup" | "equipment"
+>;
+
 export type ConfiguredExercise = {
     id: string;
     exerciseId: string;
@@ -7,7 +41,7 @@ export type ConfiguredExercise = {
     sets: number;
     targetReps: number;
     restSeconds: number;
-    targetWeight?: number | null;
+    targetWeight: number | null;
 };
 
 export type Workout = {
