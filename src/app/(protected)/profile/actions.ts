@@ -7,6 +7,10 @@ import {
     createDefaultProfile,
     updateProfileByUserId,
 } from "@/db/profile";
+import {
+    getDisplayName,
+    getUnitPreferences,
+} from "@/validation/profile";
 
 export async function updateUserName(formData: FormData) {
     const session = await auth();
@@ -15,17 +19,7 @@ export async function updateUserName(formData: FormData) {
         throw new Error("Unauthorized");
     }
 
-    const value = formData.get("account-name");
-
-    if (typeof value !== "string") {
-        throw new Error("Invalid name");
-    }
-
-    const name = value.trim();
-
-    if (name.length < 2 || name.length > 50) {
-        throw new Error("Name must contain between 2 and 50 characters");
-    }
+    const name = getDisplayName(formData);
 
     await createDefaultProfile(session.user.id, session.user.name);
     await updateProfileByUserId(session.user.id, { displayName: name });
@@ -44,21 +38,11 @@ export async function updateUnitPreferences(values: {
         throw new Error("Unauthorized");
     }
 
-    if (values.weightUnit !== "kg" && values.weightUnit !== "lb") {
-        throw new Error("Invalid weight unit");
-    }
-
-    if (
-        values.measurementUnit !== "cm" &&
-        values.measurementUnit !== "in"
-    ) {
-        throw new Error("Invalid measurement unit");
-    }
+    const preferences = getUnitPreferences(values);
 
     await createDefaultProfile(session.user.id, session.user.name);
     await updateProfileByUserId(session.user.id, {
-        weightUnit: values.weightUnit,
-        measurementUnit: values.measurementUnit,
+        ...preferences,
     });
 
     revalidatePath("/profile");
