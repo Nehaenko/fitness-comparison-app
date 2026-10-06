@@ -6,15 +6,15 @@ import WorkoutsBuilder from "@/components/routines/workoutsBuilder";
 import PrimaryButton from "@/components/layout/actionComponents/primaryButton";
 import Icon from "@/components/layout/actionComponents/iconComponent";
 import {useState} from "react";
-import type {Workout} from "@/types/routine-builder";
-import type {Exercise} from "@/db/schema";
+import type {ExerciseOption, Workout} from "@/types/routine-builder";
+import type {WeightUnit} from "@/types/profile";
 
 type NewRoutineProps = {
-    exercises: Exercise[];
-    weightUnit: string;
+    exercises: ExerciseOption[];
+    weightUnit: WeightUnit;
 };
 
-export default function NewRoutineFrom({exercises, weightUnit}: NewRoutineProps) {
+export default function NewRoutineForm({exercises, weightUnit}: NewRoutineProps) {
     const [workouts, setWorkouts] = useState<Workout[]>([]);
 
     return (

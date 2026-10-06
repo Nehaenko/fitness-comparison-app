@@ -5,9 +5,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { profiles } from "@/db/schema";
 
-export type UserProfile = typeof profiles.$inferSelect;
-export type WeightUnit = UserProfile["weightUnit"];
-export type MeasurementUnit = UserProfile["measurementUnit"];
+import type {WeightUnit, MeasurementUnit} from "@/types/profile";
 
 const defaultDisplayName = "Forma user";
 

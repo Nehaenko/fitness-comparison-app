@@ -4,6 +4,7 @@ import EditRoutineForm from "@/components/routines/editRoutineForm";
 
 import { getAuthenticatedRoutineWithWorkouts } from "../../data";
 import {getAuthenticatedUserProfile} from "@/app/(protected)/profile/data";
+import {kilogramsToWeight} from "@/helpers/weight-conversion";
 
 export default async function EditRoutine({
                                               params,
@@ -11,11 +12,11 @@ export default async function EditRoutine({
     params: Promise<{ routineId: string }>;
 }) {
     const { routineId } = await params;
-    const exercises = await getExercises();
-    const profile = await getAuthenticatedUserProfile();
-
-    const result =
-        await getAuthenticatedRoutineWithWorkouts(routineId);
+    const [exercises, profile, result] = await Promise.all([
+        getExercises(),
+        getAuthenticatedUserProfile(),
+        getAuthenticatedRoutineWithWorkouts(routineId),
+    ]);
 
     if (!result) {
         notFound();
@@ -33,7 +34,15 @@ export default async function EditRoutine({
             initialWorkouts={workouts.map((workout) => ({
                 id: workout.id,
                 name: workout.name,
-                exercises: [],
+                exercises: workout.exercises.map((exercise) => ({
+                    ...exercise,
+                    targetWeight: exercise.targetWeight === null
+                        ? null
+                        : kilogramsToWeight(
+                            exercise.targetWeight,
+                            profile.weightUnit,
+                        ),
+                })),
             }))}
             exercises={exercises}
             weightUnit={profile.weightUnit}

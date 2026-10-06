@@ -2,11 +2,10 @@ import "server-only";
 
 import { auth } from "@/auth";
 import {
-    getRoutineByIdForUser,
     getRoutinesWithWorkoutsByUserId,
     RoutineWithWorkouts,
 } from "@/db/routines";
-import {getWorkoutTemplatesByRoutineId} from "@/db/workoutTemplates";
+import {getRoutineWithWorkoutsForUser} from "@/db/workoutTemplates";
 
 async function requireAuthenticatedUserId() {
     const session = await auth();
@@ -25,28 +24,9 @@ export async function getAuthenticatedRoutines():
 
     return getRoutinesWithWorkoutsByUserId(userId);
 }
-export async function getAuthenticatedRoutineById(
-    routineId: string,
-) {
-    const userId = await requireAuthenticatedUserId();
-
-    return getRoutineByIdForUser(routineId, userId);
-}
 
 export async function getAuthenticatedRoutineWithWorkouts(routineId: string) {
     const userId = await requireAuthenticatedUserId();
-    const routine = await getRoutineByIdForUser(
-        routineId,
-        userId
-    )
 
-    if (!routine) {
-        return null;
-    }
-
-    const workouts = await getWorkoutTemplatesByRoutineId(routineId, userId);
-
-    return {
-        routine, workouts
-    }
+    return getRoutineWithWorkoutsForUser(routineId, userId);
 }

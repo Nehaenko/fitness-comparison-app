@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 
 import { updateUnitPreferences } from "@/app/(protected)/profile/actions";
-import type { MeasurementUnit, WeightUnit } from "@/db/profile";
+import type { MeasurementUnit, WeightUnit } from "@/types/profile";
 
 type PreferencesProps = {
     initialWeightUnit: WeightUnit;

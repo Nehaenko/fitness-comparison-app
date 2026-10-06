@@ -1,6 +1,6 @@
 import { getExercises } from "@/db/exercises";
 import {getAuthenticatedUserProfile} from "@/app/(protected)/profile/data";
-import NewRoutineForm from "@/components/routines/newRoutineFrom";
+import NewRoutineForm from "@/components/routines/newRoutineForm";
 
 export default async function RoutineNewPage() {
     const [exercises, profile] = await Promise.all([
