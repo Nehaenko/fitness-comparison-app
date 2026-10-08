@@ -1,4 +1,4 @@
-import type {Exercise, WorkoutTemplate} from "@/db/schema";
+import type {Exercise, Routine, WorkoutTemplate} from "@/db/schema";
 
 export type RoutineValues = {
     name: string;
@@ -25,7 +25,9 @@ export type WorkoutValues = {
 export type WorkoutSummary = Pick<
     WorkoutTemplate,
     "id" | "name" | "position"
->;
+> & {
+    exerciseCount: number;
+};
 
 export type ExerciseOption = Pick<
     Exercise,
@@ -50,6 +52,10 @@ export type Workout = {
     exercises: ConfiguredExercise[];
 };
 
+export type WorkoutTemplateWithExercises = WorkoutTemplate & {
+    exercises: ConfiguredExercise[];
+};
+
 export type ExerciseChanges = Pick<
     ConfiguredExercise,
     | "sets"
@@ -57,3 +63,8 @@ export type ExerciseChanges = Pick<
     | "targetWeight"
     | "restSeconds"
 >;
+
+export type RoutineWithWorkouts = Routine & {
+    workouts: WorkoutSummary[];
+    workoutCount: number;
+}

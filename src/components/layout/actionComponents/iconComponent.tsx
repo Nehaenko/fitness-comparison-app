@@ -11,6 +11,8 @@ type IconName =
     | "chevron-down"
     | "reorder"
     | "arrow-left"
+    | "check"
+    | "play"
     | "brand"
     | "google"
     | "edit"
@@ -74,6 +76,8 @@ export default function Icon({ name, className }: { name: IconName; className?: 
             )}
             {name === "chevron-down" && <path d="m8 10 4 4 4-4" />}
             {name === "arrow-left" && <path d="M19 12H5M10 7l-5 5 5 5" />}
+            {name === "check" && <path d="m5 12 4 4L19 6" />}
+            {name === "play" && <path d="m8 5 11 7-11 7V5Z" />}
             {name === "edit" && (
                 <>
                     <path d="M13.5 5.5 18.5 10.5M4.5 19.5l3.75-.75L19 8a1.75 1.75 0 0 0 0-2.5l-.5-.5a1.75 1.75 0 0 0-2.5 0L5.25 15.75 4.5 19.5Z" />

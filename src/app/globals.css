@@ -24,6 +24,8 @@
   --forma-surface-subtle: #f0f0ed;
   --forma-surface-muted: #e8e9e6;
   --forma-surface-inverse: #19191b;
+  --forma-surface-inverse-control: #303033;
+  --forma-surface-inverse-control-hover: #3a3a3d;
 
   /* Text */
   --forma-text-primary: #1b1b1d;
@@ -31,11 +33,14 @@
   --forma-text-tertiary: #aaaba6;
   --forma-text-inverse: #ffffff;
   --forma-text-inverse-muted: #9d9da0;
+  --forma-text-inverse-soft: #c5c5c7;
 
   /* Borders and dividers */
   --forma-border: #dedfda;
   --forma-border-strong: #c9cbc5;
   --forma-divider: #e2e3df;
+  --forma-divider-inverse: #323235;
+  --forma-border-inverse-control: #414144;
 
   /* Semantic states */
   --forma-danger: #dc3b32;
@@ -74,16 +79,21 @@
   --color-surface-subtle: var(--forma-surface-subtle);
   --color-surface-muted: var(--forma-surface-muted);
   --color-surface-inverse: var(--forma-surface-inverse);
+  --color-surface-inverse-control: var(--forma-surface-inverse-control);
+  --color-surface-inverse-control-hover: var(--forma-surface-inverse-control-hover);
 
   --color-primary: var(--forma-text-primary);
   --color-secondary: var(--forma-text-secondary);
   --color-tertiary: var(--forma-text-tertiary);
   --color-inverse: var(--forma-text-inverse);
   --color-inverse-muted: var(--forma-text-inverse-muted);
+  --color-inverse-soft: var(--forma-text-inverse-soft);
 
   --color-border: var(--forma-border);
   --color-border-strong: var(--forma-border-strong);
   --color-divider: var(--forma-divider);
+  --color-divider-inverse: var(--forma-divider-inverse);
+  --color-border-inverse-control: var(--forma-border-inverse-control);
 
   --color-danger: var(--forma-danger);
   --color-danger-hover: var(--forma-danger-hover);
