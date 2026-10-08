@@ -3,8 +3,9 @@ import "server-only";
 import { auth } from "@/auth";
 import {
     getRoutinesWithWorkoutsByUserId,
-    RoutineWithWorkouts,
 } from "@/db/routines";
+import type {RoutineWithWorkouts} from "@/types/routine-builder";
+
 import {getRoutineWithWorkoutsForUser} from "@/db/workoutTemplates";
 
 async function requireAuthenticatedUserId() {
