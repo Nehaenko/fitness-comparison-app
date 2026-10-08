@@ -1,20 +1,16 @@
 import "server-only"
 
-import {asc, eq, inArray} from "drizzle-orm";
+import {asc, eq, inArray, and} from "drizzle-orm";
 
 import {db} from "@/db";
 import {
+    routines,
     exercises,
     workoutTemplates,
     workoutTemplateExercises,
-    type WorkoutTemplate,
 } from "@/db/schema";
 import {getRoutineByIdForUser} from "@/db/routines";
-import type {ConfiguredExercise} from "@/types/routine-builder";
-
-type WorkoutTemplateWithExercises = WorkoutTemplate & {
-    exercises: ConfiguredExercise[];
-};
+import type {ConfiguredExercise, Workout, WorkoutTemplateWithExercises} from "@/types/routine-builder";
 
 async function getWorkoutTemplatesByRoutineId(
     routineId: string,
@@ -111,3 +107,69 @@ export async function getRoutineWithWorkoutsForUser(
 
     return {routine, workouts};
 }
+
+export async function getWorkoutWithExercisesForUser(
+    workoutId: string,
+    userId: string,
+): Promise<Workout | null> {
+    const [workout] = await db
+        .select({
+            id: workoutTemplates.id,
+            name: workoutTemplates.name,
+        })
+        .from(workoutTemplates)
+        .innerJoin(
+            routines,
+            eq(workoutTemplates.routineId, routines.id),
+        )
+        .where(
+            and(
+                eq(workoutTemplates.id, workoutId),
+                eq(routines.userId, userId),
+            ),
+        )
+        .limit(1);
+
+    if (!workout) {
+        return null;
+    }
+
+    const configuredExercises = await db
+        .select({
+            id: workoutTemplateExercises.id,
+            exerciseId: workoutTemplateExercises.exerciseId,
+            name: exercises.name,
+            muscleGroup: exercises.muscleGroup,
+            equipment: exercises.equipment,
+            sets: workoutTemplateExercises.sets,
+            targetReps: workoutTemplateExercises.targetReps,
+            targetWeight: workoutTemplateExercises.targetWeight,
+            restSeconds: workoutTemplateExercises.restSeconds,
+        })
+        .from(workoutTemplateExercises)
+        .innerJoin(
+            exercises,
+            eq(
+                workoutTemplateExercises.exerciseId,
+                exercises.id,
+            ),
+        )
+        .where(
+            eq(
+                workoutTemplateExercises.workoutTemplateId,
+                workoutId,
+            ),
+        )
+        .orderBy(asc(workoutTemplateExercises.position));
+
+    return {
+        ...workout,
+        exercises: configuredExercises.map((exercise) => ({
+            ...exercise,
+            targetWeight:
+                exercise.targetWeight === null
+                    ? null
+                    : Number(exercise.targetWeight),
+        })),
+    };
+};

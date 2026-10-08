@@ -1,16 +1,11 @@
 import "server-only";
 
-import {and, eq, inArray, sql, asc, desc} from "drizzle-orm";
+import {and, eq, inArray, sql, asc, desc, count} from "drizzle-orm";
 import type {BatchItem} from "drizzle-orm/batch";
 import {db} from "@/db";
 import {routines, workoutTemplates, workoutTemplateExercises, type Routine} from "@/db/schema";
 import {randomUUID} from "node:crypto";
-import type {RoutineValues, WorkoutValues, WorkoutSummary, ExerciseValues} from "@/types/routine-builder";
-
-export type RoutineWithWorkouts = Routine & {
-    workouts: WorkoutSummary[];
-    workoutCount: number;
-}
+import type {RoutineValues, WorkoutValues, WorkoutSummary, ExerciseValues, RoutineWithWorkouts} from "@/types/routine-builder";
 
 function normalizeRoutineValues(values: RoutineValues) {
     const name = values.name.trim();
@@ -90,17 +85,24 @@ export async function getRoutinesWithWorkoutsByUserId(
             routineId: workoutTemplates.routineId,
             name: workoutTemplates.name,
             position: workoutTemplates.position,
+            exerciseCount: count(workoutTemplateExercises.id),
         })
         .from(workoutTemplates)
-        .where(
-            inArray(
-                workoutTemplates.routineId,
-                routineIds,
+        .leftJoin(
+            workoutTemplateExercises,
+            eq(
+                workoutTemplateExercises.workoutTemplateId,
+                workoutTemplates.id,
             ),
         )
-        .orderBy(
-            asc(workoutTemplates.position),
-        );
+        .where(inArray(workoutTemplates.routineId, routineIds))
+        .groupBy(
+            workoutTemplates.id,
+            workoutTemplates.routineId,
+            workoutTemplates.name,
+            workoutTemplates.position,
+        )
+        .orderBy(asc(workoutTemplates.position));
 
     const workoutsByRoutineId = new Map<string, WorkoutSummary[]>();
 
