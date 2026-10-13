@@ -12,6 +12,7 @@ type IconName =
     | "reorder"
     | "arrow-left"
     | "check"
+    | "timer"
     | "play"
     | "brand"
     | "google"
@@ -77,6 +78,12 @@ export default function Icon({ name, className }: { name: IconName; className?: 
             {name === "chevron-down" && <path d="m8 10 4 4 4-4" />}
             {name === "arrow-left" && <path d="M19 12H5M10 7l-5 5 5 5" />}
             {name === "check" && <path d="m5 12 4 4L19 6" />}
+            {name === "timer" && (
+                <>
+                    <circle cx="12" cy="13" r="7.5" />
+                    <path d="M12 9.5V13l2.5 1.5M9.5 3h5M12 3v2.5" />
+                </>
+            )}
             {name === "play" && <path d="m8 5 11 7-11 7V5Z" />}
             {name === "edit" && (
                 <>
