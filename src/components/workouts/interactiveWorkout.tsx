@@ -8,6 +8,10 @@ import ExerciseFrame from "@/components/workouts/exerciseFrame";
 import RestTimer from "@/components/workouts/restTimer";
 import WorkoutTimer from "@/components/workouts/workoutTimer";
 import type {ConfiguredExercise, Workout} from "@/types/routine-builder";
+import type {WorkoutSessionDraft, WorkoutSetDraft} from "@/types/workout-session";
+import {createWorkoutSessionDraft} from "@/helpers/workout-session";
+import {completeWorkoutAction} from "@/app/(protected)/workouts/actions";
+import {loadActiveWorkout, saveActiveWorkout} from "@/helpers/active-workout-storage";
 
 type InteractiveWorkoutProps = {
     workout: Workout;
@@ -15,19 +19,58 @@ type InteractiveWorkoutProps = {
 
 export default function InteractiveWorkout({workout}: InteractiveWorkoutProps) {
     const router = useRouter();
+    const [activeWorkout, setActiveWorkout] =
+        useState<Workout>(workout);
     const [selectedExercise, setSelectedExercise] =
         useState<ConfiguredExercise | null>(
-            workout.exercises[0] ?? null,
+            activeWorkout.exercises[0] ?? null,
         );
+
     const [showDiscardDialog, setShowDiscardDialog] = useState(false);
     const [restEndsAt, setRestEndsAt] = useState<number | null>(null);
+
+    const [
+        hasRestoredActiveWorkout,
+        setHasRestoredActiveWorkout,
+    ] = useState(false);
+
     const exerciseButtonRefs = useRef(
         new Map<string, HTMLButtonElement>(),
     );
-    const selectedExerciseIndex = workout.exercises.findIndex(
+
+    const [isFinishing, setIsFinishing] = useState(false);
+    const [finishError, setFinishError] = useState<string | null>(null);
+
+    const selectedExerciseIndex = activeWorkout.exercises.findIndex(
         (exercise) => exercise.id === selectedExercise?.id,
     );
-    const nextExercise = workout.exercises[selectedExerciseIndex + 1];
+
+    const selectedExerciseId = selectedExercise?.id ?? null;
+
+    const nextExercise = activeWorkout.exercises[selectedExerciseIndex + 1];
+
+    const [workoutSession, setWorkoutSession] = useState<WorkoutSessionDraft>(() =>
+        createWorkoutSessionDraft(activeWorkout)
+    );
+
+    const selectedExerciseDraft = workoutSession.exercises.find(
+        (exercise) =>
+            exercise.workoutTemplateExerciseId === selectedExercise?.id,
+    )
+
+    const updateExerciseSets = (
+        workoutTemplateExerciseId: string,
+        sets: WorkoutSetDraft[],
+    ) => {
+        setWorkoutSession((currentSession) => ({
+            ...currentSession,
+            exercises: currentSession.exercises.map((exercise) =>
+                exercise.workoutTemplateExerciseId === workoutTemplateExerciseId
+                    ? {...exercise, sets}
+                    : exercise,
+            ),
+        }));
+    }
 
     const startRest = useCallback((seconds: number) => {
         setRestEndsAt(Date.now() + seconds * 1000);
@@ -55,44 +98,122 @@ export default function InteractiveWorkout({workout}: InteractiveWorkoutProps) {
         router.push("/dashboard");
     };
 
-    const finishWorkout = () => {
-        console.log("finish workout");
+    const finishWorkout = async () => {
+        if (isFinishing) {
+            return;
+        }
+
+        const hasCompletedSet = workoutSession.exercises.some(
+            (exercise) => exercise.sets.some((set) => set.completed)
+        );
+
+        if (!hasCompletedSet) {
+            setFinishError("Complete at least one set before finishing.")
+            return;
+        }
+
+        setIsFinishing(true);
+        setFinishError(null);
+
+        try {
+            await completeWorkoutAction(workoutSession)
+            router.replace("/history");
+        } catch {
+            setFinishError("Unable to save your workout. Please try again.",);
+        } finally {
+            setIsFinishing(false);
+        }
     };
 
     const selectExercise = (exercise: ConfiguredExercise) => {
         setSelectedExercise(exercise);
     };
 
+    useEffect(() => {
+        const savedWorkout = loadActiveWorkout();
+
+        const canRestore =
+            savedWorkout !== null &&
+            savedWorkout.workout.id === workout.id &&
+            savedWorkout.session.workoutTemplateId ===
+            workout.id;
+
+        /* eslint-disable react-hooks/set-state-in-effect --
+           Restore client-only localStorage state after hydration. */
+
+        if (canRestore) {
+            setActiveWorkout(savedWorkout.workout);
+            setWorkoutSession(savedWorkout.session);
+
+            // Existing selected exercise and rest timer restoration
+        }
+
+        setHasRestoredActiveWorkout(true);
+
+        /* eslint-enable react-hooks/set-state-in-effect */
+    }, [workout.id]);
+
+    useEffect(() => {
+        if (!hasRestoredActiveWorkout) {
+            return;
+        }
+
+        saveActiveWorkout({
+            version: 1,
+            workout: activeWorkout,
+            session: workoutSession,
+            selectedExerciseId,
+            restEndsAt,
+            updatedAt: Date.now(),
+        });
+    }, [
+        activeWorkout,
+        workoutSession,
+        selectedExerciseId,
+        restEndsAt,
+        hasRestoredActiveWorkout,
+    ]);
+
     return (
         <main className="fixed inset-0 z-40 overflow-y-auto bg-canvas text-primary">
+            {finishError && (
+                <p
+                    role="alert"
+                    className="mb-4 rounded-control bg-danger-soft p-3 text-sm text-danger"
+                >
+                    {finishError}
+                </p>
+            )}
             <div className="mx-auto min-h-dvh w-full max-w-3xl bg-canvas">
-                <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-divider bg-surface px-4">
+                <header
+                    className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-divider bg-surface px-4">
                     <button
                         type="button"
                         onClick={() => setShowDiscardDialog(true)}
                         aria-label="Close workout"
                         className="grid size-10 place-items-center rounded-full text-secondary transition hover:bg-surface-subtle hover:text-primary"
                     >
-                        <Icon name="close" className="size-5" />
+                        <Icon name="close" className="size-5"/>
                     </button>
 
-                    <WorkoutTimer />
+                    <WorkoutTimer startedAt={workoutSession.startedAt}/>
 
                     <button
                         type="button"
+                        disabled={isFinishing}
                         onClick={finishWorkout}
-                        className="h-10 rounded-control bg-brand-soft px-4 text-sm font-semibold text-brand transition hover:bg-brand-soft-hover"
+                        className="h-10 rounded-control bg-brand-soft px-4 text-sm font-semibold text-brand transition hover:bg-brand-soft-hover disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                        Finish
+                        {isFinishing ? "Saving..." : "Finish"}
                     </button>
                 </header>
 
                 <nav
-                    aria-label={`${workout.name} exercises`}
+                    aria-label={`${activeWorkout.name} exercises`}
                     className="sticky top-16 z-20 overflow-x-auto border-b border-divider bg-surface px-3 py-2 scrollbar-none [&::-webkit-scrollbar]:hidden"
                 >
                     <div className="flex min-w-max gap-2">
-                        {workout.exercises.map((exercise, index) => {
+                        {activeWorkout.exercises.map((exercise, index) => {
                             const isSelected = selectedExercise?.id === exercise.id;
 
                             return (
@@ -127,12 +248,18 @@ export default function InteractiveWorkout({workout}: InteractiveWorkoutProps) {
                 </nav>
 
                 <div className="px-4 py-6 pb-28 md:px-8">
-                    {selectedExercise ? (
+                    {selectedExercise && selectedExerciseDraft ? (
                         <>
                             <ExerciseFrame
                                 key={selectedExercise.id}
                                 selectedExercise={selectedExercise}
+                                sets={selectedExerciseDraft.sets}
                                 onStartRest={startRest}
+                                onSetsChange={(updatedSets) =>
+                                    updateExerciseSets(
+                                        selectedExerciseDraft.workoutTemplateExerciseId,
+                                        updatedSets,
+                                    )}
                             />
 
                             {nextExercise ? (
@@ -146,17 +273,18 @@ export default function InteractiveWorkout({workout}: InteractiveWorkoutProps) {
                             ) : (
                                 <button
                                     type="button"
+                                    disabled={isFinishing}
                                     onClick={finishWorkout}
-                                    className="mt-5 flex h-14 w-full items-center justify-center rounded-control bg-brand px-5 text-sm font-semibold text-white"
+                                    className="mt-5 flex h-14 w-full items-center justify-center rounded-control bg-brand px-5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
                                 >
-                                    Finish workout
+                                    {isFinishing ? "Saving workout..." : "Finish workout"}
                                 </button>
                             )}
                         </>
                     ) : (
                         <section className="rounded-card border border-border bg-surface p-6 text-center shadow-card">
                             <h1 className="font-display text-heading font-bold">
-                                {workout.name}
+                                {activeWorkout.name}
                             </h1>
                             <p className="mt-2 text-sm text-secondary">
                                 This workout does not contain any exercises yet.

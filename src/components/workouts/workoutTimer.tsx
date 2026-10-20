@@ -1,15 +1,29 @@
 import {useEffect, useState} from "react";
+import {getElapsedSeconds} from "@/helpers/workout-session";
 
-export default function WorkoutTimer() {
+type WorkoutTimerProps = {
+    startedAt: number;
+}
+
+export default function WorkoutTimer({startedAt}: WorkoutTimerProps) {
     const [seconds, setSeconds] = useState(0);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setSeconds((current) => current + 1);
-        }, 1000);
+        const updateTimer = () => {
+            setSeconds(getElapsedSeconds(startedAt));
+        }
 
-        return () => clearInterval(interval);
-    }, []);
+        updateTimer();
+
+        const interval = setInterval(
+            updateTimer,
+            1_000
+        );
+
+        return () => {
+            window.clearInterval(interval);
+        }
+    }, [startedAt]);
 
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
