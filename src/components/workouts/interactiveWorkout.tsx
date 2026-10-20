@@ -145,7 +145,21 @@ export default function InteractiveWorkout({workout}: InteractiveWorkoutProps) {
             setActiveWorkout(savedWorkout.workout);
             setWorkoutSession(savedWorkout.session);
 
-            // Existing selected exercise and rest timer restoration
+            const restoredSelectedExercise =
+                savedWorkout.workout.exercises.find(
+                    (exercise) =>
+                        exercise.id === savedWorkout.selectedExerciseId,
+                ) ??
+                savedWorkout.workout.exercises[0] ??
+                null;
+
+            setSelectedExercise(restoredSelectedExercise);
+            setRestEndsAt(
+                savedWorkout.restEndsAt !== null &&
+                savedWorkout.restEndsAt > Date.now()
+                    ? savedWorkout.restEndsAt
+                    : null,
+            );
         }
 
         setHasRestoredActiveWorkout(true);
