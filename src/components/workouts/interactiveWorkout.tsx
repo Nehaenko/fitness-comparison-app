@@ -11,7 +11,11 @@ import type {ConfiguredExercise, Workout} from "@/types/routine-builder";
 import type {WorkoutSessionDraft, WorkoutSetDraft} from "@/types/workout-session";
 import {createWorkoutSessionDraft} from "@/helpers/workout-session";
 import {completeWorkoutAction} from "@/app/(protected)/workouts/actions";
-import {loadActiveWorkout, saveActiveWorkout} from "@/helpers/active-workout-storage";
+import {
+    loadActiveWorkout,
+    removeActiveWorkout,
+    saveActiveWorkout,
+} from "@/helpers/active-workout-storage";
 
 type InteractiveWorkoutProps = {
     workout: Workout;
@@ -95,7 +99,8 @@ export default function InteractiveWorkout({workout}: InteractiveWorkoutProps) {
     }, [selectedExercise]);
 
     const discardChanges = () => {
-        router.push("/dashboard");
+        removeActiveWorkout();
+        router.replace("/dashboard");
     };
 
     const finishWorkout = async () => {
@@ -116,7 +121,8 @@ export default function InteractiveWorkout({workout}: InteractiveWorkoutProps) {
         setFinishError(null);
 
         try {
-            await completeWorkoutAction(workoutSession)
+            await completeWorkoutAction(workoutSession);
+            removeActiveWorkout();
             router.replace("/history");
         } catch {
             setFinishError("Unable to save your workout. Please try again.",);
