@@ -200,6 +200,198 @@ export const workoutTemplateExercises = pgTable("workout_template_exercises", {
     ],
 );
 
+export const workoutSessions = pgTable(
+    "workout_sessions",
+    {
+        id: uuid("id")
+            .defaultRandom()
+            .primaryKey(),
+
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, {
+                onDelete: "cascade",
+            }),
+
+        routineId: uuid("routine_id")
+            .references(() => routines.id, {
+                onDelete: "set null",
+            }),
+
+        workoutTemplateId: uuid("workout_template_id")
+            .references(() => workoutTemplates.id, {
+                onDelete: "set null",
+            }),
+
+        routineName: text("routine_name")
+            .notNull(),
+
+        workoutName: text("workout_name")
+            .notNull(),
+
+        startedAt: timestamp("started_at", {
+            withTimezone: true,
+            mode: "date",
+        }).notNull(),
+
+        completedAt: timestamp("completed_at", {
+            withTimezone: true,
+            mode: "date",
+        }).notNull(),
+
+        durationSeconds: integer("duration_seconds")
+            .notNull(),
+
+        createdAt: timestamp("created_at", {
+            withTimezone: true,
+            mode: "date",
+        })
+            .defaultNow()
+            .notNull(),
+    },
+    (table) => [
+        index("workout_sessions_user_completed_at_idx")
+            .on(table.userId, table.completedAt),
+
+        index("workout_sessions_workout_template_id_idx")
+            .on(table.workoutTemplateId),
+
+        check(
+            "workout_sessions_duration_seconds_check",
+            sql`${table.durationSeconds} >= 0`,
+        ),
+
+        check(
+            "workout_sessions_completed_after_started_check",
+            sql`${table.completedAt} >= ${table.startedAt}`,
+        ),
+    ],
+);
+
+export type WorkoutSession =
+    typeof workoutSessions.$inferSelect;
+
+export const workoutSessionExercises = pgTable(
+    "workout_session_exercises",
+    {
+        id: uuid("id")
+            .defaultRandom()
+            .primaryKey(),
+
+        workoutSessionId: uuid("workout_session_id")
+            .notNull()
+            .references(() => workoutSessions.id, {
+                onDelete: "cascade",
+            }),
+
+        workoutTemplateExerciseId: uuid(
+            "workout_template_exercise_id",
+        ).references(() => workoutTemplateExercises.id, {
+            onDelete: "set null",
+        }),
+
+        exerciseId: uuid("exercise_id")
+            .notNull()
+            .references(() => exercises.id, {
+                onDelete: "restrict",
+            }),
+
+        exerciseName: text("exercise_name")
+            .notNull(),
+
+        position: integer("position")
+            .notNull(),
+
+        createdAt: timestamp("created_at", {
+            withTimezone: true,
+            mode: "date",
+        })
+            .defaultNow()
+            .notNull(),
+    },
+    (table) => [
+        uniqueIndex(
+            "workout_session_exercises_session_position_idx",
+        ).on(
+            table.workoutSessionId,
+            table.position,
+        ),
+
+        index(
+            "workout_session_exercises_exercise_id_idx",
+        ).on(table.exerciseId),
+
+        check(
+            "workout_session_exercises_position_check",
+            sql`${table.position} >= 0`,
+        ),
+    ],
+);
+
+export type WorkoutSessionExercise =
+    typeof workoutSessionExercises.$inferSelect;
+
+export const workoutSessionSets = pgTable(
+    "workout_session_sets",
+    {
+        id: uuid("id")
+            .defaultRandom()
+            .primaryKey(),
+
+        workoutSessionExerciseId: uuid(
+            "workout_session_exercise_id",
+        )
+            .notNull()
+            .references(() => workoutSessionExercises.id, {
+                onDelete: "cascade",
+            }),
+
+        position: integer("position")
+            .notNull(),
+
+        weight: numeric("weight", {
+            precision: 8,
+            scale: 2,
+        }),
+
+        reps: integer("reps")
+            .notNull(),
+
+        createdAt: timestamp("created_at", {
+            withTimezone: true,
+            mode: "date",
+        })
+            .defaultNow()
+            .notNull(),
+    },
+    (table) => [
+        uniqueIndex(
+            "workout_session_sets_exercise_position_idx",
+        ).on(
+            table.workoutSessionExerciseId,
+            table.position,
+        ),
+
+        check(
+            "workout_session_sets_position_check",
+            sql`${table.position} >= 0`,
+        ),
+
+        check(
+            "workout_session_sets_weight_check",
+            sql`${table.weight} IS NULL OR ${table.weight} >= 0`,
+        ),
+
+        check(
+            "workout_session_sets_reps_check",
+            sql`${table.reps} > 0`,
+        ),
+    ],
+);
+
+export type WorkoutSessionSet =
+    typeof workoutSessionSets.$inferSelect;
+
 export const accounts = pgTable(
     "accounts",
     {
