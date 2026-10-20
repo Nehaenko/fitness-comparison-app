@@ -4,7 +4,7 @@ import {auth} from "@/auth";
 import {getWorkoutHistorySummariesForUser} from "@/db/workoutHistory";
 import type {WorkoutHistorySummary} from "@/types/history";
 
-export async function getAuthenticatedWorkoutWithExercises(
+export async function getAuthenticatedWorkoutHistorySummaries(
     limit: number,
 ): Promise<WorkoutHistorySummary[]> {
     const session = await auth();
