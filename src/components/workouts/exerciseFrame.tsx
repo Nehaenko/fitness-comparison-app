@@ -1,12 +1,14 @@
 import Icon from "@/components/layout/actionComponents/iconComponent";
 import type {ConfiguredExercise} from "@/types/routine-builder";
 import type {WorkoutSetDraft} from "@/types/workout-session";
+import type {PreviousExercisePerformance} from "@/types/history";
 
 type ExerciseFrameProps = {
     selectedExercise: ConfiguredExercise;
     sets: WorkoutSetDraft[];
     onStartRest: (seconds: number) => void;
     onSetsChange: (sets: WorkoutSetDraft[]) => void;
+    previousPerformance?: PreviousExercisePerformance;
 };
 
 type WorkoutSetChanges = Partial<
@@ -16,6 +18,7 @@ type WorkoutSetChanges = Partial<
 export default function ExerciseFrame({
                                           selectedExercise,
                                           sets,
+                                          previousPerformance,
                                           onStartRest,
                                           onSetsChange,
                                       }: ExerciseFrameProps) {
@@ -61,6 +64,7 @@ export default function ExerciseFrame({
     };
 
     const completedCount = sets.filter((set) => set.completed).length;
+    const hasPreviousPerformance = Boolean(previousPerformance?.sets.length);
 
     return (
         <section>
@@ -75,7 +79,37 @@ export default function ExerciseFrame({
             </header>
 
             <div className="mt-6">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-secondary">
+                {hasPreviousPerformance && previousPerformance && (
+                    <section className="rounded-card bg-surface-subtle px-5 py-4">
+                        <h2 className="text-sm font-semibold uppercase tracking-wide text-secondary">
+                            Previous
+                        </h2>
+
+                        <div className="mt-3 space-y-1.5 font-mono text-sm tabular-nums text-secondary">
+                            {previousPerformance.sets.map((set) => (
+                                <p
+                                    key={set.id}
+                                    className="grid grid-cols-[3.25rem_auto_minmax(0,1fr)] items-baseline gap-2"
+                                >
+                                    <span>Set {set.position + 1}</span>
+                                    <span aria-hidden="true">—</span>
+                                    <span>
+                                        {set.weight === null
+                                            ? "Bodyweight"
+                                            : `${set.weight} kg`} {" "}
+                                        × {set.reps}
+                                    </span>
+                                </p>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                <h2
+                    className={`text-sm font-semibold uppercase tracking-wide text-secondary ${
+                        hasPreviousPerformance ? "mt-6" : ""
+                    }`}
+                >
                     Today
                 </h2>
 

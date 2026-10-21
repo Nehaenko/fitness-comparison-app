@@ -9,7 +9,8 @@ import {
     workoutSessionSets,
 } from "@/db/schema";
 
-import type {
+import {
+    PreviousExercisePerformanceByExerciseId,
     WorkoutHistoryDetail,
     WorkoutHistorySet,
     WorkoutHistorySummary,
@@ -178,4 +179,127 @@ export async function getWorkoutHistoryDetailForUser(
         setCount: historySets.length,
         exercises,
     };
+}
+
+export async function getPreviousExercisePerformanceForUser(
+    userId: string,
+    exerciseIds: string[],
+): Promise<PreviousExercisePerformanceByExerciseId> {
+    const uniqueExerciseIds = [
+        ...new Set(exerciseIds),
+    ];
+
+    if (uniqueExerciseIds.length === 0) {
+        return {};
+    }
+
+    const latestExercises = await db
+        .selectDistinctOn(
+            [workoutSessionExercises.exerciseId],
+            {
+                sessionExerciseId:
+                workoutSessionExercises.id,
+                exerciseId:
+                workoutSessionExercises.exerciseId,
+                completedAt:
+                workoutSessions.completedAt,
+            },
+        )
+        .from(workoutSessionExercises)
+        .innerJoin(
+            workoutSessions,
+            eq(
+                workoutSessionExercises.workoutSessionId,
+                workoutSessions.id,
+            ),
+        )
+        .where(
+            and(
+                eq(workoutSessions.userId, userId),
+                inArray(
+                    workoutSessionExercises.exerciseId,
+                    uniqueExerciseIds,
+                ),
+            ),
+        )
+        .orderBy(
+            asc(workoutSessionExercises.exerciseId),
+            desc(workoutSessions.completedAt),
+            desc(workoutSessions.id),
+            asc(workoutSessionExercises.position),
+        );
+
+    if (latestExercises.length === 0) {
+        return {};
+    }
+
+    const previousSets = await db
+        .select({
+            id: workoutSessionSets.id,
+            workoutSessionExerciseId:
+            workoutSessionSets.workoutSessionExerciseId,
+            position: workoutSessionSets.position,
+            weight: workoutSessionSets.weight,
+            reps: workoutSessionSets.reps,
+        })
+        .from(workoutSessionSets)
+        .where(
+            inArray(
+                workoutSessionSets.workoutSessionExerciseId,
+                latestExercises.map(
+                    (exercise) => exercise.sessionExerciseId,
+                ),
+            ),
+        )
+        .orderBy(
+            asc(workoutSessionSets.workoutSessionExerciseId),
+            asc(workoutSessionSets.position),
+        );
+
+    const exerciseIdBySessionExerciseId = new Map(
+        latestExercises.map((exercise) => [
+            exercise.sessionExerciseId,
+            exercise.exerciseId,
+        ]),
+    );
+
+    const previousPerformanceByExerciseId:
+        PreviousExercisePerformanceByExerciseId = {};
+
+    for (const exercise of latestExercises) {
+        previousPerformanceByExerciseId[exercise.exerciseId] = {
+            exerciseId: exercise.exerciseId,
+            completedAt: exercise.completedAt,
+            sets: [],
+        };
+    }
+
+    for (const previousSet of previousSets) {
+        const exerciseId = exerciseIdBySessionExerciseId.get(
+            previousSet.workoutSessionExerciseId,
+        );
+
+        if (!exerciseId) {
+            continue;
+        }
+
+        const previousPerformance =
+            previousPerformanceByExerciseId[exerciseId];
+
+        if (!previousPerformance) {
+            continue;
+        }
+
+        previousPerformance.sets.push({
+            id: previousSet.id,
+            position: previousSet.position,
+            weight:
+                previousSet.weight === null
+                    ? null
+                    : Number(previousSet.weight),
+            reps: previousSet.reps,
+        });
+    }
+
+    return previousPerformanceByExerciseId;
 }
