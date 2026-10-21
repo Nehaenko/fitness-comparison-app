@@ -1,17 +1,22 @@
 import {notFound} from "next/navigation";
 
-import {getAuthenticatedWorkoutWithExercises} from "@/app/(protected)/workouts/data";
+import {getAuthenticatedWorkoutWithPreviousPerformance} from "@/app/(protected)/workouts/data";
 import InteractiveWorkout from "@/components/workouts/interactiveWorkout";
 
 export default async function ActiveWorkoutPage({params}: {
     params: Promise<{ workoutId: string }>;
 }) {
     const {workoutId} = await params;
-    const workout = await getAuthenticatedWorkoutWithExercises(workoutId);
+    const result =
+        await getAuthenticatedWorkoutWithPreviousPerformance(
+            workoutId,
+        );
 
-    if (!workout) {
+    if (!result) {
         notFound();
     }
 
-    return <InteractiveWorkout workout={workout}/>
+    return <InteractiveWorkout workout={result.workout} previousPerformanceByExerciseId={
+        result.previousPerformanceByExerciseId
+    }/>
 }

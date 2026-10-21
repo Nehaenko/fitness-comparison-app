@@ -9,6 +9,7 @@ type IconName =
     | "logout"
     | "delete"
     | "chevron-down"
+    | "chevron-right"
     | "reorder"
     | "arrow-left"
     | "check"
@@ -76,6 +77,7 @@ export default function Icon({ name, className }: { name: IconName; className?: 
                 </>
             )}
             {name === "chevron-down" && <path d="m8 10 4 4 4-4" />}
+            {name === "chevron-right" && <path d="m10 8 4 4-4 4" />}
             {name === "arrow-left" && <path d="M19 12H5M10 7l-5 5 5 5" />}
             {name === "check" && <path d="m5 12 4 4L19 6" />}
             {name === "timer" && (

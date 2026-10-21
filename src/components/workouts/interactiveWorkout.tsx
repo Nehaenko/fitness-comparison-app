@@ -11,13 +11,21 @@ import type {ConfiguredExercise, Workout} from "@/types/routine-builder";
 import type {WorkoutSessionDraft, WorkoutSetDraft} from "@/types/workout-session";
 import {createWorkoutSessionDraft} from "@/helpers/workout-session";
 import {completeWorkoutAction} from "@/app/(protected)/workouts/actions";
-import {loadActiveWorkout, saveActiveWorkout} from "@/helpers/active-workout-storage";
+import {
+    loadActiveWorkout,
+    removeActiveWorkout,
+    saveActiveWorkout,
+} from "@/helpers/active-workout-storage";
+import type {
+    PreviousExercisePerformanceByExerciseId,
+} from "@/types/history";
 
 type InteractiveWorkoutProps = {
     workout: Workout;
+    previousPerformanceByExerciseId: PreviousExercisePerformanceByExerciseId;
 };
 
-export default function InteractiveWorkout({workout}: InteractiveWorkoutProps) {
+export default function InteractiveWorkout({workout, previousPerformanceByExerciseId}: InteractiveWorkoutProps) {
     const router = useRouter();
     const [activeWorkout, setActiveWorkout] =
         useState<Workout>(workout);
@@ -25,6 +33,12 @@ export default function InteractiveWorkout({workout}: InteractiveWorkoutProps) {
         useState<ConfiguredExercise | null>(
             activeWorkout.exercises[0] ?? null,
         );
+
+    const previousPerformance = selectedExercise
+        ? previousPerformanceByExerciseId[
+            selectedExercise.exerciseId
+            ]
+        : undefined;
 
     const [showDiscardDialog, setShowDiscardDialog] = useState(false);
     const [restEndsAt, setRestEndsAt] = useState<number | null>(null);
@@ -95,7 +109,8 @@ export default function InteractiveWorkout({workout}: InteractiveWorkoutProps) {
     }, [selectedExercise]);
 
     const discardChanges = () => {
-        router.push("/dashboard");
+        removeActiveWorkout();
+        router.replace("/dashboard");
     };
 
     const finishWorkout = async () => {
@@ -116,7 +131,8 @@ export default function InteractiveWorkout({workout}: InteractiveWorkoutProps) {
         setFinishError(null);
 
         try {
-            await completeWorkoutAction(workoutSession)
+            await completeWorkoutAction(workoutSession);
+            removeActiveWorkout();
             router.replace("/history");
         } catch {
             setFinishError("Unable to save your workout. Please try again.",);
@@ -254,6 +270,7 @@ export default function InteractiveWorkout({workout}: InteractiveWorkoutProps) {
                                 key={selectedExercise.id}
                                 selectedExercise={selectedExercise}
                                 sets={selectedExerciseDraft.sets}
+                                previousPerformance={previousPerformance}
                                 onStartRest={startRest}
                                 onSetsChange={(updatedSets) =>
                                     updateExerciseSets(

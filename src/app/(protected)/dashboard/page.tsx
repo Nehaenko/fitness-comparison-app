@@ -1,16 +1,32 @@
 import Link from "next/link";
 
-import { getAuthenticatedRoutines } from "@/app/(protected)/routines/data";
+import {getAuthenticatedRoutines} from "@/app/(protected)/routines/data";
 import ActiveWorkout from "@/components/dashboard/activeWorkout";
+import HistoryBlock from "@/components/dashboard/historyBlock";
+import {getAuthenticatedDashboardWorkoutHistory} from "@/app/(protected)/history/data";
 
 export default async function DashboardPage() {
     const routines = await getAuthenticatedRoutines();
     const activeRoutine = routines.find((routine) => routine.isActive);
+    const now = new Date();
+    const startDate = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        1,
+    );
+    const endDate = new Date(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        1,
+    );
+
+    const historyItems = await getAuthenticatedDashboardWorkoutHistory(startDate, endDate);
 
     if (!activeRoutine) {
         return (
             <main className="flex flex-1 items-center justify-center bg-canvas px-5 py-12 text-primary">
-                <section className="w-full max-w-md rounded-card border border-border bg-surface p-7 text-center shadow-card">
+                <section
+                    className="w-full max-w-md rounded-card border border-border bg-surface p-7 text-center shadow-card">
                     <h1 className="font-display text-heading font-bold">
                         No active routine
                     </h1>
@@ -40,7 +56,7 @@ export default async function DashboardPage() {
                             This month
                         </h2>
                         <p className="mt-2 font-display text-xl font-bold">
-                            0
+                            {historyItems.completedThisMonth}
                         </p>
                         <p className="mt-1.5 text-base text-secondary">
                             workouts
@@ -60,7 +76,7 @@ export default async function DashboardPage() {
                     </article>
                 </section>
 
-                <ActiveWorkout activeRoutine={activeRoutine} />
+                <ActiveWorkout activeRoutine={activeRoutine}/>
 
                 <div className="mt-5 grid gap-5">
                     <section className="overflow-hidden rounded-card border border-border bg-surface shadow-card">
@@ -69,16 +85,25 @@ export default async function DashboardPage() {
                                 Recent Workouts
                             </h2>
                             <Link
-                                href="#"
+                                href="/history"
                                 className="text-xs font-semibold text-brand hover:text-brand-hover"
                             >
                                 View all
                             </Link>
                         </header>
 
-                        <p className="px-5 py-5 text-xs text-secondary">
-                            History block here
-                        </p>
+                        {historyItems.recentWorkouts.length === 0 ? (
+                            <div className="px-5 py-6">
+                                <p className="text-small font-semibold text-primary">
+                                    No completed workouts yet
+                                </p>
+                                <p className="mt-1 text-small text-secondary">
+                                    Finish your first workout and it will appear here.
+                                </p>
+                            </div>
+                        ) : (
+                            <HistoryBlock records={historyItems.recentWorkouts}/>
+                        )}
                     </section>
 
                     <section className="overflow-hidden rounded-card border border-border bg-surface shadow-card">
