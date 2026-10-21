@@ -105,13 +105,9 @@ export default function ExerciseFrame({
                     </section>
                 )}
 
-                <h2
-                    className={`text-sm font-semibold uppercase tracking-wide text-secondary ${
+                <h2 className={`text-sm font-semibold uppercase tracking-wide text-secondary ${
                         hasPreviousPerformance ? "mt-6" : ""
-                    }`}
-                >
-                    Today
-                </h2>
+                    }`}>Today</h2>
 
                 <form className="mt-3 space-y-3">
                     {sets.map((set, index) => {
@@ -165,7 +161,14 @@ export default function ExerciseFrame({
                                     </span>
                                         <input
                                             type="number"
-                                            value={set.weight ?? "0"}
+                                            inputMode="decimal"
+                                            min="0"
+                                            step="any"
+                                            value={set.weight ?? ""}
+                                            placeholder="0"
+                                            onFocus={(event) =>
+                                                event.currentTarget.select()
+                                            }
                                             onChange={(event) =>
                                                 updateSet(set.id, {
                                                     weight:
@@ -189,7 +192,14 @@ export default function ExerciseFrame({
                                     </span>
                                         <input
                                             type="number"
-                                            value={set.reps ?? "0"}
+                                            inputMode="numeric"
+                                            min="0"
+                                            step="1"
+                                            value={set.reps ?? ""}
+                                            placeholder="0"
+                                            onFocus={(event) =>
+                                                event.currentTarget.select()
+                                            }
                                             onChange={(event) =>
                                                 updateSet(set.id, {
                                                     reps:
