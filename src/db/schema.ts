@@ -12,6 +12,7 @@ import {
     uniqueIndex,
     uuid,
     check, numeric,
+    date,
 } from "drizzle-orm/pg-core";
 
 export const weightUnitEnum = pgEnum("weight_unit", ["kg", "lb"]);
@@ -55,6 +56,104 @@ export const profiles = pgTable("profiles", {
         .defaultNow()
         .notNull(),
 });
+
+export const bodyMeasurements = pgTable(
+    "body_measurements",
+    {
+        id: uuid("id")
+            .defaultRandom()
+            .primaryKey(),
+
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, {
+                onDelete: "cascade",
+            }),
+
+        measuredOn: date("measured_on", {
+            mode: "string",
+        }).notNull(),
+
+        weight: numeric("weight", {
+            precision: 8,
+            scale: 2,
+        }),
+
+        waist: numeric("waist", {
+            precision: 8,
+            scale: 2,
+        }),
+
+        chest: numeric("chest", {
+            precision: 8,
+            scale: 2,
+        }),
+
+        hips: numeric("hips", {
+            precision: 8,
+            scale: 2,
+        }),
+
+        thigh: numeric("thigh", {
+            precision: 8,
+            scale: 2,
+        }),
+
+        arm: numeric("arm", {
+            precision: 8,
+            scale: 2,
+        }),
+
+        createdAt: timestamp("created_at", {
+            withTimezone: true,
+            mode: "date",
+        })
+            .defaultNow()
+            .notNull(),
+
+        updatedAt: timestamp("updated_at", {
+            withTimezone: true,
+            mode: "date",
+        })
+            .defaultNow()
+            .notNull(),
+    },
+    (table) => [
+        uniqueIndex(
+            "body_measurements_user_measured_on_idx",
+        ).on(
+            table.userId,
+            table.measuredOn,
+        ),
+
+        check(
+            "body_measurements_at_least_one_value_check",
+            sql`
+                ${table.weight} IS NOT NULL OR
+                ${table.waist} IS NOT NULL OR
+                ${table.chest} IS NOT NULL OR
+                ${table.hips} IS NOT NULL OR
+                ${table.thigh} IS NOT NULL OR
+                ${table.arm} IS NOT NULL
+            `,
+        ),
+
+        check(
+            "body_measurements_positive_values_check",
+            sql`
+                (${table.weight} IS NULL OR ${table.weight} > 0) AND
+                (${table.waist} IS NULL OR ${table.waist} > 0) AND
+                (${table.chest} IS NULL OR ${table.chest} > 0) AND
+                (${table.hips} IS NULL OR ${table.hips} > 0) AND
+                (${table.thigh} IS NULL OR ${table.thigh} > 0) AND
+                (${table.arm} IS NULL OR ${table.arm} > 0)
+            `,
+        ),
+    ],
+);
+
+export type BodyMeasurement =
+    typeof bodyMeasurements.$inferSelect;
 
 export const routines = pgTable("routines", {
         id: uuid("id").defaultRandom().primaryKey(),

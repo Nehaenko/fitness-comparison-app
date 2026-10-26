@@ -43,6 +43,13 @@
       "when": 1791910679494,
       "tag": "0005_add_workout_history",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793041312725,
+      "tag": "0006_add_body_measurements",
+      "breakpoints": true
     }
   ]
 }
