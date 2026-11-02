@@ -1,0 +1,199 @@
+"use client";
+
+import {useEffect, useState} from "react";
+
+import {saveMeasurementAction} from "@/app/(protected)/measurements/actions";
+import Icon from "@/components/layout/actionComponents/iconComponent";
+import type {MeasurementUnit, WeightUnit} from "@/types/profile";
+
+type LogModalProps = {
+    defaultDate: string;
+    weightUnit: WeightUnit;
+    measurementUnit: MeasurementUnit;
+};
+
+const bodyFields = [
+    {name: "waist", label: "Waist", placeholder: "e.g. 85"},
+    {name: "chest", label: "Chest", placeholder: "e.g. 100"},
+    {name: "hips", label: "Hips", placeholder: "e.g. 95"},
+    {name: "thigh", label: "Thigh", placeholder: "e.g. 58"},
+    {name: "arm", label: "Arm", placeholder: "e.g. 38"},
+] as const;
+
+export default function LogModal({
+    defaultDate,
+    weightUnit,
+    measurementUnit,
+}: LogModalProps) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
+        const closeOnEscape = (event: KeyboardEvent) => {
+            if (event.key === "Escape" && !isSaving) {
+                setIsOpen(false);
+            }
+        };
+
+        window.addEventListener("keydown", closeOnEscape);
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+            window.removeEventListener("keydown", closeOnEscape);
+        };
+    }, [isOpen, isSaving]);
+
+    const closeModal = () => {
+        if (isSaving) return;
+        setError(null);
+        setIsOpen(false);
+    };
+
+    const submitMeasurement = async (
+        event: React.FormEvent<HTMLFormElement>,
+    ) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        setIsSaving(true);
+        setError(null);
+
+        try {
+            await saveMeasurementAction(
+                new FormData(form),
+            );
+            form.reset();
+            setIsOpen(false);
+        } catch (submitError) {
+            setError(
+                submitError instanceof Error
+                    ? submitError.message
+                    : "Unable to save measurement",
+            );
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    return (
+        <>
+            <button
+                type="button"
+                onClick={() => setIsOpen(true)}
+                aria-label="Log measurements"
+                className="grid size-12 shrink-0 place-items-center rounded-control bg-surface-inverse text-2xl font-light leading-none text-inverse transition hover:bg-surface-inverse-control"
+            >
+                <span aria-hidden="true">+</span>
+            </button>
+
+            {isOpen ? (
+                <div className="fixed inset-0 z-50 flex items-end justify-center bg-backdrop backdrop-blur-[3px] sm:items-center sm:p-4">
+                    <button
+                        type="button"
+                        aria-label="Close measurement form"
+                        onClick={closeModal}
+                        className="absolute inset-0"
+                    />
+
+                    <section
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="log-measurements-title"
+                        className="relative z-10 flex max-h-[calc(100dvh-1rem)] w-full max-w-xl flex-col overflow-hidden rounded-t-panel bg-surface shadow-floating sm:rounded-panel"
+                    >
+                        <header className="flex shrink-0 items-center justify-between border-b border-divider px-5 py-5 sm:px-6">
+                            <h2
+                                id="log-measurements-title"
+                                className="text-body font-semibold"
+                            >
+                                Log measurements
+                            </h2>
+
+                            <button
+                                type="button"
+                                onClick={closeModal}
+                                disabled={isSaving}
+                                aria-label="Close measurement form"
+                                className="grid size-9 place-items-center rounded-full text-secondary transition hover:bg-surface-subtle hover:text-primary disabled:opacity-50"
+                            >
+                                <Icon name="close" className="size-5"/>
+                            </button>
+                        </header>
+
+                        <form
+                            onSubmit={submitMeasurement}
+                            className="min-h-0 overflow-y-auto px-5 py-5 sm:px-6"
+                        >
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-5">
+                                <label className="col-span-2">
+                                    <span className="form-label">Date</span>
+                                    <input
+                                        type="date"
+                                        name="measuredOn"
+                                        defaultValue={defaultDate}
+                                        required
+                                        className="form-control"
+                                    />
+                                </label>
+
+                                <label>
+                                    <span className="form-label">
+                                        Weight ({weightUnit})
+                                    </span>
+                                    <input
+                                        type="number"
+                                        inputMode="decimal"
+                                        min="0.01"
+                                        step="any"
+                                        name="weight"
+                                        placeholder="e.g. 80"
+                                        className="form-control"
+                                    />
+                                </label>
+
+                                {bodyFields.map((field) => (
+                                    <label key={field.name}>
+                                        <span className="form-label">
+                                            {field.label} ({measurementUnit})
+                                        </span>
+                                        <input
+                                            type="number"
+                                            inputMode="decimal"
+                                            min="0.01"
+                                            step="any"
+                                            name={field.name}
+                                            placeholder={field.placeholder}
+                                            className="form-control"
+                                        />
+                                    </label>
+                                ))}
+                            </div>
+
+                            {error ? (
+                                <p
+                                    role="alert"
+                                    className="mt-4 rounded-control bg-danger-soft px-4 py-3 text-small text-danger"
+                                >
+                                    {error}
+                                </p>
+                            ) : null}
+
+                            <button
+                                type="submit"
+                                disabled={isSaving}
+                                className="mt-7 h-13 w-full rounded-control bg-surface-inverse px-5 font-semibold text-inverse transition hover:bg-surface-inverse-control disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {isSaving ? "Saving..." : "Save entry"}
+                            </button>
+                        </form>
+                    </section>
+                </div>
+            ) : null}
+        </>
+    );
+}
