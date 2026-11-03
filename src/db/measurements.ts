@@ -2,12 +2,17 @@ import "server-only";
 
 import {db} from "@/db";
 import {bodyMeasurements} from "@/db/schema";
-import type {NormalizedMeasurementValues} from "@/types/measurements";
+import type {NormalizedMeasurementValues, MeasurementRecord} from "@/types/measurements";
+import {desc, eq, and} from "drizzle-orm";
 
 function numericValue(value: number | null) {
     return value === null
         ? null
         : value.toString();
+}
+
+function parseNumericValue(value:string | null) {
+    return value === null ? null : Number(value);
 }
 
 export async function upsertMeasurementForUser(
@@ -68,4 +73,53 @@ export async function upsertMeasurementForUser(
         .returning();
 
     return savedMeasurement ?? null;
+}
+
+export async function getMeasurementsForUser(userId: string): Promise<MeasurementRecord[]> {
+    const rows = await db
+        .select({
+            id: bodyMeasurements.id,
+            measuredOn: bodyMeasurements.measuredOn,
+            weight: bodyMeasurements.weight,
+            waist: bodyMeasurements.waist,
+            chest: bodyMeasurements.chest,
+            hips: bodyMeasurements.hips,
+            thigh: bodyMeasurements.thigh,
+            arm: bodyMeasurements.arm,
+        })
+        .from(bodyMeasurements)
+        .where(eq(bodyMeasurements.userId, userId))
+        .orderBy(
+            desc(bodyMeasurements.measuredOn),
+            desc(bodyMeasurements.createdAt),
+        );
+
+    return rows.map((row) => ({
+        ...row,
+        weight: parseNumericValue(row.weight),
+        waist: parseNumericValue(row.waist),
+        chest: parseNumericValue(row.chest),
+        hips: parseNumericValue(row.hips),
+        thigh: parseNumericValue(row.thigh),
+        arm: parseNumericValue(row.arm)
+    }));
+}
+
+export async function deleteMeasurementForUser(
+    measurementId: string,
+    userId: string,
+) {
+    const [deletedMeasurement] = await db
+        .delete(bodyMeasurements)
+        .where(
+            and(
+                eq(bodyMeasurements.id, measurementId),
+                eq(bodyMeasurements.userId, userId),
+            )
+        )
+        .returning({
+            id: bodyMeasurements.id,
+        });
+
+    return deletedMeasurement ?? null;
 }

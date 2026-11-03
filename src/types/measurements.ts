@@ -25,3 +25,7 @@ export type NormalizedMeasurementValues = {
     thigh: number | null;
     arm: number | null;
 };
+
+export type MeasurementRecord = NormalizedMeasurementValues & {
+    id: string;
+}

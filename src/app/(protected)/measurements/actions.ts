@@ -3,7 +3,7 @@
 import {revalidatePath} from "next/cache";
 
 import {auth} from "@/auth";
-import {upsertMeasurementForUser} from "@/db/measurements";
+import {upsertMeasurementForUser, deleteMeasurementForUser} from "@/db/measurements";
 import {getProfileByUserId} from "@/db/profile";
 import type {MeasurementInputValues} from "@/types/measurements";
 import {getMeasurementValues} from "@/validation/measurements";
@@ -87,5 +87,37 @@ export async function saveMeasurementAction(
     return {
         id: savedMeasurement.id,
         measuredOn: savedMeasurement.measuredOn,
+    };
+}
+
+export async function deleteMeasurementAction(measurementId: string) {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+        throw new Error("Unauthorized");
+    }
+
+    if (
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+            measurementId,
+        )
+    ) {
+        throw new Error("Invalid measurement");
+    }
+
+    const deletedMeasurement =
+        await deleteMeasurementForUser(measurementId, session.user.id);
+
+    if (!deletedMeasurement) {
+        throw new Error(
+            "Measurement not found or cannot be removed",
+        );
+    }
+
+    revalidatePath("/measurements");
+    revalidatePath("/dashboard");
+
+    return {
+        id: deletedMeasurement.id,
     };
 }
