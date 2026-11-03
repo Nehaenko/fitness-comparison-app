@@ -1,13 +1,12 @@
 "use client";
 
 import LogModal from "@/components/measurements/logModal";
-import Icon from "@/components/layout/actionComponents/iconComponent";
-import {formatMeasurementDate, getLondonDate, getDisplayValue} from "@/helpers/measurement-conversion";
-import {deleteMeasurementAction} from "@/app/(protected)/measurements/actions";
+import {getLondonDate, getDisplayValue} from "@/helpers/measurement-conversion";
 import {UserProfile} from "@/types/profile";
 import type {MeasurementField, MeasurementRecord} from "@/types/measurements";
 
 import {useState} from "react";
+import MeasurementHistory from "@/components/measurements/measurementHistory";
 
 type measurementsStructureProps = {
     profile: Pick<UserProfile, "weightUnit" | "measurementUnit">,
@@ -37,35 +36,6 @@ export default function MeasurementsStructure({profile, measurements}: measureme
         (measurement) => measurement[selectedTab] !== null,
     );
     const selectedUnit = selectedTab === "weight" ? profile.weightUnit : profile.measurementUnit;
-
-    const [deletingId, setDeletingId] = useState<string | null>(null);
-    const [deleteError, setDeleteError] = useState<string | null>(null);
-
-    const removeMeasurement = async (
-        measurementId: string,
-        measuredOn: string
-    ) => {
-        const confirmed = window.confirm(
-            `Remove all measurements logged on ${formatMeasurementDate(measuredOn)}?`,
-        )
-
-        if (!confirmed) {
-            return;
-        }
-
-        setDeletingId(measurementId);
-        setDeleteError(null);
-
-        try {
-            await deleteMeasurementAction(measurementId);
-        } catch (error) {
-            setDeleteError(error instanceof Error
-                ? error.message
-                : "Unable to remove measurement",);
-        } finally {
-            setDeletingId(null);
-        }
-    };
 
     return <>
         <div className="mx-auto w-full max-w-3xl">
@@ -120,7 +90,7 @@ export default function MeasurementsStructure({profile, measurements}: measureme
                                 <h3 className="text-small text-secondary">
                                     {tab.label}
                                 </h3>
-                                <p className="mt-1 flex items-baseline gap-1 font-mono text-heading font-semibold tabular-nums">
+                                <p className="mt-1 flex items-baseline gap-1 text-base font-semibold">
                                     <span>{latestDisplayValue ?? "—"}</span>
                                     <span className="font-sans text-small font-normal text-secondary">
                                             {unit}
@@ -164,119 +134,9 @@ export default function MeasurementsStructure({profile, measurements}: measureme
                 ))}
             </nav>
 
-            {deleteError ? (
-                <p
-                    role="alert"
-                    className="border-t border-divider bg-danger-soft px-5 py-3 text-small text-danger"
-                >
-                    {deleteError}
-                </p>
-            ) : null}
-
-            <section className="mt-6 overflow-hidden rounded-card border border-border bg-surface shadow-card">
-                <header className="bg-surface-subtle px-5 py-4">
-                    <h2 className="font-semibold capitalize">
-                        {selectedTab} history
-                    </h2>
-                </header>
-
-                {selectedMeasurements.length === 0 ? (
-                    <div className="border-t border-divider px-5 py-8 text-center">
-                        <p className="text-small font-semibold">
-                            No measurements yet
-                        </p>
-                        <p className="mx-auto mt-1 max-w-sm text-small text-secondary">
-                            Log your first entry to start building your measurement history.
-                        </p>
-                    </div>
-                ) : (
-                    <div className="divide-y divide-divider border-t">
-                        {selectedMeasurements.map((measurement, index) => {
-                            const storedValue = measurement[selectedTab];
-                            const olderStoredValue =
-                                selectedMeasurements[index + 1]?.[selectedTab] ?? null;
-
-                            if (storedValue === null) {
-                                return null;
-                            }
-                            const displayValue = getDisplayValue(storedValue, selectedTab, profile);
-                            const difference =
-                                olderStoredValue === null
-                                    ? null
-                                    : Math.round(
-                                    (
-                                        displayValue -
-                                        getDisplayValue(
-                                            olderStoredValue,
-                                            selectedTab,
-                                            profile,
-                                        )
-                                    ) * 100,
-                                ) / 100;
-
-                            const differenceText =
-                                difference === null
-                                    ? null
-                                    : difference > 0
-                                        ? `+${difference}`
-                                        : `${difference}`;
-
-                            return (
-                                <div
-                                    key={measurement.id}
-                                    className="grid min-h-16 grid-cols-[minmax(0,1fr)_auto_3.5rem_2rem] items-center gap-3 px-5 py-3"
-                                >
-                                    <time
-                                        dateTime={measurement.measuredOn}
-                                        className="truncate text-small text-secondary"
-                                    >
-                                        {formatMeasurementDate(measurement.measuredOn)}
-                                    </time>
-
-                                    <p className="whitespace-nowrap font-mono text-body font-semibold tabular-nums text-primary">
-                                        {displayValue}{" "}
-                                        <span className="text-small">
-                                        {selectedUnit}
-                                    </span>
-                                    </p>
-
-                                    <p
-                                        className={`text-right font-mono text-small tabular-nums ${
-                                            difference === null
-                                                ? "text-secondary"
-                                                : difference > 0
-                                                    ? "text-brand"
-                                                    : difference < 0
-                                                        ? "text-danger"
-                                                        : "text-secondary"
-                                        }`}
-                                    >
-                                        {differenceText ?? ""}
-                                    </p>
-
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            removeMeasurement(
-                                                measurement.id,
-                                                measurement.measuredOn,
-                                            )}
-                                        disabled={deletingId === measurement.id}
-                                        aria-label={
-                                            deletingId === measurement.id
-                                                ? "Removing measurement"
-                                                : `Remove measurement from ${formatMeasurementDate(measurement.measuredOn)}`
-                                        }
-                                        className="grid disabled:cursor-not-allowed disabled:opacity-40 size-8 place-items-center rounded-full text-secondary transition hover:bg-danger-soft hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
-                                    >
-                                        <Icon name="close" className="size-4"/>
-                                    </button>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
-            </section>
+            <MeasurementHistory selectedTab={selectedTab}
+                                selectedMeasurements={selectedMeasurements}
+                                profile={profile} selectedUnit={selectedUnit}/>
         </div>
     </>
 }

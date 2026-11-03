@@ -4,6 +4,9 @@ import {getAuthenticatedRoutines} from "@/app/(protected)/routines/data";
 import ActiveWorkout from "@/components/dashboard/activeWorkout";
 import HistoryBlock from "@/components/dashboard/historyBlock";
 import {getAuthenticatedDashboardWorkoutHistory} from "@/app/(protected)/history/data";
+import {getAuthenticatedMeasurements} from "@/app/(protected)/measurements/data";
+import {getAuthenticatedUserProfile} from "@/app/(protected)/profile/data";
+import MeasurementBlock from "@/components/dashboard/measurementBlock";
 
 export default async function DashboardPage() {
     const routines = await getAuthenticatedRoutines();
@@ -21,6 +24,8 @@ export default async function DashboardPage() {
     );
 
     const historyItems = await getAuthenticatedDashboardWorkoutHistory(startDate, endDate);
+    const measurementsItems = await getAuthenticatedMeasurements();
+    const profile = await getAuthenticatedUserProfile();
 
     if (!activeRoutine) {
         return (
@@ -112,16 +117,29 @@ export default async function DashboardPage() {
                                 Latest Measurements
                             </h2>
                             <Link
-                                href="#"
+                                href="/measurements"
                                 className="text-xs font-semibold text-brand hover:text-brand-hover"
                             >
-                                Update
+                                View all
                             </Link>
                         </header>
 
-                        <p className="px-5 py-5 text-xs text-secondary">
-                            Measurements block here
-                        </p>
+
+                        {measurementsItems.length === 0 ? (
+                            <div className="px-5 py-6">
+                                <p className="text-small font-semibold text-primary">
+                                    No measurements yet
+                                </p>
+                                <p className="mt-1 text-small text-secondary">
+                                    Log your first entry to track your progress.
+                                </p>
+                            </div>
+                        ) : (
+                            <MeasurementBlock
+                                records={measurementsItems}
+                                profile={profile}
+                            />
+                        )}
                     </section>
                 </div>
             </div>
