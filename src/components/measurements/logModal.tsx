@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 
 import {saveMeasurementAction} from "@/app/(protected)/measurements/actions";
 import Icon from "@/components/layout/actionComponents/iconComponent";
@@ -28,26 +28,80 @@ export default function LogModal({
     const [isOpen, setIsOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const dialogRef = useRef<HTMLElement>(null);
+    const dateInputRef = useRef<HTMLInputElement>(null);
+    const isSavingRef = useRef(isSaving);
+
+    useEffect(() => {
+        isSavingRef.current = isSaving;
+    }, [isSaving]);
 
     useEffect(() => {
         if (!isOpen) return;
 
         const previousOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
+        const trigger = triggerRef.current;
+        const focusFrame = window.requestAnimationFrame(() => {
+            dateInputRef.current?.focus();
+        });
 
-        const closeOnEscape = (event: KeyboardEvent) => {
-            if (event.key === "Escape" && !isSaving) {
+        const handleModalKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape" && !isSavingRef.current) {
+                setError(null);
                 setIsOpen(false);
+                return;
+            }
+
+            if (event.key !== "Tab") {
+                return;
+            }
+
+            const dialog = dialogRef.current;
+
+            if (!dialog) {
+                return;
+            }
+
+            const focusableElements = Array.from(
+                dialog.querySelectorAll<HTMLElement>(
+                    'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+                ),
+            );
+
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements.at(-1);
+
+            if (!firstElement || !lastElement) {
+                event.preventDefault();
+                return;
+            }
+
+            if (
+                event.shiftKey &&
+                document.activeElement === firstElement
+            ) {
+                event.preventDefault();
+                lastElement.focus();
+            } else if (
+                !event.shiftKey &&
+                document.activeElement === lastElement
+            ) {
+                event.preventDefault();
+                firstElement.focus();
             }
         };
 
-        window.addEventListener("keydown", closeOnEscape);
+        window.addEventListener("keydown", handleModalKeyDown);
 
         return () => {
+            window.cancelAnimationFrame(focusFrame);
             document.body.style.overflow = previousOverflow;
-            window.removeEventListener("keydown", closeOnEscape);
+            window.removeEventListener("keydown", handleModalKeyDown);
+            trigger?.focus();
         };
-    }, [isOpen, isSaving]);
+    }, [isOpen]);
 
     const closeModal = () => {
         if (isSaving) return;
@@ -83,6 +137,7 @@ export default function LogModal({
     return (
         <>
             <button
+                ref={triggerRef}
                 type="button"
                 onClick={() => setIsOpen(true)}
                 aria-label="Log measurements"
@@ -101,6 +156,7 @@ export default function LogModal({
                     />
 
                     <section
+                        ref={dialogRef}
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby="log-measurements-title"
@@ -133,6 +189,7 @@ export default function LogModal({
                                 <label className="col-span-2">
                                     <span className="form-label">Date</span>
                                     <input
+                                        ref={dateInputRef}
                                         type="date"
                                         name="measuredOn"
                                         defaultValue={defaultDate}

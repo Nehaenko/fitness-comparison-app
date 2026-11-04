@@ -40,7 +40,9 @@ export default function MeasurementsStructure({profile, measurements}: measureme
         (measurement) => measurement[selectedTab] !== null,
     );
     const selectedUnit = selectedTab === "weight" ? profile.weightUnit : profile.measurementUnit;
-    const latestMeasurementDate = measurements[0]?.measuredOn ?? null;
+
+    const latestMeasurement = measurements[0];
+    const latestMeasurementDate = latestMeasurement?.measuredOn ?? null;
 
     return <>
         <div className="mx-auto w-full max-w-3xl">
@@ -61,6 +63,17 @@ export default function MeasurementsStructure({profile, measurements}: measureme
                 />
             </header>
 
+            {measurements.length === 0 ? (
+                <section className="mt-7 rounded-card border border-border bg-surface px-6 py-10 text-center shadow-card">
+                    <h2 className="font-display text-heading font-bold">
+                        No measurements yet
+                    </h2>
+                    <p className="mx-auto mt-2 max-w-md text-body text-secondary">
+                        Log your first entry to start tracking changes over time.
+                    </p>
+                </section>
+            ) : (
+                <>
             <section className="mt-7 rounded-card border border-border bg-surface p-5 shadow-card sm:p-7">
                 <h2 className="text-small font-semibold uppercase tracking-wide text-secondary">
                     Latest
@@ -71,11 +84,6 @@ export default function MeasurementsStructure({profile, measurements}: measureme
 
                 <div className="mt-5 grid grid-cols-3 gap-x-4 gap-y-7">
                     {measurementTabs.map((tab) => {
-                        const latestMeasurement = measurements.find(
-                            (measurement) =>
-                                measurement[tab.field] !== null,
-                        );
-
                         const latestStoredValue =
                             latestMeasurement?.[tab.field] ?? null;
 
@@ -106,7 +114,7 @@ export default function MeasurementsStructure({profile, measurements}: measureme
                                 return getDisplayValue(value, tab.field, profile);
                             });
 
-                        const latestDifference = chartValues.length < 2
+                        const latestDifference = latestStoredValue === null || chartValues.length < 2
                             ? null
                             : Math.round(
                                 (
@@ -170,6 +178,8 @@ export default function MeasurementsStructure({profile, measurements}: measureme
             <MeasurementHistory selectedTab={selectedTab}
                                 selectedMeasurements={selectedMeasurements}
                                 profile={profile} selectedUnit={selectedUnit}/>
+                </>
+            )}
         </div>
     </>
 }

@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
     auth: vi.fn(),
     getProfileByUserId: vi.fn(),
     revalidatePath: vi.fn(),
+    deleteMeasurementForUser: vi.fn(),
     upsertMeasurementForUser: vi.fn(),
 }));
 
@@ -23,6 +24,8 @@ vi.mock("@/db/profile", () => ({
 }));
 
 vi.mock("@/db/measurements", () => ({
+    deleteMeasurementForUser:
+    mocks.deleteMeasurementForUser,
     upsertMeasurementForUser:
     mocks.upsertMeasurementForUser,
 }));
@@ -31,7 +34,13 @@ vi.mock("next/cache", () => ({
     revalidatePath: mocks.revalidatePath,
 }));
 
-import {saveMeasurementAction} from "@/app/(protected)/measurements/actions";
+import {
+    deleteMeasurementAction,
+    saveMeasurementAction,
+} from "@/app/(protected)/measurements/actions";
+
+const measurementId =
+    "11111111-1111-4111-8111-111111111111";
 
 function createMeasurementFormData() {
     const formData = new FormData();
@@ -135,6 +144,73 @@ describe("saveMeasurementAction", () => {
             ),
         ).rejects.toThrow(
             "Unable to save measurement",
+        );
+    });
+});
+
+describe("deleteMeasurementAction", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+
+        mocks.auth.mockResolvedValue({
+            user: {
+                id: "user-1",
+            },
+        });
+
+        mocks.deleteMeasurementForUser.mockResolvedValue({
+            id: measurementId,
+        });
+    });
+
+    it("rejects unauthenticated requests", async () => {
+        mocks.auth.mockResolvedValue(null);
+
+        await expect(
+            deleteMeasurementAction(measurementId),
+        ).rejects.toThrow("Unauthorized");
+
+        expect(
+            mocks.deleteMeasurementForUser,
+        ).not.toHaveBeenCalled();
+    });
+
+    it("rejects an invalid measurement id", async () => {
+        await expect(
+            deleteMeasurementAction("not-a-uuid"),
+        ).rejects.toThrow("Invalid measurement");
+
+        expect(
+            mocks.deleteMeasurementForUser,
+        ).not.toHaveBeenCalled();
+    });
+
+    it("deletes only for the authenticated user and revalidates affected pages", async () => {
+        await expect(
+            deleteMeasurementAction(measurementId),
+        ).resolves.toEqual({id: measurementId});
+
+        expect(
+            mocks.deleteMeasurementForUser,
+        ).toHaveBeenCalledWith(
+            measurementId,
+            "user-1",
+        );
+        expect(
+            mocks.revalidatePath,
+        ).toHaveBeenCalledWith("/measurements");
+        expect(
+            mocks.revalidatePath,
+        ).toHaveBeenCalledWith("/dashboard");
+    });
+
+    it("reports a record that is missing or belongs to another user", async () => {
+        mocks.deleteMeasurementForUser.mockResolvedValue(null);
+
+        await expect(
+            deleteMeasurementAction(measurementId),
+        ).rejects.toThrow(
+            "Measurement not found or cannot be removed",
         );
     });
 });

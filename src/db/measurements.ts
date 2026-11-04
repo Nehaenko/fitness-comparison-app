@@ -3,7 +3,7 @@ import "server-only";
 import {db} from "@/db";
 import {bodyMeasurements} from "@/db/schema";
 import type {NormalizedMeasurementValues, MeasurementRecord} from "@/types/measurements";
-import {desc, eq, and} from "drizzle-orm";
+import {desc, eq, and, isNotNull} from "drizzle-orm";
 
 function numericValue(value: number | null) {
     return value === null
@@ -75,8 +75,8 @@ export async function upsertMeasurementForUser(
     return savedMeasurement ?? null;
 }
 
-export async function getMeasurementsForUser(userId: string): Promise<MeasurementRecord[]> {
-    const rows = await db
+export async function getMeasurementsForUser(userId: string, limit?: number): Promise<MeasurementRecord[]> {
+    let query = db
         .select({
             id: bodyMeasurements.id,
             measuredOn: bodyMeasurements.measuredOn,
@@ -92,7 +92,14 @@ export async function getMeasurementsForUser(userId: string): Promise<Measuremen
         .orderBy(
             desc(bodyMeasurements.measuredOn),
             desc(bodyMeasurements.createdAt),
-        );
+        )
+        .$dynamic();
+
+    if (limit !== undefined) {
+        query = query.limit(limit);
+    }
+
+    const rows = await query;
 
     return rows.map((row) => ({
         ...row,
@@ -122,4 +129,30 @@ export async function deleteMeasurementForUser(
         });
 
     return deletedMeasurement ?? null;
+}
+
+export async function getLatestWeightForUser(
+    userId: string,
+): Promise<number | null> {
+    const [result] = await db
+        .select({
+            weight: bodyMeasurements.weight,
+        })
+        .from(bodyMeasurements)
+        .where(
+            and(
+                eq(bodyMeasurements.userId, userId),
+                isNotNull(bodyMeasurements.weight),
+            ),
+        )
+        .orderBy(
+            desc(bodyMeasurements.measuredOn),
+            desc(bodyMeasurements.createdAt),
+        )
+        .limit(1);
+
+    return result?.weight === undefined ||
+    result.weight === null
+        ? null
+        : Number(result.weight);
 }

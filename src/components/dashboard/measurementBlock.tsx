@@ -21,15 +21,14 @@ export default function MeasurementBlock({
                                              records,
                                              profile,
                                          }: MeasurementBlockProps) {
-    const latestMeasurements = records.slice(0, 3);
 
-    if (latestMeasurements.length === 0) {
+    if (records.length === 0) {
         return null;
     }
 
     return (
         <div>
-            {latestMeasurements.map((measurement) => (
+            {records.map((measurement) => (
                 <div key={measurement.id}>
                     <div className="grid grid-cols-4 gap-3 px-5 py-5">
                         {dashboardFields.map(({field, label}) => {
