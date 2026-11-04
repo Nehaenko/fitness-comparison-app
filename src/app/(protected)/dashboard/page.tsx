@@ -4,10 +4,12 @@ import {getAuthenticatedRoutines} from "@/app/(protected)/routines/data";
 import ActiveWorkout from "@/components/dashboard/activeWorkout";
 import HistoryBlock from "@/components/dashboard/historyBlock";
 import {getAuthenticatedDashboardWorkoutHistory} from "@/app/(protected)/history/data";
+import {getAuthenticatedDashboardMeasurements} from "@/app/(protected)/measurements/data";
+import {getAuthenticatedUserProfile} from "@/app/(protected)/profile/data";
+import MeasurementBlock from "@/components/dashboard/measurementBlock";
+import {getDisplayValue} from "@/helpers/measurement-conversion";
 
 export default async function DashboardPage() {
-    const routines = await getAuthenticatedRoutines();
-    const activeRoutine = routines.find((routine) => routine.isActive);
     const now = new Date();
     const startDate = new Date(
         now.getFullYear(),
@@ -20,7 +22,37 @@ export default async function DashboardPage() {
         1,
     );
 
-    const historyItems = await getAuthenticatedDashboardWorkoutHistory(startDate, endDate);
+    const [
+        routines,
+        profile,
+        historyItems,
+        dashboardMeasurements,
+    ] = await Promise.all([
+        getAuthenticatedRoutines(),
+        getAuthenticatedUserProfile(),
+        getAuthenticatedDashboardWorkoutHistory(
+            startDate,
+            endDate,
+        ),
+        getAuthenticatedDashboardMeasurements(),
+    ]);
+
+    const activeRoutine = routines.find(
+        (routine) => routine.isActive,
+    );
+    const {
+        recentMeasurements,
+        latestWeight,
+    } = dashboardMeasurements;
+
+    const latestDisplayValue =
+        latestWeight === null
+            ? null
+            : getDisplayValue(
+                latestWeight,
+                "weight",
+                profile,
+            );
 
     if (!activeRoutine) {
         return (
@@ -68,10 +100,10 @@ export default async function DashboardPage() {
                             Weight
                         </h2>
                         <p className="mt-2 font-display text-xl font-bold">
-                            79.2
+                            {latestDisplayValue ?? "—"}
                         </p>
                         <p className="mt-1.5 text-base text-secondary">
-                            kg
+                            {profile.weightUnit}
                         </p>
                     </article>
                 </section>
@@ -112,16 +144,29 @@ export default async function DashboardPage() {
                                 Latest Measurements
                             </h2>
                             <Link
-                                href="#"
+                                href="/measurements"
                                 className="text-xs font-semibold text-brand hover:text-brand-hover"
                             >
-                                Update
+                                View all
                             </Link>
                         </header>
 
-                        <p className="px-5 py-5 text-xs text-secondary">
-                            Measurements block here
-                        </p>
+
+                        {recentMeasurements.length === 0 ? (
+                            <div className="px-5 py-6">
+                                <p className="text-small font-semibold text-primary">
+                                    No measurements yet
+                                </p>
+                                <p className="mt-1 text-small text-secondary">
+                                    Log your first entry to track your progress.
+                                </p>
+                            </div>
+                        ) : (
+                            <MeasurementBlock
+                                records={recentMeasurements}
+                                profile={profile}
+                            />
+                        )}
                     </section>
                 </div>
             </div>
