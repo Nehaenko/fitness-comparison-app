@@ -1,10 +1,14 @@
 "use client";
 
 import LogModal from "@/components/measurements/logModal";
-import {getLondonDate, getDisplayValue} from "@/helpers/measurement-conversion";
+import MeasurementSparkline from "@/components/measurements/measurementSparkline";
+import {
+    formatMeasurementDate,
+    getDisplayValue,
+    getLondonDate,
+} from "@/helpers/measurement-conversion";
 import {UserProfile} from "@/types/profile";
 import type {MeasurementField, MeasurementRecord} from "@/types/measurements";
-
 import {useState} from "react";
 import MeasurementHistory from "@/components/measurements/measurementHistory";
 
@@ -36,6 +40,7 @@ export default function MeasurementsStructure({profile, measurements}: measureme
         (measurement) => measurement[selectedTab] !== null,
     );
     const selectedUnit = selectedTab === "weight" ? profile.weightUnit : profile.measurementUnit;
+    const latestMeasurementDate = measurements[0]?.measuredOn ?? null;
 
     return <>
         <div className="mx-auto w-full max-w-3xl">
@@ -59,6 +64,9 @@ export default function MeasurementsStructure({profile, measurements}: measureme
             <section className="mt-7 rounded-card border border-border bg-surface p-5 shadow-card sm:p-7">
                 <h2 className="text-small font-semibold uppercase tracking-wide text-secondary">
                     Latest
+                    {latestMeasurementDate
+                        ? ` — ${formatMeasurementDate(latestMeasurementDate)}`
+                        : ""}
                 </h2>
 
                 <div className="mt-5 grid grid-cols-3 gap-x-4 gap-y-7">
@@ -85,6 +93,34 @@ export default function MeasurementsStructure({profile, measurements}: measureme
                                 ? profile.weightUnit
                                 : profile.measurementUnit;
 
+                        const reversedMeasurements = [...measurements].reverse();
+                        const chartValues = reversedMeasurements
+                            .filter((measurement) => measurement[tab.field] !== null)
+                            .map((measurement) => {
+                                const value = measurement[tab.field];
+
+                                if (value === null) {
+                                    throw new Error("Measurement value should not be null");
+                                }
+
+                                return getDisplayValue(value, tab.field, profile);
+                            });
+
+                        const latestDifference = chartValues.length < 2
+                            ? null
+                            : Math.round(
+                                (
+                                    chartValues[chartValues.length - 1] -
+                                    chartValues[chartValues.length - 2]
+                                ) * 100,
+                            ) / 100;
+
+                        const latestDifferenceText = latestDifference === null
+                            ? null
+                            : latestDifference > 0
+                                ? `+${latestDifference}`
+                                : `${latestDifference}`;
+
                         return (
                             <article key={tab.field} className="min-w-0">
                                 <h3 className="text-small text-secondary">
@@ -96,18 +132,15 @@ export default function MeasurementsStructure({profile, measurements}: measureme
                                             {unit}
                                     </span>
                                 </p>
+
+                                <p className="min-h-5 font-mono text-small tabular-nums text-secondary">
+                                    {latestDifferenceText ?? ""}
+                                </p>
+
+                                <MeasurementSparkline values={chartValues} label={tab.label} />
                             </article>
                         );
                     })}
-                </div>
-
-                <div className="mt-7 rounded-control bg-surface-subtle px-4 py-5 text-center">
-                    <p className="text-small font-semibold">
-                        Your progress chart will appear here
-                    </p>
-                    <p className="mt-1 text-small text-secondary">
-                        Log at least 3 entries for a measurement to see its trend.
-                    </p>
                 </div>
             </section>
 

@@ -126,17 +126,7 @@ export default function MeasurementHistory({
                                     </span>
                                     </p>
 
-                                    <p
-                                        className={`text-right font-mono text-small tabular-nums ${
-                                            difference === null
-                                                ? "text-secondary"
-                                                : difference > 0
-                                                    ? "text-brand"
-                                                    : difference < 0
-                                                        ? "text-danger"
-                                                        : "text-secondary"
-                                        }`}
-                                    >
+                                    <p className="text-right font-mono text-small tabular-nums text-secondary">
                                         {differenceText ?? ""}
                                     </p>
 

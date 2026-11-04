@@ -18,50 +18,55 @@ const dashboardFields: {
 ];
 
 export default function MeasurementBlock({
-    records,
-    profile,
-}: MeasurementBlockProps) {
-    const latestMeasurement = records[0];
+                                             records,
+                                             profile,
+                                         }: MeasurementBlockProps) {
+    const latestMeasurements = records.slice(0, 3);
 
-    if (!latestMeasurement) {
+    if (latestMeasurements.length === 0) {
         return null;
     }
 
     return (
         <div>
-            <div className="grid grid-cols-4 gap-3 px-5 py-5">
-                {dashboardFields.map(({field, label}) => {
-                    const storedValue = latestMeasurement[field];
-                    const displayValue = storedValue === null
-                        ? null
-                        : getDisplayValue(
-                            storedValue,
-                            field,
-                            profile,
-                        );
-                    const unit = field === "weight"
-                        ? profile.weightUnit
-                        : profile.measurementUnit;
+            {latestMeasurements.map((measurement) => (
+                <div key={measurement.id}>
+                    <div className="grid grid-cols-4 gap-3 px-5 py-5">
+                        {dashboardFields.map(({field, label}) => {
+                            const storedValue = measurement[field];
+                            const displayValue = storedValue === null
+                                ? null
+                                : getDisplayValue(
+                                    storedValue,
+                                    field,
+                                    profile,
+                                );
 
-                    return (
-                        <article key={field} className="min-w-0">
-                            <h3 className="text-small text-secondary">
-                                {label}
-                            </h3>
-                            <p className="mt-1 flex items-baseline gap-1 text-small font-semibold text-primary">
-                                <span>{displayValue ?? "—"}</span>
-                                <span className="font-sans text-small font-normal text-secondary">
-                                    {unit}
-                                </span>
-                            </p>
-                        </article>
-                    );
-                })}
-            </div>
+                            const unit = field === "weight"
+                                ? profile.weightUnit
+                                : profile.measurementUnit;
 
-            <p className="border-t border-divider bg-surface-subtle px-5 py-3 text-small text-secondary">
-                Logged {formatMeasurementDate(latestMeasurement.measuredOn)}
-            </p>
+                            return (
+                                <article key={field} className="min-w-0">
+                                    <h3 className="text-small text-secondary">
+                                        {label}
+                                    </h3>
+                                    <p className="mt-1 flex items-baseline gap-1 text-small font-semibold text-primary">
+                                        <span>{displayValue ?? "—"}</span>
+                                        <span className="font-sans text-small font-normal text-secondary">
+                                            {unit}
+                                        </span>
+                                    </p>
+                                </article>
+                            );
+                        })}
+                    </div>
+
+                    <p className="border-t border-divider bg-surface-subtle px-5 py-3 text-small text-secondary">
+                        Logged {formatMeasurementDate(measurement.measuredOn)}
+                    </p>
+                </div>
+            ))}
         </div>
     );
 }
