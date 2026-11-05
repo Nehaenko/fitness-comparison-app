@@ -155,6 +155,65 @@ export const bodyMeasurements = pgTable(
 export type BodyMeasurement =
     typeof bodyMeasurements.$inferSelect;
 
+export const progressPhotoViewEnum = pgEnum(
+    "progress_photo_view",
+    ["front", "side", "back"],
+)
+export const progressEntries = pgTable(
+    "progress_entries",
+    {
+        id: uuid("id").defaultRandom().primaryKey(),
+
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, {
+                onDelete: "cascade",
+            }),
+
+        recordedOn: date("recorded_on", {
+            mode: "string",
+        }).notNull(),
+
+        createdAt: timestamp("created_at", {
+            withTimezone: true,
+            mode: "date",
+        }).defaultNow().notNull(),
+    },
+    (table) => [
+        uniqueIndex("progress_entries_user_recorded_on_idx")
+            .on(table.userId, table.recordedOn),
+    ],
+);
+
+export const progressPhotos = pgTable(
+    "progress_photos",
+    {
+        id: uuid("id").defaultRandom().primaryKey(),
+
+        progressEntryId: uuid("progress_entry_id")
+            .notNull()
+            .references(() => progressEntries.id, {
+                onDelete: "cascade",
+            }),
+
+        view: progressPhotoViewEnum("view").notNull(),
+
+        storageKey: text("storage_key").notNull(),
+
+        createdAt: timestamp("created_at", {
+            withTimezone: true,
+            mode: "date",
+        }).defaultNow().notNull(),
+    },
+    (table) => [
+        uniqueIndex("progress_photos_entry_view_idx")
+            .on(table.progressEntryId, table.view),
+
+        uniqueIndex("progress_photos_storage_key_idx")
+            .on(table.storageKey),
+    ],
+);
+
 export const routines = pgTable("routines", {
         id: uuid("id").defaultRandom().primaryKey(),
         userId: text("user_id").notNull().references(() => users.id, {
