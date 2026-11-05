@@ -29,3 +29,20 @@ export type NormalizedProgressEntryValues = {
     weight: number | null;
     photos: ProgressPhotoUpload[];
 }
+
+export type StoredProgressPhotoValues = {
+    view: ProgressPhotoView;
+    storageKey: string;
+};
+
+export type SaveProgressEntryValues = {
+    recordedOn: string;
+    weight: number | null;
+    photos: StoredProgressPhotoValues[];
+};
+
+export type ProgressEntrySaveInputValues = {
+    recordedOn: string;
+    weight: string;
+    photos: StoredProgressPhotoValues[];
+}

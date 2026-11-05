@@ -2,7 +2,9 @@ import {weightToKilograms} from "@/helpers/weight-conversion";
 import type {
     NormalizedProgressEntryValues,
     ProgressEntryInputValues,
+    ProgressEntrySaveInputValues,
     ProgressPhotoView,
+    SaveProgressEntryValues,
 } from "@/types/progress";
 import type {WeightUnit} from "@/types/profile";
 
@@ -111,6 +113,65 @@ export function getProgressEntryValues(
             inputWeight === null
                 ? null
                 : weightToKilograms(inputWeight, weightUnit),
+        photos,
+    };
+}
+
+export function getProgressEntrySaveValues(
+    input: ProgressEntrySaveInputValues,
+    userId: string,
+    weightUnit: WeightUnit,
+): SaveProgressEntryValues {
+    const recordedOn = validateProgressDate(
+        input.recordedOn,
+    );
+
+    const inputWeight = parseOptionalWeight(
+        input.weight,
+    );
+
+    if (
+        input.photos.length === 0 ||
+        input.photos.length > 3
+    ) {
+        throw new Error(
+            "Add between one and three progress photos",
+        );
+    }
+
+    const usedViews = new Set<ProgressPhotoView>();
+    const expectedPrefix =
+        `progress-photos/${userId}/`;
+
+    const photos = input.photos.map((photo) => {
+        if (
+            !PROGRESS_PHOTO_VIEWS.includes(photo.view) ||
+            usedViews.has(photo.view)
+        ) {
+            throw new Error("Invalid progress photo view");
+        }
+
+        if (
+            typeof photo.storageKey !== "string" ||
+            !photo.storageKey.startsWith(expectedPrefix)
+        ) {
+            throw new Error("Invalid progress photo");
+        }
+
+        usedViews.add(photo.view);
+
+        return photo;
+    });
+
+    return {
+        recordedOn,
+        weight:
+            inputWeight === null
+                ? null
+                : weightToKilograms(
+                    inputWeight,
+                    weightUnit,
+                ),
         photos,
     };
 }
