@@ -166,3 +166,31 @@ export async function getProgressEntriesForUser(
         ),
     }));
 }
+
+export async function getProgressPhotoForUser(
+    photoId: string,
+    userId: string,
+) {
+    const [photo] = await db
+        .select({
+            id: progressPhotos.id,
+            storageKey: progressPhotos.storageKey,
+        })
+        .from(progressPhotos)
+        .innerJoin(
+            progressEntries,
+            eq(
+                progressPhotos.progressEntryId,
+                progressEntries.id,
+            ),
+        )
+        .where(
+            and(
+                eq(progressPhotos.id, photoId),
+                eq(progressEntries.userId, userId),
+            ),
+        )
+        .limit(1);
+
+    return photo ?? null;
+}
