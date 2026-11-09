@@ -1,5 +1,5 @@
 import {handleUpload, type HandleUploadBody} from "@vercel/blob/client";
-import {NextRequest, NextResponse} from "next/server";
+import {NextResponse} from "next/server";
 
 import {auth} from "@/auth";
 
@@ -35,15 +35,7 @@ export async function POST(
                     ],
                     maximumSizeInBytes: MAX_PHOTO_SIZE,
                     addRandomSuffix: true,
-                    tokenPayload: JSON.stringify({
-                        userId: session.user.id,
-                    }),
                 };
-            },
-
-            onUploadCompleted: async () => {
-                // The database entry will be created later
-                // by the authenticated save action.
             },
         });
         return NextResponse.json(response);
