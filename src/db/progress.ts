@@ -194,3 +194,50 @@ export async function getProgressPhotoForUser(
 
     return photo ?? null;
 }
+
+export async function deleteProgressEntryForUser(
+    entryId: string,
+    userId: string,
+) {
+    const photoRows = await db
+        .select({
+            storageKey: progressPhotos.storageKey,
+        })
+        .from(progressPhotos)
+        .innerJoin(
+            progressEntries,
+            eq(
+                progressPhotos.progressEntryId,
+                progressEntries.id,
+            ),
+        )
+        .where(
+            and(
+                eq(progressEntries.id, entryId),
+                eq(progressEntries.userId, userId),
+            ),
+        );
+
+    const [deletedEntry] = await db
+        .delete(progressEntries)
+        .where(
+            and(
+                eq(progressEntries.id, entryId),
+                eq(progressEntries.userId, userId),
+            ),
+        )
+        .returning({
+            id: progressEntries.id,
+        });
+
+    if (!deletedEntry) {
+        return null;
+    }
+
+    return {
+        id: deletedEntry.id,
+        storageKeys: photoRows.map(
+            (photo) => photo.storageKey,
+        ),
+    };
+}

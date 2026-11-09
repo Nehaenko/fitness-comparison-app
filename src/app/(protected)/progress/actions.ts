@@ -1,10 +1,10 @@
 "use server";
 
-import {head} from "@vercel/blob";
+import {del, head} from "@vercel/blob";
 import {revalidatePath} from "next/cache";
 
 import {auth} from "@/auth";
-import {createProgressEntryForUser} from "@/db/progress";
+import {createProgressEntryForUser, deleteProgressEntryForUser} from "@/db/progress";
 import {getProfileByUserId} from "@/db/profile";
 import type {ProgressEntrySaveInputValues} from "@/types/progress";
 import {getProgressEntrySaveValues} from "@/validation/progress";
@@ -74,5 +74,49 @@ export async function saveProgressEntryAction(
     return {
         id: savedEntry.id,
         recordedOn: savedEntry.recordedOn,
+    };
+}
+
+export async function deleteProgressAction(progressId: string) {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+        throw new Error("Unauthorized");
+    }
+
+    if (
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+            progressId,
+        )
+    ) {
+        throw new Error("Invalid progress entry");
+    }
+
+    const deletedEntry =
+        await deleteProgressEntryForUser(progressId, session.user.id);
+
+    if (!deletedEntry) {
+        throw new Error(
+            "Progress entry not found or cannot be removed",
+        );
+    }
+
+    if (deletedEntry.storageKeys.length > 0) {
+        try {
+            await del(deletedEntry.storageKeys);
+        } catch (cleanupError) {
+            // The user-facing record is already deleted. Keep the action
+            // successful and report the orphaned Blob cleanup for monitoring.
+            console.error(
+                "Unable to remove progress photo blobs",
+                cleanupError,
+            );
+        }
+    }
+
+    revalidatePath("/progress");
+
+    return {
+        id: deletedEntry.id,
     };
 }
