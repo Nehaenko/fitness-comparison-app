@@ -1,5 +1,10 @@
 import type {ConfiguredExercise, Workout} from "@/types/routine-builder";
 
+export type PointerPosition = {
+    x: number;
+    y: number;
+};
+
 export function moveWorkout(workouts: Workout[], from: number, to: number) {
     const reorderedWorkouts = [...workouts];
     const [movedWorkout] = reorderedWorkouts.splice(from, 1);
@@ -28,4 +33,14 @@ export function moveExercise(
     reorderedExercises.splice(to, 0, movedExercise);
 
     return reorderedExercises;
+}
+
+export function getPointerDistance(
+    first: PointerPosition,
+    second: PointerPosition,
+) {
+    return Math.hypot(
+        second.x - first.x,
+        second.y - first.y,
+    );
 }
