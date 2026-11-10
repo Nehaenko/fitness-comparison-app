@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import {useRouter} from "next/navigation";
 import {useState} from "react";
 
 import {deleteProgressAction} from "@/app/(protected)/progress/actions";
 import Icon from "@/components/layout/actionComponents/iconComponent";
 import PhotoPlaceholder from "@/components/progress/photoPlaceholder";
+import ProgressPhotoImage from "@/components/progress/progressPhotoImage";
 import {kilogramsToWeight} from "@/helpers/weight-conversion";
 import type {UserProfile} from "@/types/profile";
 import type {ProgressEntryRecord, ProgressPhotoView} from "@/types/progress";
@@ -156,11 +156,9 @@ export default function ProgressGallery({
                                         >
                                             {photo ? (
                                                 <>
-                                                    <Image
+                                                    <ProgressPhotoImage
                                                         src={photo.imageUrl}
                                                         alt={`${label} progress photo from ${formatProgressDate(entry.recordedOn)}`}
-                                                        fill
-                                                        unoptimized
                                                         sizes="(max-width: 640px) 30vw, 12rem"
                                                         className="object-cover"
                                                     />

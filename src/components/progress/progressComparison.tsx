@@ -1,10 +1,13 @@
+"use client"
+
+import {useState} from "react";
+
+import ComparisonPhoto from "@/components/progress/comparisonPhoto";
 import {ProgressEntryRecord, ProgressPhotoView} from "@/types/progress";
-import type {UserProfile} from "@/types/profile";
 import {formatProgressDate} from "@/validation/progress";
 
 type ProgressComparisonProps = {
     entries: ProgressEntryRecord[];
-    weightUnit: UserProfile["weightUnit"];
     photoViews: {
         view: ProgressPhotoView;
         label: string;
@@ -13,11 +16,28 @@ type ProgressComparisonProps = {
 
 export default function ProgressComparison({
                                                entries,
-                                               weightUnit,
                                                photoViews
                                            }: ProgressComparisonProps) {
-    const beforeEntry = entries.at(-1);
-    const afterEntry = entries[0];
+    const [beforeEntryId, setBeforeEntryId] = useState<string>(entries.at(-1)?.id ?? "");
+    const [afterEntryId, setAfterEntryId] = useState<string>(entries[0]?.id ?? "")
+
+    const beforeEntry = entries.find(
+        (entry) => entry.id === beforeEntryId
+    );
+
+    const afterEntry = entries.find(
+        (entry) => entry.id === afterEntryId
+    );
+
+    const [selectedView, setSelectedView] = useState<ProgressPhotoView>("front");
+
+    const beforePhoto = beforeEntry?.photos.find(
+        (photo) => photo.view === selectedView,
+    );
+
+    const afterPhoto = afterEntry?.photos.find(
+        (photo) => photo.view === selectedView,
+    );
 
     return (
         <>
@@ -25,7 +45,8 @@ export default function ProgressComparison({
                 <div className="grid grid-cols-2 gap-4">
                     <label className="form-label">
                         Before
-                        <select className="form-control normal-case" defaultValue={beforeEntry?.id ?? ""}>
+                        <select className="form-control normal-case" value={beforeEntryId}
+                                onChange={(event) => setBeforeEntryId(event.target.value)}>
                             {entries.length === 0 ? (
                                 <option value="">No entries</option>
                             ) : entries.map((entry) => (
@@ -38,7 +59,8 @@ export default function ProgressComparison({
 
                     <label className="form-label">
                         After
-                        <select className="form-control normal-case" defaultValue={afterEntry?.id ?? ""}>
+                        <select className="form-control normal-case" value={afterEntryId}
+                                onChange={(event) => setAfterEntryId(event.target.value)}>
                             {entries.length === 0 ? (
                                 <option value="">No entries</option>
                             ) : entries.map((entry) => (
@@ -50,22 +72,17 @@ export default function ProgressComparison({
                     </label>
                 </div>
 
-                <div className="mt-5 rounded-control bg-surface-subtle px-4 py-3 text-small text-secondary">
-                    Weight change:
-                    <span className="ml-2 font-mono font-semibold text-primary">
-                        — {weightUnit}
-                    </span>
-                </div>
             </section>
 
             <nav aria-label="Progress photo view" className="mt-5 grid grid-cols-3 gap-2">
-                {photoViews.map(({view, label}, index) => (
+                {photoViews.map(({view, label}) => (
                     <button
                         key={view}
                         type="button"
-                        aria-pressed={index === 0}
+                        aria-pressed={selectedView === view}
+                        onClick={() => setSelectedView(view)}
                         className={`rounded-control px-4 py-3 text-small font-semibold ${
-                            index === 0
+                            selectedView === view
                                 ? "bg-surface-inverse text-inverse"
                                 : "bg-surface-subtle text-secondary"
                         }`}
@@ -77,24 +94,23 @@ export default function ProgressComparison({
 
             <section
                 aria-label="Progress photo comparison"
-                className="mt-4 grid min-h-[30rem] grid-cols-2 overflow-hidden rounded-card border border-border bg-surface shadow-card"
+                className="mt-4 grid min-h-120 grid-cols-2 overflow-hidden rounded-card border border-border bg-surface shadow-card"
             >
-                <div
-                    className="relative flex items-center justify-center border-r border-divider bg-surface-subtle text-secondary">
-                    Before photo
-                    <span
-                        className="absolute bottom-4 left-4 rounded-pill bg-surface-inverse/80 px-3 py-1 text-label text-inverse">
-                        {beforeEntry ? formatProgressDate(beforeEntry.recordedOn) : "Before"}
-                    </span>
-                </div>
+                <ComparisonPhoto
+                    key={`before-${beforeEntryId}-${selectedView}`}
+                    photo={beforePhoto}
+                    recordedOn={beforeEntry?.recordedOn}
+                    selectedView={selectedView}
+                    side="before"
+                />
 
-                <div className="relative flex items-center justify-center bg-surface text-secondary">
-                    After photo
-                    <span
-                        className="absolute bottom-4 right-4 rounded-pill bg-surface-inverse/80 px-3 py-1 text-label text-inverse">
-                        {afterEntry ? formatProgressDate(afterEntry.recordedOn) : "After"}
-                    </span>
-                </div>
+                <ComparisonPhoto
+                    key={`after-${afterEntryId}-${selectedView}`}
+                    photo={afterPhoto}
+                    recordedOn={afterEntry?.recordedOn}
+                    selectedView={selectedView}
+                    side="after"
+                />
             </section>
         </>
     );

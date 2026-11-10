@@ -98,7 +98,6 @@ export default function ProgressStructure({
                 <ProgressComparison
                     photoViews={photoViews}
                     entries={entries}
-                    weightUnit={profile.weightUnit}
                 />
             ) : null}
         </div>

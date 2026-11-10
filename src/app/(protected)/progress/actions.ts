@@ -71,6 +71,11 @@ export async function saveProgressEntryAction(
 
     revalidatePath("/progress");
 
+    if (values.weight !== null) {
+        revalidatePath("/measurements");
+        revalidatePath("/dashboard");
+    }
+
     return {
         id: savedEntry.id,
         recordedOn: savedEntry.recordedOn,
