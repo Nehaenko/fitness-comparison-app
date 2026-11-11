@@ -1,20 +1,29 @@
-import {handleUpload, type HandleUploadBody} from "@vercel/blob/client";
+import {issueSignedToken} from "@vercel/blob";
+import {
+    handleUploadPresigned,
+    type HandleUploadPresignedBody,
+} from "@vercel/blob/client";
 import {NextResponse} from "next/server";
 
 import {auth} from "@/auth";
 
 const MAX_PHOTO_SIZE = 10 * 1024 * 1024;
+const ALLOWED_PHOTO_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+];
 
 export async function POST(
     request: Request,
 ): Promise<NextResponse> {
-    const body = await request.json() as HandleUploadBody;
+    const body = await request.json() as HandleUploadPresignedBody;
 
     try {
-        const response = await handleUpload({
+        const response = await handleUploadPresigned({
             body, request,
 
-            onBeforeGenerateToken: async (pathname) => {
+            getSignedToken: async (pathname) => {
                 const session = await auth();
 
                 if (!session?.user?.id) {
@@ -28,13 +37,17 @@ export async function POST(
                 }
 
                 return {
-                    allowedContentTypes: [
-                        "image/jpeg",
-                        "image/png",
-                        "image/webp",
-                    ],
-                    maximumSizeInBytes: MAX_PHOTO_SIZE,
-                    addRandomSuffix: true,
+                    token: await issueSignedToken({
+                        pathname,
+                        operations: ["put"],
+                        allowedContentTypes: ALLOWED_PHOTO_TYPES,
+                        maximumSizeInBytes: MAX_PHOTO_SIZE,
+                    }),
+                    urlOptions: {
+                        allowedContentTypes: ALLOWED_PHOTO_TYPES,
+                        maximumSizeInBytes: MAX_PHOTO_SIZE,
+                        addRandomSuffix: true,
+                    },
                 };
             },
         });

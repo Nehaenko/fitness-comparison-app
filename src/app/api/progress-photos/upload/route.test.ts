@@ -2,13 +2,18 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 
 const mocks = vi.hoisted(() => ({
     auth: vi.fn(),
-    handleUpload: vi.fn(),
+    handleUploadPresigned: vi.fn(),
+    issueSignedToken: vi.fn(),
 }));
 
 vi.mock("@/auth", () => ({auth: mocks.auth}));
 
+vi.mock("@vercel/blob", () => ({
+    issueSignedToken: mocks.issueSignedToken,
+}));
+
 vi.mock("@vercel/blob/client", () => ({
-    handleUpload: mocks.handleUpload,
+    handleUploadPresigned: mocks.handleUploadPresigned,
 }));
 
 import {POST} from "@/app/api/progress-photos/upload/route";
@@ -17,7 +22,7 @@ function createRequest() {
     return new Request("http://localhost/api/progress-photos/upload", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({type: "blob.generate-client-token"}),
+        body: JSON.stringify({type: "blob.generate-presigned-url"}),
     });
 }
 
@@ -28,9 +33,14 @@ describe("progress photo upload authorization", () => {
         vi.clearAllMocks();
         requestedPath = "progress-photos/user-1/front.jpg";
         mocks.auth.mockResolvedValue({user: {id: "user-1"}});
-        mocks.handleUpload.mockImplementation(
-            async ({onBeforeGenerateToken}) =>
-                onBeforeGenerateToken(requestedPath, null),
+        mocks.issueSignedToken.mockResolvedValue({
+            delegationToken: "delegation-token",
+            clientSigningToken: "client-signing-token",
+            validUntil: Date.now() + 60_000,
+        });
+        mocks.handleUploadPresigned.mockImplementation(
+            async ({getSignedToken}) =>
+                getSignedToken(requestedPath, null, false),
         );
     });
 
@@ -58,14 +68,30 @@ describe("progress photo upload authorization", () => {
         const result = await response.json();
 
         expect(response.status).toBe(200);
-        expect(result).toMatchObject({
+        expect(mocks.issueSignedToken).toHaveBeenCalledWith({
+            pathname: requestedPath,
+            operations: ["put"],
             allowedContentTypes: [
                 "image/jpeg",
                 "image/png",
                 "image/webp",
             ],
             maximumSizeInBytes: 10 * 1024 * 1024,
-            addRandomSuffix: true,
+        });
+        expect(result).toMatchObject({
+            token: {
+                delegationToken: "delegation-token",
+                clientSigningToken: "client-signing-token",
+            },
+            urlOptions: {
+                allowedContentTypes: [
+                    "image/jpeg",
+                    "image/png",
+                    "image/webp",
+                ],
+                maximumSizeInBytes: 10 * 1024 * 1024,
+                addRandomSuffix: true,
+            },
         });
     });
 });

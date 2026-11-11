@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import {useEffect, useRef, useState} from "react";
-import {upload} from "@vercel/blob/client";
+import {uploadPresigned} from "@vercel/blob/client";
 import {useRouter} from "next/navigation";
 
 import {saveProgressEntryAction} from "@/app/(protected)/progress/actions";
@@ -155,7 +155,7 @@ export default function NewProgressRecord({
                         const pathname =
                             `progress-photos/${userId}/${crypto.randomUUID()}-${photo.view}`;
 
-                        const blob = await upload(
+                        const blob = await uploadPresigned(
                             pathname,
                             photo.file,
                             {
