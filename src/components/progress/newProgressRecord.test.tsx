@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
     refresh: vi.fn(),
     revokeObjectURL: vi.fn(),
     saveProgressEntryAction: vi.fn(),
-    upload: vi.fn(),
+    uploadPresigned: vi.fn(),
 }));
 
 vi.mock("next/image", () => ({
@@ -36,7 +36,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@vercel/blob/client", () => ({
-    upload: mocks.upload,
+    uploadPresigned: mocks.uploadPresigned,
 }));
 
 vi.mock("@/app/(protected)/progress/actions", () => ({
@@ -70,7 +70,7 @@ describe("NewProgressRecord", () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mocks.createObjectURL.mockReturnValue("blob:preview");
-        mocks.upload.mockResolvedValue({
+        mocks.uploadPresigned.mockResolvedValue({
             pathname: "progress-photos/user-1/front.jpg",
         });
         mocks.saveProgressEntryAction.mockResolvedValue({
@@ -117,7 +117,7 @@ describe("NewProgressRecord", () => {
         expect(await screen.findByRole("alert")).toHaveTextContent(
             "A progress entry already exists for this date",
         );
-        expect(mocks.upload).not.toHaveBeenCalled();
+        expect(mocks.uploadPresigned).not.toHaveBeenCalled();
         expect(mocks.saveProgressEntryAction).not.toHaveBeenCalled();
     });
 
@@ -158,7 +158,7 @@ describe("NewProgressRecord", () => {
             });
         });
 
-        expect(mocks.upload).toHaveBeenCalledWith(
+        expect(mocks.uploadPresigned).toHaveBeenCalledWith(
             expect.stringMatching(
                 /^progress-photos\/user-1\/.+-front$/,
             ),
