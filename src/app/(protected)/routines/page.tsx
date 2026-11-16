@@ -33,6 +33,7 @@ export default async function RoutinesPage() {
 
                     <Link
                         href="/routines/new"
+                        prefetch={true}
                         aria-label="Create a new routine"
                         className="grid size-11 shrink-0 place-items-center rounded-control bg-surface-inverse text-xl text-inverse"
                     >
@@ -96,6 +97,7 @@ export default async function RoutinesPage() {
                                 <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-divider pt-4">
                                     <Link
                                         href={`/routines/${routine.id}/edit`}
+                                        prefetch={true}
                                         className="flex h-10 items-center gap-2 rounded-control bg-surface-subtle px-4 text-small font-semibold"
                                     >
                                         <Icon name="edit" className="size-4" strokeWidth={1.25}/>
