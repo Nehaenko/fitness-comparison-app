@@ -21,6 +21,13 @@ export default function MeasurementHistory({
 
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [deleteError, setDeleteError] = useState<string | null>(null);
+    const [deletedIds, setDeletedIds] = useState<Set<string>>(
+        () => new Set(),
+    );
+
+    const visibleMeasurements = selectedMeasurements.filter(
+        (measurement) => !deletedIds.has(measurement.id),
+    );
 
     const removeMeasurement = async (
         measurementId: string,
@@ -39,6 +46,11 @@ export default function MeasurementHistory({
 
         try {
             await deleteMeasurementAction(measurementId);
+            setDeletedIds((currentIds) => {
+                const nextIds = new Set(currentIds);
+                nextIds.add(measurementId);
+                return nextIds;
+            });
         } catch (error) {
             setDeleteError(error instanceof Error
                 ? error.message
@@ -66,21 +78,21 @@ export default function MeasurementHistory({
                     </h2>
                 </header>
 
-                {selectedMeasurements.length === 0 ? (
+                {visibleMeasurements.length === 0 ? (
                     <div className="border-t border-divider px-5 py-8 text-center">
                         <p className="text-small font-semibold">
                             No measurements yet
                         </p>
-                        <p className="mx-auto mt-1 max-w-sm text-small text-secondary">
+                        <p className="mx-auto mt-1 max-w-sm text-small text-primary">
                             Log your first entry to start building your measurement history.
                         </p>
                     </div>
                 ) : (
                     <div className="divide-y divide-divider border-t">
-                        {selectedMeasurements.map((measurement, index) => {
+                        {visibleMeasurements.map((measurement, index) => {
                             const storedValue = measurement[selectedTab];
                             const olderStoredValue =
-                                selectedMeasurements[index + 1]?.[selectedTab] ?? null;
+                                visibleMeasurements[index + 1]?.[selectedTab] ?? null;
 
                             if (storedValue === null) {
                                 return null;
@@ -114,7 +126,7 @@ export default function MeasurementHistory({
                                 >
                                     <time
                                         dateTime={measurement.measuredOn}
-                                        className="truncate text-small text-secondary"
+                                        className="truncate text-small text-primary"
                                     >
                                         {formatMeasurementDate(measurement.measuredOn)}
                                     </time>
@@ -126,7 +138,7 @@ export default function MeasurementHistory({
                                     </span>
                                     </p>
 
-                                    <p className="text-right font-mono text-small tabular-nums text-secondary">
+                                    <p className="text-right font-mono text-small tabular-nums text-primary">
                                         {differenceText ?? ""}
                                     </p>
 
@@ -143,7 +155,7 @@ export default function MeasurementHistory({
                                                 ? "Removing measurement"
                                                 : `Remove measurement from ${formatMeasurementDate(measurement.measuredOn)}`
                                         }
-                                        className="grid disabled:cursor-not-allowed disabled:opacity-40 size-8 place-items-center rounded-full text-secondary transition hover:bg-danger-soft hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+                                        className="grid size-8 place-items-center rounded-full text-primary transition hover:bg-danger-soft hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger disabled:cursor-not-allowed disabled:opacity-40"
                                     >
                                         <Icon name="close" className="size-4"/>
                                     </button>

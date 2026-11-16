@@ -175,7 +175,7 @@ export default function LogModal({
                                 onClick={closeModal}
                                 disabled={isSaving}
                                 aria-label="Close measurement form"
-                                className="grid size-9 place-items-center rounded-full text-secondary transition hover:bg-surface-subtle hover:text-primary disabled:opacity-50"
+                                className="grid size-9 place-items-center rounded-full text-primary transition hover:bg-surface-subtle disabled:opacity-50"
                             >
                                 <Icon name="close" className="size-5"/>
                             </button>
@@ -183,30 +183,28 @@ export default function LogModal({
 
                         <form
                             onSubmit={submitMeasurement}
-                            className="min-h-0 overflow-y-auto px-5 py-5 sm:px-6"
+                            className="min-h-0 overflow-x-hidden overflow-y-auto px-5 py-5 sm:px-6"
                         >
-                            <div className="grid grid-cols-2 gap-x-4 gap-y-5">
-                                <label className="col-span-2">
-                                    <span className="form-label">Date</span>
+                            <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-4 gap-y-5">
+                                <label className="col-span-2 min-w-0">
+                                    <span className="form-label !font-normal !text-primary">Date</span>
                                     <input
                                         ref={dateInputRef}
                                         type="date"
                                         name="measuredOn"
                                         defaultValue={defaultDate}
                                         required
-                                        className="form-control"
+                                        className="form-control min-w-0 max-w-full appearance-none normal-case [color-scheme:light]"
                                     />
                                 </label>
 
-                                <label>
-                                    <span className="form-label">
+                                <label className="min-w-0">
+                                    <span className="form-label !font-normal !text-primary">
                                         Weight ({weightUnit})
                                     </span>
                                     <input
-                                        type="number"
+                                        type="text"
                                         inputMode="decimal"
-                                        min="0.01"
-                                        step="any"
                                         name="weight"
                                         placeholder="e.g. 80"
                                         className="form-control"
@@ -214,15 +212,13 @@ export default function LogModal({
                                 </label>
 
                                 {bodyFields.map((field) => (
-                                    <label key={field.name}>
-                                        <span className="form-label">
+                                    <label key={field.name} className="min-w-0">
+                                        <span className="form-label !font-normal !text-primary">
                                             {field.label} ({measurementUnit})
                                         </span>
                                         <input
-                                            type="number"
+                                            type="text"
                                             inputMode="decimal"
-                                            min="0.01"
-                                            step="any"
                                             name={field.name}
                                             placeholder={field.placeholder}
                                             className="form-control"

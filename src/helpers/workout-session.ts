@@ -3,11 +3,11 @@ import type {WorkoutSessionDraft} from "@/types/workout-session";
 
 export function createWorkoutSessionDraft(workout: Workout): WorkoutSessionDraft {
     const exercisesDraft = workout.exercises.map((exercise) => {
-        const exerciseSets = Array.from({ length: exercise.sets }, () => {
+        const exerciseSets = Array.from({ length: exercise.sets }, (_, index) => {
             return {
                 id: crypto.randomUUID(),
-                reps: exercise.targetReps,
-                weight: exercise.targetWeight,
+                reps: index === 0 ? exercise.targetReps : null,
+                weight: index === 0 ? exercise.targetWeight : null,
                 completed: false,
             }
         });

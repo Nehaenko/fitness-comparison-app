@@ -10,23 +10,6 @@ type ExercisesFormData = {
     onAddExercise: (exercise: ExerciseOption) => void;
 };
 
-const exerciseCategories = [
-    {label: "All", value: "all", muscleGroups: []},
-    {label: "Chest", value: "chest", muscleGroups: ["chest"]},
-    {
-        label: "Back",
-        value: "back",
-        muscleGroups: ["lats", "middle back", "lower back", "traps"],
-    },
-    {
-        label: "Shoulders",
-        value: "shoulders",
-        muscleGroups: ["shoulders"],
-    },
-    {label: "Biceps", value: "biceps", muscleGroups: ["biceps"]},
-    {label: "Triceps", value: "triceps", muscleGroups: ["triceps"]},
-];
-
 export default function ExercisesForm({
                                           exercises,
                                           handleExerciseModalVisibility,
@@ -34,27 +17,14 @@ export default function ExercisesForm({
                                       }: ExercisesFormData) {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const [selectedCategory, setSelectedCategory] = useState("all");
 
     const itemsPerPage = 10;
 
-    const selectedMuscleGroups = exerciseCategories.find(
-        (category) => category.value === selectedCategory,
-    )?.muscleGroups ?? [];
-
-    const filteredExercises = exercises.filter((exercise) => {
-        const matchesSearch = exercise.name
+    const filteredExercises = exercises.filter((exercise) =>
+        exercise.name
             .toLowerCase()
-            .includes(searchTerm.toLowerCase());
-
-        const matchesCategory =
-            selectedCategory === "all" ||
-            selectedMuscleGroups.includes(
-                exercise.muscleGroup?.toLowerCase() ?? "",
-            );
-
-        return matchesSearch && matchesCategory;
-    });
+            .includes(searchTerm.toLowerCase()),
+    );
 
     const totalPages = Math.max(
         1,
@@ -68,13 +38,13 @@ export default function ExercisesForm({
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-backdrop p-4 backdrop-blur-[2px]"
+            className="fixed inset-0 z-50 flex items-end justify-center bg-backdrop backdrop-blur-[3px] sm:items-center sm:p-4"
             role="dialog"
             aria-modal="true"
             aria-labelledby="exercise-modal-title"
         >
             <div
-                className="flex h-[min(58rem,calc(100dvh-2rem))] w-full flex-col overflow-hidden rounded-panel bg-surface shadow-floating">
+                className="flex h-[calc(100dvh-1rem)] w-full max-w-xl flex-col overflow-hidden rounded-t-panel bg-surface shadow-floating sm:h-[min(58rem,calc(100dvh-2rem))] sm:rounded-panel">
                 <header className="flex items-center justify-between border-b border-divider px-5 py-4">
                     <h2 id="exercise-modal-title" className="font-semibold text-primary">
                         Add Exercise
@@ -106,25 +76,6 @@ export default function ExercisesForm({
                         className="h-11 w-full rounded-control border border-brand bg-surface px-3 text-small outline-none placeholder:text-secondary"
                     />
 
-                    <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
-                        {exerciseCategories.map((category) => (
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setSelectedCategory(category.value);
-                                    setCurrentPage(1);
-                                }}
-                                key={category.value}
-                                className={`shrink-0 rounded-pill px-3 py-1.5 text-label font-semibold ${
-                                    selectedCategory === category.value
-                                        ? "bg-surface-inverse text-inverse"
-                                        : "bg-surface-subtle text-secondary"
-                                }`}
-                            >
-                                {category.label}
-                            </button>
-                        ))}
-                    </div>
                 </div>
 
                 <div className="min-h-0 flex-1 overflow-y-auto px-5 py-2">

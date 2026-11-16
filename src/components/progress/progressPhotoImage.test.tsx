@@ -31,9 +31,8 @@ describe("ProgressPhotoImage", () => {
             </div>,
         );
 
-        expect(screen.getByRole("status")).toHaveTextContent(
-            "Loading photo…",
-        );
+        expect(screen.getByRole("status", {name: "Loading photo"}))
+            .toBeInTheDocument();
 
         const image = screen.getByRole("img", {
             name: "Front progress",
@@ -87,9 +86,8 @@ describe("ProgressPhotoImage", () => {
             />,
         );
 
-        expect(screen.getByRole("status")).toHaveTextContent(
-            "Loading photo…",
-        );
+        expect(screen.getByRole("status", {name: "Loading photo"}))
+            .toBeInTheDocument();
         expect(
             screen.getByRole("img", {name: "Second progress photo"}),
         ).toHaveClass("opacity-0");

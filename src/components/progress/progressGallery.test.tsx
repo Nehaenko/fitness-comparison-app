@@ -54,7 +54,6 @@ describe("ProgressGallery", () => {
         render(
             <ProgressGallery
                 entries={[entry]}
-                weightUnit="kg"
                 photoViews={photoViews}
             />,
         );
@@ -78,7 +77,6 @@ describe("ProgressGallery", () => {
         render(
             <ProgressGallery
                 entries={[entry]}
-                weightUnit="kg"
                 photoViews={photoViews}
             />,
         );

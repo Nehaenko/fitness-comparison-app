@@ -129,7 +129,8 @@ export default function Menu({ user, logoutAction }: MenuProps) {
                   >
                     <Icon
                       name={item.icon}
-                      className={`size-6 ${isActive ? "text-brand" : "text-secondary"}`}
+                      className={`size-6 ${isActive ? "text-brand" : "text-primary"}`}
+                      strokeWidth={1.25}
                     />
                     {item.label}
                   </Link>
@@ -158,7 +159,11 @@ export default function Menu({ user, logoutAction }: MenuProps) {
               onClick={() => setIsOpen(false)}
               className="flex min-h-12 items-center gap-4 rounded-control px-3 font-semibold text-primary transition hover:bg-surface-subtle"
             >
-              <Icon name="profile" className="size-6 text-secondary" />
+              <Icon
+                name="profile"
+                className="size-6 text-primary"
+                strokeWidth={1.25}
+              />
               Profile &amp; settings
             </Link>
 
@@ -167,7 +172,11 @@ export default function Menu({ user, logoutAction }: MenuProps) {
                 type="submit"
                 className="flex min-h-12 w-full items-center gap-4 rounded-control px-3 text-left font-semibold text-secondary transition hover:bg-surface-subtle hover:text-primary"
               >
-                <Icon name="logout" className="size-6" />
+                <Icon
+                  name="logout"
+                  className="size-6 text-primary"
+                  strokeWidth={1.25}
+                />
                 Log out
               </button>
             </form>

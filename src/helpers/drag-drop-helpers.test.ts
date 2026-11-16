@@ -1,6 +1,10 @@
 import {describe, expect, it} from "vitest";
 
-import {moveExercise, moveWorkout} from "@/helpers/drag-drop-helpers";
+import {
+    getPointerCenter,
+    moveExercise,
+    moveWorkout,
+} from "@/helpers/drag-drop-helpers";
 import type {ConfiguredExercise, Workout} from "@/types/routine-builder";
 
 const exercises: ConfiguredExercise[] = [
@@ -64,5 +68,24 @@ describe("moveExercise", () => {
             "configured-1",
         ]);
         expect(exercises[0]?.id).toBe("configured-1");
+    });
+});
+
+describe("getPointerCenter", () => {
+    it("tracks horizontal and vertical movement during a two-finger gesture", () => {
+        const initialCenter = getPointerCenter(
+            {x: 20, y: 40},
+            {x: 80, y: 100},
+        );
+        const movedCenter = getPointerCenter(
+            {x: 35, y: 30},
+            {x: 95, y: 90},
+        );
+
+        expect(initialCenter).toEqual({x: 50, y: 70});
+        expect({
+            x: movedCenter.x - initialCenter.x,
+            y: movedCenter.y - initialCenter.y,
+        }).toEqual({x: 15, y: -10});
     });
 });

@@ -91,10 +91,10 @@ export default function SortableWorkout({
                     exerciseDropdownOpened
                         ? "border-brand"
                         : "border-border"
-                } ${isDragging ? "opacity-60" : ""}`}
+                } ${isDragging ? "relative z-10 border-brand shadow-floating" : ""}`}
             >
                 <div
-                    className="flex min-h-14 items-center gap-2 px-4"
+                    className="grid min-h-16 grid-cols-[auto_auto_minmax(0,1fr)_auto_auto] items-center px-4"
                     onClick={handleExerciseDropdownOpen}
                 >
                     <button
@@ -102,9 +102,9 @@ export default function SortableWorkout({
                         type="button"
                         aria-label={`Reorder ${workout.name}`}
                         onClick={(event) => event.stopPropagation()}
-                        className="cursor-grab touch-none text-tertiary"
+                        className="-ml-2 grid size-10 shrink-0 cursor-grab touch-none place-items-center rounded-full text-primary active:cursor-grabbing active:bg-surface-subtle"
                     >
-                        <Icon name="reorder" className="size-4"/>
+                        <Icon name="reorder" className="size-5"/>
                     </button>
 
                     <span
@@ -122,55 +122,58 @@ export default function SortableWorkout({
                             }
                             onClick={(event) => event.stopPropagation()}
                             aria-label="Workout name"
-                            className="min-w-0 flex-1 rounded-control border border-border bg-surface px-3 py-1.5 outline-none"
+                            className="mx-2 min-w-0 rounded-control border border-border bg-surface px-3 py-1.5 outline-none"
                             autoFocus
                         />
                     ) : (
-                        <div className="flex min-w-0 flex-1 items-baseline gap-1.5">
-                            <p className="truncate text-small font-semibold text-primary">
+                        <div className="min-w-0 px-2">
+                            <p className="break-words text-small font-semibold leading-tight text-primary">
                                 {workout.name}
                             </p>
-                            <span className="shrink-0 text-label text-secondary">
+                            <span className="mt-0.5 block text-label leading-tight text-secondary">
                                 {workout.exercises.length} {workout.exercises.length === 1 ? "exercise" : "exercises"}
                             </span>
                         </div>
                     )}
 
-                    {isEditing ? (
-                        <button
-                            type="button"
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                saveName();
-                            }}
-                            className="text-label font-semibold text-brand"
-                        >
-                            Save
-                        </button>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                setIsEditing(true);
-                            }}
-                            className="px-1 text-label text-secondary"
-                        >
-                            Rename
-                        </button>
-                    )}
+                    <div className="flex items-center">
+                        {isEditing ? (
+                            <button
+                                type="button"
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    saveName();
+                                }}
+                                className="px-2 text-label font-semibold text-brand"
+                            >
+                                Save
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                aria-label={`Rename ${workout.name}`}
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    setIsEditing(true);
+                                }}
+                                className="grid size-8 shrink-0 place-items-center rounded-full text-primary hover:bg-surface-subtle"
+                            >
+                                <Icon name="edit" className="size-4" strokeWidth={1.25}/>
+                            </button>
+                        )}
 
-                    <button
-                        type="button"
-                        onClick={(event) => {
-                            event.stopPropagation();
-                            onRemove(workout.id);
-                        }}
-                        aria-label={`Remove ${workout.name}`}
-                        className="grid size-8 place-items-center text-secondary"
-                    >
-                        <Icon name="delete" className="size-4"/>
-                    </button>
+                        <button
+                            type="button"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                onRemove(workout.id);
+                            }}
+                            aria-label={`Remove ${workout.name}`}
+                            className="grid size-8 shrink-0 place-items-center rounded-full text-primary hover:bg-danger-soft hover:text-danger"
+                        >
+                            <Icon name="delete" className="size-4" strokeWidth={1.25}/>
+                        </button>
+                    </div>
 
                     <button
                         type="button"
@@ -179,7 +182,7 @@ export default function SortableWorkout({
                             handleExerciseDropdownOpen();
                         }}
                         aria-label={`${exerciseDropdownOpened ? "Collapse" : "Expand"} ${workout.name}`}
-                        className="grid size-8 place-items-center text-secondary"
+                        className="grid size-8 shrink-0 place-items-center text-primary"
                     >
                         <Icon
                             name="chevron-down"

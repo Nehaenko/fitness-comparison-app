@@ -2,6 +2,7 @@ import {useSortable} from "@dnd-kit/react/sortable";
 import {useState} from "react";
 
 import Icon from "@/components/layout/actionComponents/iconComponent";
+import {isCardioExercise} from "@/helpers/exercise-formatting";
 import type {ConfiguredExercise, ExerciseChanges} from "@/types/routine-builder";
 import type {WeightUnit} from "@/types/profile";
 
@@ -29,6 +30,7 @@ export default function SortableExercise({
     });
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const isCardio = isCardioExercise(exercise.muscleGroup);
 
     const handleEditModal = () => {
         setIsEditModalOpen(!isEditModalOpen);
@@ -50,7 +52,7 @@ export default function SortableExercise({
             targetWeight:
                 draft.targetWeight === ""
                     ? null
-                    : Number(draft.targetWeight),
+                    : Number(draft.targetWeight.replace(",", ".")),
             restSeconds: Number(draft.restSeconds),
         };
         onUpdateExercise(exercise.id, newExerciseData);
@@ -60,8 +62,8 @@ export default function SortableExercise({
     return (
         <div
             ref={ref}
-            className={`border-t border-divider px-5 py-4 ${
-                isDragging ? "opacity-60" : ""
+            className={`border-t border-divider px-4 py-4 ${
+                isDragging ? "relative z-10 bg-surface shadow-floating" : ""
             }`}
         >
             <div className="flex items-center gap-3">
@@ -69,19 +71,26 @@ export default function SortableExercise({
                     ref={handleRef}
                     type="button"
                     aria-label={`Reorder ${exercise.name}`}
-                    className="cursor-grab touch-none text-tertiary"
+                    className="-ml-2 grid size-10 shrink-0 cursor-grab touch-none place-items-center rounded-full text-primary active:cursor-grabbing active:bg-surface-subtle"
                 >
-                    <Icon name="reorder" className="size-4"/>
+                    <Icon name="reorder" className="size-5"/>
                 </button>
 
                 <p className="min-w-0 flex-1 truncate text-small font-semibold text-primary">
                     {exercise.name}
                 </p>
 
-                <button type="button" onClick={handleEditModal} className="text-label text-secondary">
-                    Edit
-                </button>
-                {isEditModalOpen && (
+                {!isCardio && (
+                    <button
+                        type="button"
+                        onClick={handleEditModal}
+                        aria-label={`Edit ${exercise.name}`}
+                        className="grid size-8 shrink-0 place-items-center rounded-full text-primary hover:bg-surface-subtle"
+                    >
+                        <Icon name="edit" className="size-4" strokeWidth={1.25}/>
+                    </button>
+                )}
+                {!isCardio && isEditModalOpen && (
                     <div
                         className="fixed inset-0 z-50 flex items-center justify-center bg-backdrop p-4 backdrop-blur-[2px]"
                         role="dialog"
@@ -146,9 +155,8 @@ export default function SortableExercise({
                                     <span className="form-label">Target weight ({weightUnit})</span>
                                     <input
                                         id={`target-weight-${exercise.id}`}
-                                        type="number"
-                                        min={0}
-                                        step="0.5"
+                                        type="text"
+                                        inputMode="decimal"
                                         placeholder="Optional"
                                         value={draft.targetWeight}
                                         onChange={(event) =>
@@ -194,18 +202,20 @@ export default function SortableExercise({
                     type="button"
                     onClick={() => onRemoveExercise(exercise.id)}
                     aria-label={`Remove ${exercise.name}`}
-                    className="grid size-8 place-items-center text-secondary"
+                    className="grid size-8 shrink-0 place-items-center rounded-full text-primary hover:bg-danger-soft hover:text-danger"
                 >
-                    <Icon name="delete" className="size-4"/>
+                    <Icon name="delete" className="size-4" strokeWidth={1.25}/>
                 </button>
             </div>
 
-            <div className="mt-2 flex gap-3 pl-7 text-label text-secondary">
-                <p>{exercise.sets} sets</p>
-                <p>{exercise.targetReps} reps</p>
-                <p>{exercise.restSeconds}s rest</p>
-                {exercise.targetWeight && <p>{exercise.targetWeight}</p>}
-            </div>
+            {!isCardio && (
+                <div className="mt-2 flex gap-3 pl-8 text-label text-secondary">
+                    <p>{exercise.sets} sets</p>
+                    <p>{exercise.targetReps} reps</p>
+                    <p>{exercise.restSeconds}s rest</p>
+                    {exercise.targetWeight && <p>{exercise.targetWeight}</p>}
+                </div>
+            )}
         </div>
     );
 }

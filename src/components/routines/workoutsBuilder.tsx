@@ -2,6 +2,7 @@ import {DragDropProvider, type DragEndEvent} from "@dnd-kit/react";
 import {isSortableOperation} from "@dnd-kit/react/sortable";
 import type {Dispatch, SetStateAction} from "react";
 import {moveExercise, moveWorkout} from "@/helpers/drag-drop-helpers";
+import {isCardioExercise} from "@/helpers/exercise-formatting";
 
 import SortableWorkout from "./sortableWorkout";
 
@@ -43,15 +44,16 @@ export default function WorkoutsBuilder({
         workoutId: string,
         exercise: ExerciseOption,
     )=> {
+        const isCardio = isCardioExercise(exercise.muscleGroup);
         const configuredExercise: ConfiguredExercise = {
             id: crypto.randomUUID(),
             exerciseId: exercise.id,
             name: exercise.name,
             muscleGroup: exercise.muscleGroup,
             equipment: exercise.equipment,
-            sets: 3,
-            targetReps: 10,
-            restSeconds: 90,
+            sets: isCardio ? 1 : 3,
+            targetReps: isCardio ? 1 : 10,
+            restSeconds: isCardio ? 0 : 90,
             targetWeight: null,
         }
 
@@ -73,6 +75,14 @@ export default function WorkoutsBuilder({
     }
 
     const removeWorkout = (id: string) => {
+        const workout = workouts.find((item) => item.id === id);
+
+        if (!workout || !window.confirm(
+            `Remove “${workout.name}” and all of its exercises?`,
+        )) {
+            return;
+        }
+
         setWorkouts((currentWorkouts) =>
             currentWorkouts.filter((workout) => workout.id !== id),
         );
@@ -132,6 +142,16 @@ export default function WorkoutsBuilder({
     };
 
     const removeExercise = (id: string) => {
+        const exercise = workouts
+            .flatMap((workout) => workout.exercises)
+            .find((item) => item.id === id);
+
+        if (!exercise || !window.confirm(
+            `Remove “${exercise.name}” from this workout?`,
+        )) {
+            return;
+        }
+
         setWorkouts((currentWorkouts) =>
             currentWorkouts.map((workout) => ({
                 ...workout,

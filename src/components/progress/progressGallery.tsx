@@ -7,14 +7,11 @@ import {deleteProgressAction} from "@/app/(protected)/progress/actions";
 import Icon from "@/components/layout/actionComponents/iconComponent";
 import PhotoPlaceholder from "@/components/progress/photoPlaceholder";
 import ProgressPhotoImage from "@/components/progress/progressPhotoImage";
-import {kilogramsToWeight} from "@/helpers/weight-conversion";
-import type {UserProfile} from "@/types/profile";
 import type {ProgressEntryRecord, ProgressPhotoView} from "@/types/progress";
 import {formatProgressDate} from "@/validation/progress";
 
 type ProgressGalleryProps = {
     entries: ProgressEntryRecord[];
-    weightUnit: UserProfile["weightUnit"];
     photoViews: {
         view: ProgressPhotoView;
         label: string;
@@ -23,7 +20,6 @@ type ProgressGalleryProps = {
 
 export default function ProgressGallery({
                                             entries,
-                                            weightUnit,
                                             photoViews
                                         }: ProgressGalleryProps) {
     const router = useRouter();
@@ -88,19 +84,9 @@ export default function ProgressGallery({
                             className="overflow-hidden rounded-card border border-border bg-surface shadow-card"
                         >
                             <header className="flex items-start justify-between gap-4 px-5 py-5 sm:px-6">
-                                <div>
-                                    <h2 className="text-body font-semibold">
-                                        {formatProgressDate(entry.recordedOn)}
-                                    </h2>
-                                    <p className="mt-0.5 font-mono text-small text-secondary">
-                                        {entry.weight === null
-                                            ? "No weight logged"
-                                            : `${kilogramsToWeight(
-                                                entry.weight,
-                                                weightUnit,
-                                            )} ${weightUnit}`}
-                                    </p>
-                                </div>
+                                <h2 className="text-body font-semibold">
+                                    {formatProgressDate(entry.recordedOn)}
+                                </h2>
 
                                 {confirmingDeleteId !== entry.id ? (
                                     <button

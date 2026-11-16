@@ -29,6 +29,39 @@ const allowedEquipment = new Set([
     "e-z curl bar",
 ]);
 
+const customExercises = [
+    {
+        externalId: "forma:running",
+        name: "Running",
+        muscleGroup: "cardiovascular system",
+        equipment: "body only",
+    },
+    {
+        externalId: "forma:step-machine",
+        name: "Step Machine",
+        muscleGroup: "cardiovascular system",
+        equipment: "machine",
+    },
+    {
+        externalId: "forma:rowing-machine",
+        name: "Rowing Machine",
+        muscleGroup: "cardiovascular system",
+        equipment: "machine",
+    },
+    {
+        externalId: "forma:negative-pull-up",
+        name: "Negative Pull-Up",
+        muscleGroup: "lats",
+        equipment: "body only",
+    },
+    {
+        externalId: "forma:hollow-rock",
+        name: "Hollow Rock",
+        muscleGroup: "abdominals",
+        equipment: "body only",
+    },
+];
+
 async function importExercises() {
     const response = await fetch(DATASET_URL);
 
@@ -55,7 +88,8 @@ async function importExercises() {
             name: exercise.name,
             muscleGroup: exercise.primaryMuscles[0] ?? null,
             equipment: exercise.equipment,
-        }));
+        }))
+        .concat(customExercises);
 
     const batchSize = 200;
 

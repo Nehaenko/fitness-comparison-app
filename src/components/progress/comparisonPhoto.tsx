@@ -7,7 +7,11 @@ import type {
     ProgressPhotoView,
 } from "@/types/progress";
 import {formatProgressDate} from "@/validation/progress";
-import {getPointerDistance, type PointerPosition} from "@/helpers/drag-drop-helpers";
+import {
+    getPointerCenter,
+    getPointerDistance,
+    type PointerPosition,
+} from "@/helpers/drag-drop-helpers";
 
 type ComparisonPhotoProps = {
     photo: ProgressPhotoRecord | undefined;
@@ -42,6 +46,7 @@ export default function ComparisonPhoto({
         new Map<number, PointerPosition>(),
     );
     const previousPinchDistanceRef = useRef<number | null>(null);
+    const previousPinchCenterRef = useRef<PointerPosition | null>(null);
     const lastDragPointRef = useRef<PointerPosition | null>(null);
 
     const clampPosition = (
@@ -63,7 +68,10 @@ export default function ComparisonPhoto({
         };
     };
 
-    const updateZoom = (nextZoom: number) => {
+    const updateZoom = (
+        nextZoom: number,
+        movement: PointerPosition = {x: 0, y: 0},
+    ) => {
         const clampedZoom = Math.min(
             MAX_SCALE,
             Math.max(MIN_SCALE, nextZoom),
@@ -72,7 +80,13 @@ export default function ComparisonPhoto({
         zoomRef.current = clampedZoom;
         setZoom(clampedZoom);
         setPosition((currentPosition) =>
-            clampPosition(currentPosition, clampedZoom),
+            clampPosition(
+                {
+                    x: currentPosition.x + movement.x,
+                    y: currentPosition.y + movement.y,
+                },
+                clampedZoom,
+            ),
         );
     };
 
@@ -81,6 +95,7 @@ export default function ComparisonPhoto({
         setZoom(MIN_SCALE);
         setPosition({x: 0, y: 0});
         previousPinchDistanceRef.current = null;
+        previousPinchCenterRef.current = null;
         lastDragPointRef.current = null;
     };
 
@@ -107,6 +122,10 @@ export default function ComparisonPhoto({
             lastDragPointRef.current = null;
             previousPinchDistanceRef.current =
                 getPointerDistance(pointers[0], pointers[1]);
+            previousPinchCenterRef.current = getPointerCenter(
+                pointers[0],
+                pointers[1],
+            );
         } else if (
             pointers.length === 1 &&
             zoomRef.current > MIN_SCALE
@@ -171,20 +190,33 @@ export default function ComparisonPhoto({
             pointers[0],
             pointers[1],
         );
+        const currentCenter = getPointerCenter(
+            pointers[0],
+            pointers[1],
+        );
 
         const previousDistance =
             previousPinchDistanceRef.current;
+        const previousCenter = previousPinchCenterRef.current;
 
         if (previousDistance !== null && previousDistance > 0) {
             const distanceChange =
                 currentDistance / previousDistance;
+            const movement = previousCenter === null
+                ? {x: 0, y: 0}
+                : {
+                    x: currentCenter.x - previousCenter.x,
+                    y: currentCenter.y - previousCenter.y,
+                };
 
             updateZoom(
                 zoomRef.current * distanceChange,
+                movement,
             );
         }
 
         previousPinchDistanceRef.current = currentDistance;
+        previousPinchCenterRef.current = currentCenter;
     };
 
     const handlePointerEnd = (
@@ -194,6 +226,7 @@ export default function ComparisonPhoto({
 
         if (activePointersRef.current.size < 2) {
             previousPinchDistanceRef.current = null;
+            previousPinchCenterRef.current = null;
         }
 
         const remainingPointers = Array.from(
