@@ -20,13 +20,21 @@ type IconName =
     | "edit"
     | "star";
 
-export default function Icon({ name, className }: { name: IconName; className?: string }) {
+export default function Icon({
+    name,
+    className,
+    strokeWidth = 1.7,
+}: {
+    name: IconName;
+    className?: string;
+    strokeWidth?: number;
+}) {
     const common = {
         fill: "none",
         stroke: "currentColor",
         strokeLinecap: "round" as const,
         strokeLinejoin: "round" as const,
-        strokeWidth: 1.7,
+        strokeWidth,
     };
 
     return (
@@ -88,10 +96,7 @@ export default function Icon({ name, className }: { name: IconName; className?: 
             )}
             {name === "play" && <path d="m8 5 11 7-11 7V5Z" />}
             {name === "edit" && (
-                <>
-                    <path d="M13.5 5.5 18.5 10.5M4.5 19.5l3.75-.75L19 8a1.75 1.75 0 0 0 0-2.5l-.5-.5a1.75 1.75 0 0 0-2.5 0L5.25 15.75 4.5 19.5Z" />
-                    <path d="M12 4.5H6.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V12" />
-                </>
+                <path d="m4.5 19.5 3.75-.75L19 8a1.75 1.75 0 0 0 0-2.5l-.5-.5a1.75 1.75 0 0 0-2.5 0L5.25 15.75l-.75 3.75ZM13.5 5.5l5 5" />
             )}
             {name === "star" && <path d="m12 3 2.7 5.47 6.03.88-4.36 4.25 1.03 6-5.4-2.84-5.4 2.84 1.03-6-4.36-4.25 6.03-.88L12 3Z" />}
             {name === "brand" && (

@@ -3,6 +3,7 @@ import {redirect} from "next/navigation";
 
 import PrimaryButton from "@/components/layout/actionComponents/primaryButton";
 import Icon from "@/components/layout/actionComponents/iconComponent";
+import ConfirmRoutineDeleteButton from "@/components/routines/confirmRoutineDeleteButton";
 
 import {
     activateRoutineAction,
@@ -18,7 +19,7 @@ export default async function RoutinesPage() {
     }
 
     return (
-        <main className="flex-1 px-5 py-7 md:px-12 md:py-14">
+        <main className="flex-1 px-4 py-7 md:px-12 md:py-14">
             <div className="max-w-5xl">
                 <header className="flex items-center justify-between gap-5">
                     <div>
@@ -97,7 +98,7 @@ export default async function RoutinesPage() {
                                         href={`/routines/${routine.id}/edit`}
                                         className="flex h-10 items-center gap-2 rounded-control bg-surface-subtle px-4 text-small font-semibold"
                                     >
-                                        <Icon name="edit" className="size-4"/>
+                                        <Icon name="edit" className="size-4" strokeWidth={1.25}/>
                                         Edit
                                     </Link>
 
@@ -116,16 +117,8 @@ export default async function RoutinesPage() {
                                     )}
 
                                     <form action={deleteAction} className="ml-auto">
-                                        <PrimaryButton
-                                            type="submit"
-                                            variant="ghost"
-                                            label="Delete"
-                                            pendingLabel="Deleting routine..."
-                                            fullWidth={false}
-                                            iconName="delete"
-                                            ariaLabel={`Delete ${routine.name}`}
-                                            compact
-                                            iconOnly
+                                        <ConfirmRoutineDeleteButton
+                                            routineName={routine.name}
                                         />
                                     </form>
                                 </div>

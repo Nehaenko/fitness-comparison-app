@@ -29,11 +29,11 @@ export default function ProgressPhotoImage({
             {!hasLoaded && !hasFailed ? (
                 <div
                     role="status"
-                    className="absolute inset-0 z-10 flex animate-pulse items-center justify-center bg-surface-muted text-small text-secondary"
+                    aria-label="Loading photo"
+                    className="absolute inset-0 z-10 grid animate-pulse place-items-center bg-surface-muted"
                 >
-                    <span className="rounded-pill bg-surface/85 px-3 py-1.5">
-                        Loading photo…
-                    </span>
+                    <span className="size-7 animate-spin rounded-full border-2 border-primary/25 border-t-primary"/>
+                    <span className="sr-only">Loading photo</span>
                 </div>
             ) : null}
 

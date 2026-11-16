@@ -44,3 +44,13 @@ export function getPointerDistance(
         second.y - first.y,
     );
 }
+
+export function getPointerCenter(
+    first: PointerPosition,
+    second: PointerPosition,
+): PointerPosition {
+    return {
+        x: (first.x + second.x) / 2,
+        y: (first.y + second.y) / 2,
+    };
+}

@@ -1,7 +1,10 @@
 import Icon from "@/components/layout/actionComponents/iconComponent";
+import DecimalInput from "@/components/layout/actionComponents/decimalInput";
 import type {ConfiguredExercise} from "@/types/routine-builder";
 import type {WorkoutSetDraft} from "@/types/workout-session";
 import type {PreviousExercisePerformance} from "@/types/history";
+import {isCardioExercise} from "@/helpers/exercise-formatting";
+import {useEffect, useState} from "react";
 
 type ExerciseFrameProps = {
     selectedExercise: ConfiguredExercise;
@@ -22,6 +25,20 @@ export default function ExerciseFrame({
                                           onStartRest,
                                           onSetsChange,
                                       }: ExerciseFrameProps) {
+    const [performanceMessage, setPerformanceMessage] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (performanceMessage === null) {
+            return;
+        }
+
+        const timeout = window.setTimeout(() => {
+            setPerformanceMessage(null);
+        }, 2_500);
+
+        return () => window.clearTimeout(timeout);
+    }, [performanceMessage]);
+
     const updateSet = (
         setId: string,
         changes: WorkoutSetChanges,
@@ -55,8 +72,58 @@ export default function ExerciseFrame({
 
     const toggleSetCompleted = (set: WorkoutSetDraft) => {
         const willBeCompleted = !set.completed;
+        const setIndex = sets.findIndex((item) => item.id === set.id);
+        const previousSet = setIndex > 0
+            ? [...sets.slice(0, setIndex)]
+                .reverse()
+                .find((item) => item.reps !== null || item.weight !== null)
+            : undefined;
 
-        updateSet(set.id, {completed: willBeCompleted});
+        const completedReps =
+            set.reps ?? previousSet?.reps ?? selectedExercise.targetReps;
+        const completedWeight =
+            set.weight ?? previousSet?.weight ?? selectedExercise.targetWeight;
+
+        updateSet(set.id, {
+            completed: willBeCompleted,
+            ...(willBeCompleted ? {
+                reps: completedReps,
+                weight: completedWeight,
+            } : {}),
+        });
+
+        if (willBeCompleted) {
+            const previousWorkoutSet = previousPerformance?.sets[setIndex];
+            const improvements: string[] = [];
+
+            if (
+                completedWeight !== null &&
+                previousWorkoutSet?.weight !== null &&
+                previousWorkoutSet?.weight !== undefined &&
+                completedWeight > previousWorkoutSet.weight
+            ) {
+                const difference = Number(
+                    (completedWeight - previousWorkoutSet.weight).toFixed(2),
+                );
+                improvements.push(`${difference} kg heavier`);
+            }
+
+            if (
+                previousWorkoutSet &&
+                completedReps > previousWorkoutSet.reps
+            ) {
+                const difference = completedReps - previousWorkoutSet.reps;
+                improvements.push(
+                    `${difference} more ${difference === 1 ? "rep" : "reps"}`,
+                );
+            }
+
+            setPerformanceMessage(
+                improvements.length > 0
+                    ? `${improvements.join(" and ")} than last time`
+                    : null,
+            );
+        }
 
         if (willBeCompleted && selectedExercise.restSeconds > 0) {
             onStartRest(selectedExercise.restSeconds);
@@ -65,9 +132,56 @@ export default function ExerciseFrame({
 
     const completedCount = sets.filter((set) => set.completed).length;
     const hasPreviousPerformance = Boolean(previousPerformance?.sets.length);
+    const isCardio = isCardioExercise(selectedExercise.muscleGroup);
+
+    if (isCardio) {
+        const cardioSet = sets[0];
+        const isCompleted = cardioSet?.completed ?? false;
+
+        return (
+            <section>
+                <header>
+                    <h1 className="font-display text-heading font-bold">
+                        {selectedExercise.name}
+                    </h1>
+                    <p className="mt-1 text-sm text-secondary">
+                        {isCompleted ? "Exercise complete" : "Cardio exercise"}
+                    </p>
+                </header>
+
+                {cardioSet && (
+                    <button
+                        type="button"
+                        onClick={() => toggleSetCompleted(cardioSet)}
+                        aria-pressed={isCompleted}
+                        className={`mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-control border font-semibold transition-colors ${
+                            isCompleted
+                                ? "border-brand bg-brand text-inverse"
+                                : "border-border bg-surface text-primary hover:border-brand"
+                        }`}
+                    >
+                        <Icon name="check" className="size-5"/>
+                        {isCompleted
+                            ? "Mark exercise incomplete"
+                            : "Mark exercise complete"}
+                    </button>
+                )}
+            </section>
+        );
+    }
 
     return (
         <section>
+            {performanceMessage ? (
+                <div
+                    role="status"
+                    aria-live="polite"
+                    className="fixed left-1/2 top-20 z-40 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-control border border-brand bg-brand-soft px-4 py-3 text-center text-small font-semibold text-primary shadow-floating"
+                >
+                    {performanceMessage}
+                </div>
+            ) : null}
+
             <header>
                 <h1 className="font-display text-heading font-bold">
                     {selectedExercise.name}
@@ -112,6 +226,15 @@ export default function ExerciseFrame({
                 <form className="mt-3 space-y-3">
                     {sets.map((set, index) => {
                         const setNumber = index + 1;
+                        const previousSet = index > 0
+                            ? [...sets.slice(0, index)]
+                                .reverse()
+                                .find((item) => item.reps !== null || item.weight !== null)
+                            : undefined;
+                        const weightPlaceholder =
+                            previousSet?.weight ?? selectedExercise.targetWeight ?? 0;
+                        const repsPlaceholder =
+                            previousSet?.reps ?? selectedExercise.targetReps;
                         return (
                             <div
                                 key={set.id}
@@ -131,9 +254,9 @@ export default function ExerciseFrame({
                                             type="button"
                                             onClick={() => removeSet(set.id)}
                                             aria-label={`Remove set ${setNumber}`}
-                                            className="grid size-11 shrink-0 place-items-center rounded-control bg-surface-subtle text-secondary transition hover:bg-danger-soft hover:text-danger"
+                                            className="grid size-8 shrink-0 place-items-center rounded-full text-primary transition hover:bg-danger-soft hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
                                         >
-                                            <Icon name="delete" className="size-4"/>
+                                            <Icon name="delete" className="size-4" strokeWidth={1.25}/>
                                         </button>
 
                                         <button
@@ -159,22 +282,15 @@ export default function ExerciseFrame({
                                     <span className="sr-only">
                                         Weight for set {setNumber}
                                     </span>
-                                        <input
-                                            type="number"
-                                            inputMode="decimal"
-                                            min="0"
-                                            step="any"
-                                            value={set.weight ?? ""}
-                                            placeholder="0"
+                                        <DecimalInput
+                                            value={set.weight}
+                                            placeholder={String(weightPlaceholder)}
                                             onFocus={(event) =>
                                                 event.currentTarget.select()
                                             }
-                                            onChange={(event) =>
+                                            onValueChange={(weight) =>
                                                 updateSet(set.id, {
-                                                    weight:
-                                                        event.target.value === ""
-                                                            ? null
-                                                            : Number(event.target.value),
+                                                    weight,
                                                 })
                                             }
                                             className="h-12 w-16 rounded-control border bg-surface-subtle px-2 text-center font-mono text-base font-semibold outline-none focus:border-border focus:ring-0 sm:w-22"
@@ -196,7 +312,7 @@ export default function ExerciseFrame({
                                             min="0"
                                             step="1"
                                             value={set.reps ?? ""}
-                                            placeholder="0"
+                                            placeholder={String(repsPlaceholder)}
                                             onFocus={(event) =>
                                                 event.currentTarget.select()
                                             }

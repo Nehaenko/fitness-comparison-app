@@ -3,7 +3,17 @@ import userEvent from "@testing-library/user-event";
 import {afterEach, describe, expect, it, vi} from "vitest";
 
 vi.mock("@/components/progress/newProgressRecord", () => ({
-    default: () => <div>New progress form</div>,
+    default: ({onSaved}: {onSaved: (recordedOn: string) => void}) => (
+        <div>
+            New progress form
+            <button
+                type="button"
+                onClick={() => onSaved("2026-11-11")}
+            >
+                Complete mocked save
+            </button>
+        </div>
+    ),
 }));
 
 vi.mock("@/components/progress/progressGallery", () => ({
@@ -45,10 +55,10 @@ describe("ProgressStructure", () => {
 
         expect(screen.getByText("New progress form")).toBeInTheDocument();
         expect(
-            screen.getByRole("button", {
+            screen.queryByRole("button", {
                 name: "Compare progress photos",
             }),
-        ).toBeDisabled();
+        ).not.toBeInTheDocument();
     });
 
     it("opens the gallery initially when entries exist", () => {
@@ -61,10 +71,10 @@ describe("ProgressStructure", () => {
 
         expect(screen.getByText("Progress gallery")).toBeInTheDocument();
         expect(
-            screen.getByRole("button", {
+            screen.queryByRole("button", {
                 name: "Compare progress photos",
             }),
-        ).toBeDisabled();
+        ).not.toBeInTheDocument();
     });
 
     it("allows comparison only when at least two entries exist", async () => {
@@ -79,6 +89,15 @@ describe("ProgressStructure", () => {
         await user.click(compareButton);
 
         expect(screen.getByText("Progress comparison")).toBeInTheDocument();
+        expect(compareButton).toHaveAttribute("aria-pressed", "true");
+        expect(screen.queryByText("Photos and visual comparison"))
+            .not.toBeInTheDocument();
+
+        await user.click(
+            screen.getByRole("button", {name: "Back to gallery"}),
+        );
+
+        expect(screen.getByText("Progress gallery")).toBeInTheDocument();
     });
 
     it("opens the add form from an existing gallery", async () => {
@@ -90,5 +109,45 @@ describe("ProgressStructure", () => {
         );
 
         expect(screen.getByText("New progress form")).toBeInTheDocument();
+        expect(screen.queryByText("Photos and visual comparison"))
+            .not.toBeInTheDocument();
+    });
+
+    it("shows a gallery skeleton until refreshed saved data arrives", async () => {
+        const user = userEvent.setup();
+        const {rerender} = render(
+            <ProgressStructure profile={profile} entries={entries}/>,
+        );
+
+        await user.click(
+            screen.getByRole("button", {name: "Add progress entry"}),
+        );
+        await user.click(
+            screen.getByRole("button", {name: "Complete mocked save"}),
+        );
+
+        expect(screen.getByRole("status", {
+            name: "Loading saved progress entry",
+        })).toBeInTheDocument();
+
+        rerender(
+            <ProgressStructure
+                profile={profile}
+                entries={[
+                    {
+                        id: "entry-3",
+                        recordedOn: "2026-11-11",
+                        weight: null,
+                        photos: [],
+                    },
+                    ...entries,
+                ]}
+            />,
+        );
+
+        expect(screen.getByText("Progress gallery")).toBeInTheDocument();
+        expect(screen.queryByRole("status", {
+            name: "Loading saved progress entry",
+        })).not.toBeInTheDocument();
     });
 });

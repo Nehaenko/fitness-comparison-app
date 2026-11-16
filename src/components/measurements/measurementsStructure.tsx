@@ -51,7 +51,7 @@ export default function MeasurementsStructure({profile, measurements}: measureme
                     <h1 className="font-display text-title font-bold">
                         Measurements
                     </h1>
-                    <p className="mt-1 text-body text-secondary">
+                    <p className="mt-1 text-body text-primary">
                         Track your body composition over time
                     </p>
                 </div>
@@ -68,14 +68,14 @@ export default function MeasurementsStructure({profile, measurements}: measureme
                     <h2 className="font-display text-heading font-bold">
                         No measurements yet
                     </h2>
-                    <p className="mx-auto mt-2 max-w-md text-body text-secondary">
+                    <p className="mx-auto mt-2 max-w-md text-body text-primary">
                         Log your first entry to start tracking changes over time.
                     </p>
                 </section>
             ) : (
                 <>
             <section className="mt-7 rounded-card border border-border bg-surface p-5 shadow-card sm:p-7">
-                <h2 className="text-small font-semibold uppercase tracking-wide text-secondary">
+                <h2 className="text-small font-semibold uppercase tracking-wide text-primary">
                     Latest
                     {latestMeasurementDate
                         ? ` — ${formatMeasurementDate(latestMeasurementDate)}`
@@ -131,12 +131,12 @@ export default function MeasurementsStructure({profile, measurements}: measureme
 
                         return (
                             <article key={tab.field} className="min-w-0">
-                                <h3 className="text-small text-secondary">
+                                <h3 className="text-small text-primary">
                                     {tab.label}
                                 </h3>
                                 <p className="mt-1 flex items-baseline gap-1 text-base font-semibold">
                                     <span>{latestDisplayValue ?? "—"}</span>
-                                    <span className="font-sans text-small font-normal text-secondary">
+                                    <span className="font-sans text-small font-normal text-primary">
                                             {unit}
                                     </span>
                                 </p>
@@ -164,10 +164,10 @@ export default function MeasurementsStructure({profile, measurements}: measureme
                         onClick={() => {
                             setTabActive(tab.field)
                         }}
-                        className={`shrink-0 rounded-pill px-4 py-2 text-small font-semibold transition ${
+                        className={`shrink-0 rounded-pill border px-4 py-2 text-small font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
                             selectedTab === tab.field
-                                ? "bg-surface-inverse text-inverse"
-                                : "bg-surface-subtle text-secondary hover:bg-surface-muted hover:text-primary"
+                                ? "border-surface-inverse bg-surface-inverse text-inverse"
+                                : "border-border-strong bg-surface text-primary hover:bg-surface-subtle"
                         }`}
                     >
                         {tab.label}

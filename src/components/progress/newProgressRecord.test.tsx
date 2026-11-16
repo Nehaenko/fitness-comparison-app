@@ -55,10 +55,7 @@ const photoViews = [
 function renderForm(existingDates: string[] = []) {
     return render(
         <NewProgressRecord
-            hasGallery
-            weightUnit="kg"
             userId="user-1"
-            onBack={vi.fn()}
             onSaved={mocks.onSaved}
             photoViews={photoViews}
             existingDates={existingDates}
@@ -110,6 +107,11 @@ describe("NewProgressRecord", () => {
                 type: "image/jpeg",
             }),
         );
+
+        expect(screen.getByRole("status", {name: "Loading photo"}))
+            .toBeInTheDocument();
+        expect(screen.queryByLabelText(/Weight/)).not.toBeInTheDocument();
+
         await user.click(
             screen.getByRole("button", {name: "Save entry"}),
         );
@@ -169,7 +171,7 @@ describe("NewProgressRecord", () => {
             },
         );
         expect(mocks.refresh).toHaveBeenCalled();
-        expect(mocks.onSaved).toHaveBeenCalled();
+        expect(mocks.onSaved).toHaveBeenCalledWith("2026-11-09");
         expect(mocks.revokeObjectURL).toHaveBeenCalledWith(
             "blob:preview",
         );

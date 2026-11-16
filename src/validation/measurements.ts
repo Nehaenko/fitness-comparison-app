@@ -17,7 +17,7 @@ function parseOptionalMeasurement(
         return null;
     }
 
-    const parsedValue = Number(trimmedValue);
+    const parsedValue = Number(trimmedValue.replace(",", "."));
 
     if (
         !Number.isFinite(parsedValue) ||

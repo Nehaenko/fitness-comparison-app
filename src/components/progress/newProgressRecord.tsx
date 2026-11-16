@@ -1,23 +1,19 @@
 "use client";
 
-import Image from "next/image";
 import {useEffect, useRef, useState} from "react";
 import {uploadPresigned} from "@vercel/blob/client";
 import {useRouter} from "next/navigation";
 
 import {saveProgressEntryAction} from "@/app/(protected)/progress/actions";
-import Icon from "@/components/layout/actionComponents/iconComponent";
+import ProgressPhotoImage from "@/components/progress/progressPhotoImage";
 import {getLondonDate} from "@/helpers/measurement-conversion";
 import type {UserProfile} from "@/types/profile";
 import type {ProgressEntryInputValues, ProgressPhotoView} from "@/types/progress";
 import {getProgressEntryValues} from "@/validation/progress";
 
 type NewProgressRecordProps = {
-    hasGallery: boolean;
-    weightUnit: UserProfile["weightUnit"];
     userId: UserProfile["userId"];
-    onBack: () => void;
-    onSaved: () => void;
+    onSaved: (recordedOn: string) => void;
     photoViews: {
         view: ProgressPhotoView;
         label: string;
@@ -26,9 +22,6 @@ type NewProgressRecordProps = {
 }
 
 export default function NewProgressRecord({
-                                              hasGallery,
-                                              weightUnit,
-                                              onBack,
                                               onSaved,
                                               photoViews,
                                               userId,
@@ -117,13 +110,7 @@ export default function NewProgressRecord({
         setIsSaving(true);
         setError(null);
 
-        const weightValue = formData.get("weight");
         const recordedOnValue = formData.get("recordedOn");
-
-        const weight =
-            typeof weightValue === "string"
-                ? weightValue
-                : "";
 
         const recordedOn =
             typeof recordedOnValue === "string"
@@ -132,7 +119,7 @@ export default function NewProgressRecord({
 
         const progressValue: ProgressEntryInputValues = {
             recordedOn,
-            weight,
+            weight: "",
             photos: files
         }
 
@@ -146,7 +133,7 @@ export default function NewProgressRecord({
             const normalizedValues =
                 getProgressEntryValues(
                     progressValue,
-                    weightUnit,
+                    "kg",
                 );
 
             const uploadedPhotos = await Promise.all(
@@ -175,14 +162,14 @@ export default function NewProgressRecord({
 
             await saveProgressEntryAction({
                 recordedOn,
-                weight,
+                weight: "",
                 photos: uploadedPhotos
             });
 
             form.reset();
             clearSelectedPhotos();
             router.refresh();
-            onSaved();
+            onSaved(recordedOn);
         } catch (submitError) {
             setError(
                 submitError instanceof Error
@@ -195,54 +182,29 @@ export default function NewProgressRecord({
     }
 
     return (
-        <>
-            {hasGallery ? (
-                <button
-                    type="button"
-                    onClick={onBack}
-                    disabled={isSaving}
-                    className="mt-5 inline-flex items-center gap-2 text-small text-secondary transition hover:text-primary"
-                >
-                    <Icon name="arrow-left" className="size-4"/>
-                    Back to gallery
-                </button>
-            ) : null}
-
             <form
                 onSubmit={submitProgressForm}
-                className="mt-6 rounded-card border border-border bg-surface p-5 shadow-card sm:p-7"
+                className="mt-7 overflow-x-hidden rounded-card border border-border bg-surface p-5 shadow-card sm:p-7"
             >
                 <h2 className="text-body font-semibold">
                     New progress entry
                 </h2>
 
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                    <label className="form-label">
+                <div className="mt-6 min-w-0">
+                    <label className="form-label block min-w-0 !font-normal !text-primary">
                         Date
                         <input
                             type="date"
                             name="recordedOn"
                             defaultValue={getLondonDate()}
-                            className="form-control normal-case"
-                        />
-                    </label>
-
-                    <label className="form-label">
-                        Weight ({weightUnit})
-                        <input
-                            type="number"
-                            name="weight"
-                            min="0"
-                            step="0.1"
-                            inputMode="decimal"
-                            placeholder="Optional"
-                            className="form-control normal-case"
+                            required
+                            className="form-control min-w-0 max-w-full appearance-none normal-case [color-scheme:light]"
                         />
                     </label>
                 </div>
 
                 <fieldset className="mt-7">
-                    <legend className="form-label">
+                    <legend className="form-label !font-normal !text-primary">
                         Progress photos
                     </legend>
                     <p className="mt-2 text-small text-secondary">
@@ -252,17 +214,15 @@ export default function NewProgressRecord({
                     <div className="mt-4 grid grid-cols-3 gap-3">
                         {photoViews.map(({view, label}) => (
                             <label key={view} className="min-w-0">
-                                <span className="text-small text-secondary">
+                                <span className="text-small font-normal text-primary">
                                     {label}
                                 </span>
                                 <span
                                     className="relative mt-2 flex aspect-3/4 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-control border border-dashed border-border-strong bg-surface-subtle px-2 text-center text-small text-secondary transition hover:bg-surface-muted hover:text-primary">
                                     {previewUrls[view] ? (
-                                        <Image
+                                        <ProgressPhotoImage
                                             src={previewUrls[view]}
                                             alt={`${label} preview`}
-                                            fill
-                                            unoptimized
                                             sizes="(max-width: 640px) 30vw, 12rem"
                                             className="object-cover"
                                         />
@@ -302,6 +262,5 @@ export default function NewProgressRecord({
                     {isSaving ? "Saving..." : "Save entry"}
                 </button>
             </form>
-        </>
     )
 }

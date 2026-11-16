@@ -9,3 +9,10 @@ export default function formatExerciseDetail(value: string | null) {
 
     return value.replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
+
+export function isCardioExercise(muscleGroup: string | null) {
+    const normalizedMuscleGroup = muscleGroup?.toLowerCase() ?? "";
+
+    return normalizedMuscleGroup === "cardio" ||
+        normalizedMuscleGroup === "cardiovascular system";
+}

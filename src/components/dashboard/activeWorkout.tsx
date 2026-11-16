@@ -76,9 +76,6 @@ export default function ActiveWorkout({activeRoutine}: ActiveWorkoutProps) {
                                             : "border-border-inverse-control bg-surface-inverse-control text-inverse-soft hover:bg-surface-inverse-control-hover"
                                     }`}
                                 >
-                                    {selectedWorkout?.id === workout.id && (
-                                        <Icon name="check" className="size-4" />
-                                    )}
                                     {workout.name}
                                 </button>
                             );

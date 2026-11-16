@@ -36,7 +36,7 @@ export default function EditRoutineForm({
     );
 
     return (
-        <main className="flex-1 px-5 py-7 md:px-12 md:py-14">
+        <main className="flex-1 px-4 py-7 md:px-12 md:py-14">
             <div className="max-w-5xl">
                 <header className="flex gap-4">
                     <Link
@@ -59,7 +59,7 @@ export default function EditRoutineForm({
 
                 <form
                     action={updateAction}
-                    className="mt-7 space-y-5 rounded-card border border-border bg-surface p-6 shadow-card"
+                    className="mt-7 space-y-5 rounded-card border border-border bg-surface p-4 shadow-card sm:p-6"
                 >
                     <label className="block" htmlFor="routineName">
                         <span className="form-label">Routine name</span>

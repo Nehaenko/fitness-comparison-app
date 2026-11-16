@@ -183,5 +183,11 @@ describe("MeasurementsStructure", () => {
                 mocks.deleteMeasurementAction,
             ).toHaveBeenCalledWith("measurement-1");
         });
+
+        expect(
+            screen.queryByRole("button", {
+                name: "Remove measurement from 4 Nov 2026",
+            }),
+        ).not.toBeInTheDocument();
     });
 });

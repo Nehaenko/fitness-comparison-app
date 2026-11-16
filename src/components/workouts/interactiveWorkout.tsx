@@ -250,10 +250,10 @@ export default function InteractiveWorkout({workout, previousPerformanceByExerci
                                     }}
                                     onClick={() => selectExercise(exercise)}
                                     aria-pressed={isSelected}
-                                    className={`h-10 rounded-control px-4 text-sm font-semibold transition ${
+                                    className={`h-10 rounded-control border px-4 text-sm font-normal text-primary transition ${
                                         isSelected
-                                            ? "bg-surface-inverse text-inverse"
-                                            : "text-secondary hover:bg-surface-subtle hover:text-primary"
+                                            ? "border-brand bg-brand-soft"
+                                            : "border-transparent hover:bg-surface-subtle"
                                     }`}
                                 >
                                     {index + 1}. {exercise.name}
