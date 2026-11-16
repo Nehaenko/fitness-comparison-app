@@ -22,7 +22,13 @@ const copy = {
   },
 } as const;
 
-export function AuthCard({ mode }: { mode: AuthMode }) {
+export function AuthCard({
+  mode,
+  error,
+}: {
+  mode: AuthMode;
+  error?: string;
+}) {
   const content = copy[mode];
 
   return (
@@ -46,6 +52,30 @@ export function AuthCard({ mode }: { mode: AuthMode }) {
       </div>
 
       <GoogleAuthButton />
+
+      {error ? (
+        <div
+          role="alert"
+          className="mt-4 rounded-xl bg-danger-soft px-4 py-3 text-center text-xs leading-5 text-danger"
+        >
+          Private testing is currently full, or this account could not be granted access.
+          You can still explore Forma using prototype mode.
+        </div>
+      ) : null}
+
+      <div className="my-5 flex items-center gap-3" aria-hidden="true">
+        <span className="h-px flex-1 bg-divider" />
+        <span className="text-xs text-secondary">or</span>
+        <span className="h-px flex-1 bg-divider" />
+      </div>
+
+      <Link
+        href="/prototype"
+        prefetch={true}
+        className="flex h-12 w-full items-center justify-center rounded-xl border border-border-strong bg-surface px-5 text-sm font-semibold text-primary transition hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+      >
+        Enter prototype
+      </Link>
 
       <p className="mt-5 text-center text-xs leading-5 text-[#8a8e8b]">
         Your fitness data stays private and belongs to you.
