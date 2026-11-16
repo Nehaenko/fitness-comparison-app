@@ -10,6 +10,7 @@ import {
     users,
     verificationTokens,
 } from "@/db/schema";
+import {canSignInWithEmail} from "@/db/userAccess";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     adapter: DrizzleAdapter(db, {
@@ -21,6 +22,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     providers: [Google],
     session: {
         strategy: "database",
+    },
+    pages: {
+        error: "/login",
+    },
+    callbacks: {
+        signIn: async ({user}) => {
+            if (!user.email) {
+                return false;
+            }
+
+            return canSignInWithEmail(user.email);
+        },
     },
     events: {
         createUser: async ({ user }) => {
