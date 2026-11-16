@@ -118,6 +118,7 @@ export default async function DashboardPage() {
                             </h2>
                             <Link
                                 href="/history"
+                                prefetch={true}
                                 className="text-xs font-semibold text-brand hover:text-brand-hover"
                             >
                                 View all

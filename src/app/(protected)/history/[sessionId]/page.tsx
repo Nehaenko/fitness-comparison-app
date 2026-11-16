@@ -31,6 +31,7 @@ export default async function HistoryRecord({params}: {
                 <header className="flex items-start gap-4">
                     <Link
                         href="/history"
+                        prefetch={true}
                         aria-label="Back to workout history"
                         className="mt-1 grid size-10 shrink-0 place-items-center rounded-full text-secondary transition hover:bg-surface-subtle hover:text-primary"
                     >

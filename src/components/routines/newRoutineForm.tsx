@@ -23,6 +23,7 @@ export default function NewRoutineForm({exercises, weightUnit}: NewRoutineProps)
                 <header className="flex gap-4">
                     <Link
                         href="/routines"
+                        prefetch={true}
                         aria-label="Back to routines"
                         className="mt-2 text-secondary"
                     >
