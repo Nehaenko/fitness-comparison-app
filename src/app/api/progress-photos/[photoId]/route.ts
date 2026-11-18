@@ -59,7 +59,8 @@ export async function GET(
                 result.blob.size.toString(),
             "Content-Disposition": "inline",
             "X-Content-Type-Options": "nosniff",
-            "Cache-Control": "private, no-store",
+            "Cache-Control": "private, max-age=3600, must-revalidate",
+            "Vary": "Cookie",
         },
     });
 }

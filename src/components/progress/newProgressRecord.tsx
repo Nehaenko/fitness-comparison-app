@@ -5,6 +5,7 @@ import {uploadPresigned} from "@vercel/blob/client";
 import {useRouter} from "next/navigation";
 
 import {saveProgressEntryAction} from "@/app/(protected)/progress/actions";
+import Icon from "@/components/layout/actionComponents/iconComponent";
 import ProgressPhotoImage from "@/components/progress/progressPhotoImage";
 import {getLondonDate} from "@/helpers/measurement-conversion";
 import type {UserProfile} from "@/types/profile";
@@ -193,13 +194,20 @@ export default function NewProgressRecord({
                 <div className="mt-6 min-w-0">
                     <label className="form-label block min-w-0 !font-normal !text-primary">
                         Date
-                        <input
-                            type="date"
-                            name="recordedOn"
-                            defaultValue={getLondonDate()}
-                            required
-                            className="form-control min-w-0 max-w-full appearance-none normal-case"
-                        />
+                        <span className="relative block">
+                            <input
+                                type="date"
+                                name="recordedOn"
+                                defaultValue={getLondonDate()}
+                                required
+                                className="date-control form-control min-w-0 max-w-full appearance-none normal-case !pr-12"
+                            />
+                            <Icon
+                                name="calendar"
+                                className="pointer-events-none absolute bottom-3.5 right-4 size-5 text-primary"
+                                strokeWidth={1.6}
+                            />
+                        </span>
                     </label>
                 </div>
 

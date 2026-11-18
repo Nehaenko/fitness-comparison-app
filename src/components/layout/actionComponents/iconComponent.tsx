@@ -20,7 +20,8 @@ type IconName =
     | "edit"
     | "star"
     | "sun"
-    | "moon";
+    | "moon"
+    | "calendar";
 
 export default function Icon({
     name,
@@ -108,6 +109,12 @@ export default function Icon({
                 </>
             )}
             {name === "moon" && <path d="M20 15.2A8.3 8.3 0 0 1 8.8 4 8.5 8.5 0 1 0 20 15.2Z" />}
+            {name === "calendar" && (
+                <>
+                    <rect x="3" y="5" width="18" height="16" rx="2.5" />
+                    <path d="M7 3v4M17 3v4M3 10h18" />
+                </>
+            )}
             {name === "brand" && (
                 <path
                     d="M7 20V4h11M7 11.5h8"

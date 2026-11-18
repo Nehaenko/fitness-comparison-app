@@ -188,14 +188,21 @@ export default function LogModal({
                             <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-4 gap-y-5">
                                 <label className="col-span-2 min-w-0">
                                     <span className="form-label !font-normal !text-primary">Date</span>
-                                    <input
-                                        ref={dateInputRef}
-                                        type="date"
-                                        name="measuredOn"
-                                        defaultValue={defaultDate}
-                                        required
-                                        className="form-control min-w-0 max-w-full appearance-none normal-case"
-                                    />
+                                    <span className="relative block">
+                                        <input
+                                            ref={dateInputRef}
+                                            type="date"
+                                            name="measuredOn"
+                                            defaultValue={defaultDate}
+                                            required
+                                            className="date-control form-control min-w-0 max-w-full appearance-none normal-case !pr-12"
+                                        />
+                                        <Icon
+                                            name="calendar"
+                                            className="pointer-events-none absolute bottom-3.5 right-4 size-5 text-primary"
+                                            strokeWidth={1.6}
+                                        />
+                                    </span>
                                 </label>
 
                                 <label className="min-w-0">

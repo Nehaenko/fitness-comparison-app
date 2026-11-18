@@ -93,7 +93,7 @@ describe("private progress photo route", () => {
         expect(mocks.get).not.toHaveBeenCalled();
     });
 
-    it("streams an owned private photo with non-cacheable security headers", async () => {
+    it("streams an owned private photo with browser-only cache headers", async () => {
         const response = await GET(
             new Request("http://localhost/photo"),
             createContext(),
@@ -105,7 +105,10 @@ describe("private progress photo route", () => {
             {access: "private"},
         );
         expect(response.headers.get("content-type")).toBe("image/jpeg");
-        expect(response.headers.get("cache-control")).toBe("private, no-store");
+        expect(response.headers.get("cache-control")).toBe(
+            "private, max-age=3600, must-revalidate",
+        );
+        expect(response.headers.get("vary")).toBe("Cookie");
         expect(response.headers.get("x-content-type-options")).toBe("nosniff");
         expect(await response.text()).toBe("photo");
     });

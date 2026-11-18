@@ -3,6 +3,8 @@
 import Image from "next/image";
 import {useState, type CSSProperties} from "react";
 
+const loadedPhotoUrls = new Set<string>();
+
 type ProgressPhotoImageProps = {
     src: string;
     alt: string;
@@ -18,10 +20,14 @@ export default function ProgressPhotoImage({
                                                className = "",
                                                style,
                                            }: ProgressPhotoImageProps) {
-    const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+    const [loadedSrc, setLoadedSrc] = useState<string | null>(() =>
+        loadedPhotoUrls.has(src) ? src : null,
+    );
     const [failedSrc, setFailedSrc] = useState<string | null>(null);
 
-    const hasLoaded = loadedSrc === src && failedSrc !== src;
+    const hasLoaded = (
+        loadedSrc === src || loadedPhotoUrls.has(src)
+    ) && failedSrc !== src;
     const hasFailed = failedSrc === src;
 
     return (
@@ -54,6 +60,7 @@ export default function ProgressPhotoImage({
                 draggable={false}
                 sizes={sizes}
                 onLoad={() => {
+                    loadedPhotoUrls.add(src);
                     setFailedSrc(null);
                     setLoadedSrc(src);
                 }}

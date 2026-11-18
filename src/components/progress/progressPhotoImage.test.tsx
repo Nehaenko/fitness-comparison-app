@@ -67,7 +67,7 @@ describe("ProgressPhotoImage", () => {
     it("shows the skeleton again when the requested photo changes", () => {
         const {rerender} = render(
             <ProgressPhotoImage
-                src="/api/progress-photos/photo-1"
+                src="/api/progress-photos/photo-2"
                 alt="First progress photo"
                 sizes="50vw"
             />,
@@ -80,7 +80,7 @@ describe("ProgressPhotoImage", () => {
 
         rerender(
             <ProgressPhotoImage
-                src="/api/progress-photos/photo-2"
+                src="/api/progress-photos/photo-3"
                 alt="Second progress photo"
                 sizes="50vw"
             />,
@@ -91,5 +91,28 @@ describe("ProgressPhotoImage", () => {
         expect(
             screen.getByRole("img", {name: "Second progress photo"}),
         ).toHaveClass("opacity-0");
+    });
+
+    it("does not show another skeleton when a loaded photo remounts", () => {
+        const photo = (
+            <ProgressPhotoImage
+                src="/api/progress-photos/photo-4"
+                alt="Cached progress photo"
+                sizes="50vw"
+            />
+        );
+        const {unmount} = render(photo);
+
+        fireEvent.load(
+            screen.getByRole("img", {name: "Cached progress photo"}),
+        );
+        unmount();
+
+        render(photo);
+
+        expect(screen.queryByRole("status")).not.toBeInTheDocument();
+        expect(
+            screen.getByRole("img", {name: "Cached progress photo"}),
+        ).toHaveClass("opacity-100");
     });
 });
