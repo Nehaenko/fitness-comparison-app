@@ -293,6 +293,19 @@ textarea {
   background: var(--forma-surface-subtle);
 }
 
+.date-control {
+  min-height: 3rem;
+  padding-block: 0.6875rem;
+  line-height: 1.5rem;
+}
+
+.date-control::-webkit-date-and-time-value {
+  min-height: 1.5rem;
+  margin: 0;
+  line-height: 1.5rem;
+  text-align: left;
+}
+
 .date-control::-webkit-calendar-picker-indicator {
   position: absolute;
   inset: 0;
