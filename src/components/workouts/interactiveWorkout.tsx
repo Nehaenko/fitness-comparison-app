@@ -283,7 +283,7 @@ export default function InteractiveWorkout({workout, previousPerformanceByExerci
                                 <button
                                     type="button"
                                     onClick={() => setSelectedExercise(nextExercise)}
-                                    className="mt-5 flex h-14 w-full items-center justify-center rounded-control bg-surface-inverse px-5 text-sm text-white font-semibold"
+                                    className="mt-5 flex h-14 w-full items-center justify-center rounded-control bg-surface-inverse px-5 text-sm font-semibold text-inverse"
                                 >
                                     Next: {nextExercise.name}
                                 </button>
@@ -292,7 +292,7 @@ export default function InteractiveWorkout({workout, previousPerformanceByExerci
                                     type="button"
                                     disabled={isFinishing}
                                     onClick={finishWorkout}
-                                    className="mt-5 flex h-14 w-full items-center justify-center rounded-control bg-brand px-5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="mt-5 flex h-14 w-full items-center justify-center rounded-control bg-brand px-5 text-sm font-semibold text-on-accent disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                     {isFinishing ? "Saving workout..." : "Finish workout"}
                                 </button>
@@ -340,7 +340,7 @@ export default function InteractiveWorkout({workout, previousPerformanceByExerci
                             <button
                                 type="button"
                                 onClick={discardChanges}
-                                className="h-12 rounded-control bg-danger px-3 text-sm font-semibold text-white"
+                                className="h-12 rounded-control bg-danger px-3 text-sm font-semibold text-on-danger"
                             >
                                 Discard
                             </button>

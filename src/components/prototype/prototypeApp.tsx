@@ -4,6 +4,7 @@ import Link from "next/link";
 import {useEffect, useState} from "react";
 
 import Icon from "@/components/layout/actionComponents/iconComponent";
+import ThemeToggle from "@/components/layout/themeToggle";
 import DecimalInput from "@/components/layout/actionComponents/decimalInput";
 
 type PrototypeView =
@@ -201,13 +202,14 @@ export default function PrototypeApp() {
                         className="flex items-center gap-2.5"
                         aria-label="Prototype dashboard"
                     >
-                        <span className="grid size-9 place-items-center rounded-control bg-brand text-inverse">
+                        <span className="grid size-9 place-items-center rounded-control bg-brand text-on-accent">
                             <Icon name="brand" className="size-5"/>
                         </span>
                         <span className="font-display text-heading font-bold">Forma</span>
                     </button>
 
                     <div className="flex items-center gap-2">
+                        <ThemeToggle compact />
                         <span className="hidden rounded-pill bg-brand-soft px-3 py-1 text-label font-semibold text-brand sm:inline-flex">
                             Prototype
                         </span>
@@ -333,7 +335,7 @@ function DashboardView({
                     <button
                         type="button"
                         onClick={() => onNavigate("workout")}
-                        className="inline-flex h-11 items-center gap-2 rounded-control bg-brand px-4 text-small font-semibold"
+                        className="inline-flex h-11 items-center gap-2 rounded-control bg-brand px-4 text-small font-semibold text-on-accent"
                     >
                         <Icon name="play" className="size-4"/>
                         Start workout
@@ -445,7 +447,7 @@ function WorkoutView({
                                             aria-pressed={set.completed}
                                             className={`grid size-11 place-items-center rounded-control border ${
                                                 set.completed
-                                                    ? "border-brand bg-brand text-inverse"
+                                                    ? "border-brand bg-brand text-on-accent"
                                                     : "border-border bg-surface-subtle text-primary"
                                             }`}
                                         >

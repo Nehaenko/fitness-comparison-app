@@ -122,7 +122,7 @@ export default function SortableWorkout({
                             }
                             onClick={(event) => event.stopPropagation()}
                             aria-label="Workout name"
-                            className="mx-2 min-w-0 rounded-control border border-border bg-surface px-3 py-1.5 outline-none"
+                            className="mx-2 min-w-0 rounded-control border border-border bg-surface px-3 py-1.5 outline-none focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                             autoFocus
                         />
                     ) : (

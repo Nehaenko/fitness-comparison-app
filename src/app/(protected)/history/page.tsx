@@ -83,7 +83,7 @@ export default async function HistoryPage() {
                         </p>
                         <Link
                             href="/dashboard"
-                            className="mt-6 inline-flex h-11 items-center justify-center rounded-control bg-brand px-5 text-small font-semibold text-inverse transition hover:bg-brand-hover"
+                            className="mt-6 inline-flex h-11 items-center justify-center rounded-control bg-brand px-5 text-small font-semibold text-on-accent transition hover:bg-brand-hover"
                         >
                             Go to dashboard
                         </Link>
@@ -106,7 +106,7 @@ export default async function HistoryPage() {
                                             <Link
                                                 key={historyItem.id}
                                                 href={`/history/${historyItem.id}`}
-                                                className="grid grid-cols-[3.5rem_minmax(0,1fr)_1.5rem] items-center gap-3 p-3 transition-colors hover:bg-surface-subtle focus-visible:bg-surface-subtle focus-visible:outline-none"
+                                                className="grid grid-cols-[3.5rem_minmax(0,1fr)_1.5rem] items-center gap-3 p-3 transition-colors hover:bg-surface-subtle focus-visible:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-focus"
                                             >
                                                 <time
                                                     dateTime={historyItem.completedAt.toISOString()}

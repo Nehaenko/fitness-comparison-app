@@ -32,21 +32,21 @@ export function AuthCard({
   const content = copy[mode];
 
   return (
-    <section className="w-full max-w-95 rounded-2xl bg-white px-8 py-8 shadow-[0_24px_70px_rgba(16,24,20,0.18)] sm:px-9 sm:py-9">
+    <section className="w-full max-w-95 rounded-2xl bg-surface px-8 py-8 shadow-floating sm:px-9 sm:py-9">
       <div className="mb-8 flex items-center gap-2.5">
-        <span className="grid size-7 place-items-center rounded-lg bg-[#287052] text-white">
+        <span className="grid size-7 place-items-center rounded-lg bg-brand text-on-accent">
           <Icon name="brand" className="size-4" />
         </span>
-        <span className="font-serif text-lg font-bold tracking-tight text-[#181a19]">
+        <span className="font-serif text-lg font-bold tracking-tight text-primary">
           Forma
         </span>
       </div>
 
       <div className="mb-7">
-        <h1 className="font-serif text-[28px] font-bold leading-tight tracking-[-0.02em] text-[#181a19]">
+        <h1 className="font-serif text-[28px] font-bold leading-tight tracking-[-0.02em] text-primary">
           {content.title}
         </h1>
-        <p className="mt-1.5 text-sm leading-6 text-[#757a77]">
+        <p className="mt-1.5 text-sm leading-6 text-secondary">
           {content.description}
         </p>
       </div>
@@ -77,15 +77,15 @@ export function AuthCard({
         Enter prototype
       </Link>
 
-      <p className="mt-5 text-center text-xs leading-5 text-[#8a8e8b]">
+      <p className="mt-5 text-center text-xs leading-5 text-secondary">
         Your fitness data stays private and belongs to you.
       </p>
 
-      <p className="mt-7 text-center text-sm text-[#747875]">
+      <p className="mt-7 text-center text-sm text-secondary">
         {content.question}{" "}
         <Link
           href={content.linkHref}
-          className="font-semibold text-[#1f5f45] underline-offset-4 hover:underline"
+          className="font-semibold text-brand underline-offset-4 hover:underline"
         >
           {content.linkLabel}
         </Link>

@@ -44,7 +44,7 @@ export default function HistoryBlock({records}: HistoryBlockProps) {
                     <Link
                         key={record.id}
                         href={`/history/${record.id}`}
-                        className="grid grid-cols-[minmax(0,1fr)_auto_1.25rem] items-center gap-3 py-3 px-5 transition-colors hover:bg-surface-subtle focus-visible:bg-surface-subtle focus-visible:outline-none"
+                        className="grid grid-cols-[minmax(0,1fr)_auto_1.25rem] items-center gap-3 px-5 py-3 transition-colors hover:bg-surface-subtle focus-visible:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-focus"
                     >
                         <span className="min-w-0">
                             <span className="block truncate text-sm font-semibold">
