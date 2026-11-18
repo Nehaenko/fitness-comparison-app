@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import Icon from "@/components/layout/actionComponents/iconComponent";
+import ThemeToggle from "@/components/layout/themeToggle";
 
 type MenuProps = {
   user: {
@@ -89,13 +90,10 @@ export default function Menu({ user, logoutAction }: MenuProps) {
             aria-label="Forma dashboard"
             onClick={() => setIsOpen(false)}
           >
-            <Image
-              src="/forma-logo.svg"
-              alt="Forma"
-              width={124}
-              height={42}
-              priority
-            />
+            <span className="relative block h-[42px] w-[124px]">
+              <Image src="/forma-logo.svg" alt="Forma" width={124} height={42} priority className="theme-logo-light" />
+              <Image src="/forma-logo-dark.svg" alt="" width={124} height={42} priority className="theme-logo-dark" />
+            </span>
           </Link>
           <button
             type="button"
@@ -142,7 +140,7 @@ export default function Menu({ user, logoutAction }: MenuProps) {
 
         <div className="shrink-0 border-t border-divider px-6 py-5">
           <div className="mb-4 flex items-center gap-4">
-            <div className="grid size-12 shrink-0 place-items-center rounded-control bg-brand font-display text-xl text-inverse">
+            <div className="grid size-12 shrink-0 place-items-center rounded-control bg-brand font-display text-xl text-on-accent">
               {initial}
             </div>
             <div className="min-w-0">
@@ -154,6 +152,8 @@ export default function Menu({ user, logoutAction }: MenuProps) {
           </div>
 
           <div className="space-y-1">
+            <ThemeToggle />
+
             <Link
               href="/profile"
               onClick={() => setIsOpen(false)}

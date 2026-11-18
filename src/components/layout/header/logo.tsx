@@ -8,7 +8,24 @@ type LogoProps = {
 export default function Logo({ src }: LogoProps) {
   return (
     <Link href="/dashboard" aria-label="Forma dashboard">
-      <Image src={src} alt="Forma" width={124} height={42} priority />
+      <span className="relative block h-[42px] w-[124px]">
+        <Image
+          src={src}
+          alt="Forma"
+          width={124}
+          height={42}
+          priority
+          className="theme-logo-light"
+        />
+        <Image
+          src="/forma-logo-dark.svg"
+          alt=""
+          width={124}
+          height={42}
+          priority
+          className="theme-logo-dark"
+        />
+      </span>
     </Link>
   );
 }

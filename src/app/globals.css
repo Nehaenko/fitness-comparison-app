@@ -17,6 +17,8 @@
   --forma-brand-hover: #245f48;
   --forma-brand-soft: #e8f2ed;
   --forma-brand-soft-hover: #dcebe3;
+  --forma-selection: #dcebe3;
+  --forma-text-on-accent: #ffffff;
 
   /* Surfaces */
   --forma-canvas: #f6f6f3;
@@ -46,6 +48,7 @@
   --forma-danger: #dc3b32;
   --forma-danger-hover: #bd3029;
   --forma-danger-soft: #fff0ee;
+  --forma-text-on-danger: #ffffff;
   --forma-warning: #ff6b2c;
   --forma-focus: #2e7457;
   --forma-backdrop: rgb(25 25 27 / 48%);
@@ -67,12 +70,63 @@
   --forma-shadow-drawer: -12px 0 40px rgb(20 24 21 / 14%);
 }
 
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Brand */
+  --forma-brand: #73b38f;
+  --forma-brand-hover: #8bc6a6;
+  --forma-brand-soft: #17271f;
+  --forma-brand-soft-hover: #203b2d;
+  --forma-selection: #315d45;
+  --forma-text-on-accent: #0b1710;
+
+  /* Green-black surfaces */
+  --forma-canvas: #09100c;
+  --forma-surface: #111a15;
+  --forma-surface-subtle: #17271f;
+  --forma-surface-muted: #203b2d;
+  --forma-surface-inverse: #f1f3ee;
+  --forma-surface-inverse-control: #e2e7df;
+  --forma-surface-inverse-control-hover: #ffffff;
+
+  /* Text */
+  --forma-text-primary: #f1f3ee;
+  --forma-text-secondary: #a5afa9;
+  --forma-text-tertiary: #7c8981;
+  --forma-text-inverse: #111613;
+  --forma-text-inverse-muted: #465149;
+  --forma-text-inverse-soft: #29342d;
+
+  /* Borders and dividers */
+  --forma-border: #5b7064;
+  --forma-border-strong: #647a6e;
+  --forma-divider: #405148;
+  --forma-divider-inverse: #cbd2cc;
+  --forma-border-inverse-control: #c1c9c2;
+
+  /* Semantic states */
+  --forma-danger: #e47b70;
+  --forma-danger-hover: #f09288;
+  --forma-danger-soft: #2c1d1b;
+  --forma-text-on-danger: #1b0c0a;
+  --forma-warning: #f2a36d;
+  --forma-focus: #73b38f;
+  --forma-backdrop: rgb(0 0 0 / 68%);
+
+  /* Elevation */
+  --forma-shadow-card: 0 1px 2px rgb(0 0 0 / 24%);
+  --forma-shadow-floating: 0 18px 50px rgb(0 0 0 / 44%);
+  --forma-shadow-drawer: -12px 0 40px rgb(0 0 0 / 42%);
+}
+
 @theme inline {
   /* Colours */
   --color-brand: var(--forma-brand);
   --color-brand-hover: var(--forma-brand-hover);
   --color-brand-soft: var(--forma-brand-soft);
   --color-brand-soft-hover: var(--forma-brand-soft-hover);
+  --color-on-accent: var(--forma-text-on-accent);
 
   --color-canvas: var(--forma-canvas);
   --color-surface: var(--forma-surface);
@@ -98,6 +152,7 @@
   --color-danger: var(--forma-danger);
   --color-danger-hover: var(--forma-danger-hover);
   --color-danger-soft: var(--forma-danger-soft);
+  --color-on-danger: var(--forma-text-on-danger);
   --color-warning: var(--forma-warning);
   --color-focus: var(--forma-focus);
   --color-backdrop: var(--forma-backdrop);
@@ -172,16 +227,36 @@ textarea {
 }
 
 ::selection {
-  background: var(--forma-brand-soft-hover);
+  background: var(--forma-selection);
   color: var(--forma-text-primary);
+}
+
+.theme-logo-dark {
+  display: none;
+}
+
+:root[data-theme="dark"] .theme-logo-light {
+  display: none;
+}
+
+:root[data-theme="dark"] .theme-logo-dark {
+  display: block;
+}
+
+.auth-screen-background {
+  background: #6e716f;
+}
+
+:root[data-theme="dark"] .auth-screen-background {
+  background: #090d0b;
 }
 
 /*Inputs*/
 
 .form-label {
-  color: var(--forma-text-secondary);
+  color: var(--forma-text-primary);
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.45;
   text-transform: uppercase;
 }
@@ -204,11 +279,29 @@ textarea {
   color: var(--forma-text-secondary);
 }
 
-.form-control:is(:hover, :focus, :focus-visible, :active) {
+.form-control:is(:hover, :active) {
   border-color: var(--forma-border);
   outline: none;
   background: var(--forma-surface-subtle);
   box-shadow: none;
+}
+
+.form-control:focus-visible {
+  border-color: var(--forma-focus);
+  outline: 2px solid var(--forma-focus);
+  outline-offset: 2px;
+  background: var(--forma-surface-subtle);
+}
+
+:root[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+  width: 1.25rem;
+  height: 1.25rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none' stroke='%23F1F3EE' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2.5' y='4.5' width='15' height='13' rx='2'/%3E%3Cpath d='M6 2.5v4M14 2.5v4M2.5 8.5h15'/%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 1.25rem 1.25rem;
+  opacity: 1;
+  cursor: pointer;
 }
 
 textarea.form-control {

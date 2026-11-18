@@ -103,7 +103,7 @@ export default function ActiveWorkout({activeRoutine}: ActiveWorkoutProps) {
                         type="button"
                         onClick={handleStartWorkout}
                         disabled={!selectedWorkout}
-                        className="flex h-11 shrink-0 items-center justify-center gap-2 rounded-control bg-brand px-4 text-sm font-semibold text-inverse transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex h-11 shrink-0 items-center justify-center gap-2 rounded-control bg-brand px-4 text-sm font-semibold text-on-accent transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         <Icon name="play" className="size-4" />
                         Start workout

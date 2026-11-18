@@ -194,7 +194,7 @@ export default function LogModal({
                                         name="measuredOn"
                                         defaultValue={defaultDate}
                                         required
-                                        className="form-control min-w-0 max-w-full appearance-none normal-case [color-scheme:light]"
+                                        className="form-control min-w-0 max-w-full appearance-none normal-case"
                                     />
                                 </label>
 

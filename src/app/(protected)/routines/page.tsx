@@ -64,7 +64,7 @@ export default async function RoutinesPage() {
                                 <div className="flex flex-wrap items-center gap-2">
                                     {routine.isActive && (
                                         <span
-                                            className="rounded-pill bg-brand-soft px-3 py-1 text-label font-semibold text-brand">
+                                            className="rounded-pill bg-brand px-3 py-1 text-label font-semibold text-on-accent">
                                             Active
                                         </span>
                                     )}

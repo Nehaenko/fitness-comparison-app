@@ -18,7 +18,9 @@ type IconName =
     | "brand"
     | "google"
     | "edit"
-    | "star";
+    | "star"
+    | "sun"
+    | "moon";
 
 export default function Icon({
     name,
@@ -99,10 +101,17 @@ export default function Icon({
                 <path d="m4.5 19.5 3.75-.75L19 8a1.75 1.75 0 0 0 0-2.5l-.5-.5a1.75 1.75 0 0 0-2.5 0L5.25 15.75l-.75 3.75ZM13.5 5.5l5 5" />
             )}
             {name === "star" && <path d="m12 3 2.7 5.47 6.03.88-4.36 4.25 1.03 6-5.4-2.84-5.4 2.84 1.03-6-4.36-4.25 6.03-.88L12 3Z" />}
+            {name === "sun" && (
+                <>
+                    <circle cx="12" cy="12" r="3.5" />
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" />
+                </>
+            )}
+            {name === "moon" && <path d="M20 15.2A8.3 8.3 0 0 1 8.8 4 8.5 8.5 0 1 0 20 15.2Z" />}
             {name === "brand" && (
                 <path
-                    d="M7 8.25v7.5M4.5 9.75v4.5M17 8.25v7.5m2.5-6v4.5M7 12h10M10 5.5v2.75m4-2.75v2.75"
-                    strokeWidth="1.8"
+                    d="M7 20V4h11M7 11.5h8"
+                    strokeWidth="2.75"
                 />
             )}
             {name === "google" && (

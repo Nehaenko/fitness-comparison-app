@@ -67,7 +67,7 @@ export default async function DashboardPage() {
                     </p>
                     <Link
                         href="/routines/"
-                        className="mt-6 inline-flex h-12 items-center justify-center rounded-control bg-brand px-5 font-semibold text-inverse transition hover:bg-brand-hover"
+                        className="mt-6 inline-flex h-12 items-center justify-center rounded-control bg-brand px-5 font-semibold text-on-accent transition hover:bg-brand-hover"
                     >
                         Choose a routine
                     </Link>

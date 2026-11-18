@@ -1,4 +1,5 @@
 import { AuthCard, type AuthMode } from "@/components/auth/auth-card";
+import ThemeToggle from "@/components/layout/themeToggle";
 
 export function AuthScreen({
   mode,
@@ -8,7 +9,10 @@ export function AuthScreen({
   error?: string;
 }) {
   return (
-    <main className="grid min-h-screen place-items-center bg-[#6e716f] px-5 py-10">
+    <main className="auth-screen-background relative grid min-h-screen place-items-center px-5 py-10">
+      <div className="absolute right-5 top-5">
+        <ThemeToggle compact />
+      </div>
       <AuthCard mode={mode} error={error} />
     </main>
   );

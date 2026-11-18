@@ -156,7 +156,7 @@ export default function ExerciseFrame({
                         aria-pressed={isCompleted}
                         className={`mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-control border font-semibold transition-colors ${
                             isCompleted
-                                ? "border-brand bg-brand text-inverse"
+                                ? "border-brand bg-brand text-on-accent"
                                 : "border-border bg-surface text-primary hover:border-brand"
                         }`}
                     >
@@ -268,7 +268,7 @@ export default function ExerciseFrame({
                                             aria-pressed={set.completed}
                                             className={`grid size-11 shrink-0 place-items-center rounded-control border transition-colors ${
                                                 set.completed
-                                                    ? "border-brand bg-brand text-inverse shadow-card"
+                                                    ? "border-brand bg-brand text-on-accent shadow-card"
                                                     : "border-border bg-surface-subtle text-secondary hover:border-border-strong hover:bg-surface-muted hover:text-primary"
                                             }`}
                                         >
@@ -293,7 +293,7 @@ export default function ExerciseFrame({
                                                     weight,
                                                 })
                                             }
-                                            className="h-12 w-16 rounded-control border bg-surface-subtle px-2 text-center font-mono text-base font-semibold outline-none focus:border-border focus:ring-0 sm:w-22"
+                                            className="h-12 w-16 rounded-control border border-border bg-surface-subtle px-2 text-center font-mono text-base font-semibold outline-none focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:w-22"
                                         />
                                         <span className="shrink-0 text-sm text-secondary">
                                         kg
@@ -324,7 +324,7 @@ export default function ExerciseFrame({
                                                             : Number(event.target.value),
                                                 })
                                             }
-                                            className="h-12 w-16 rounded-control border bg-surface-subtle px-2 text-center font-mono text-base font-semibold outline-none focus:border-border focus:ring-0 sm:w-22 [&::-webkit-inner-spin-button]:appearance-none"
+                                            className="h-12 w-16 rounded-control border border-border bg-surface-subtle px-2 text-center font-mono text-base font-semibold outline-none focus-visible:border-focus focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:w-22 [&::-webkit-inner-spin-button]:appearance-none"
                                         />
                                         <span className="shrink-0 text-sm text-secondary">
                                         reps

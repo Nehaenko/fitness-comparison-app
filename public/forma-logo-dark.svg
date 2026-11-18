@@ -1,0 +1,30 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="190"
+  height="64"
+  viewBox="0 0 190 64"
+  fill="none"
+  role="img"
+  aria-labelledby="forma-dark-logo-title forma-dark-logo-description"
+>
+  <title id="forma-dark-logo-title">Forma</title>
+  <desc id="forma-dark-logo-description">Forma fitness companion logo</desc>
+
+  <rect x="0" y="4" width="56" height="56" rx="16" fill="#73B38F" />
+  <path
+    d="M19 47V18H40M19 31H35"
+    stroke="#0B1710"
+    stroke-width="6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <text
+    x="72"
+    y="43"
+    fill="#F1F3EE"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="32"
+    font-weight="700"
+    letter-spacing="-0.8"
+  >Forma</text>
+</svg>

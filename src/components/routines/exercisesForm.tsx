@@ -73,7 +73,7 @@ export default function ExercisesForm({
                         }}
                         type="search"
                         placeholder="Search exercises..."
-                        className="h-11 w-full rounded-control border border-brand bg-surface px-3 text-small outline-none placeholder:text-secondary"
+                        className="h-11 w-full rounded-control border border-brand bg-surface px-3 text-small outline-none placeholder:text-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                     />
 
                 </div>

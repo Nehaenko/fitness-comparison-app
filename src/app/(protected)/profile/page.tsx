@@ -27,7 +27,7 @@ export default async function ProfilePage() {
 
                     <div className="mt-4 flex items-center gap-5 md:mt-5 md:gap-8">
                         <div
-                            className="flex size-15 shrink-0 items-center justify-center rounded-3xl bg-brand font-display text-3xl text-inverse"
+                            className="flex size-15 shrink-0 items-center justify-center rounded-3xl bg-brand font-display text-3xl text-on-accent"
                             aria-hidden="true"
                         >
                             {firstNameLetter}
