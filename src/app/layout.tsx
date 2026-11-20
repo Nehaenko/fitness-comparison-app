@@ -1,10 +1,27 @@
-import type { Metadata } from "next";
+import type {Metadata, Viewport} from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  applicationName: "Forma",
   title: "Forma — Private fitness companion",
   description: "Plan workouts, track progress, and compare your results.",
+  appleWebApp: {
+    capable: true,
+    title: "Forma",
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#f6f6f3",
+  colorScheme: "light dark",
 };
 
 const themeScript = `
@@ -17,6 +34,13 @@ const themeScript = `
           ? "dark"
           : "light";
       document.documentElement.dataset.theme = theme;
+      var themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) {
+        themeMeta.setAttribute(
+          "content",
+          theme === "dark" ? "#09100c" : "#f6f6f3"
+        );
+      }
     } catch (_) {}
   })();
 `;

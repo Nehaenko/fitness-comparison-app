@@ -8,6 +8,10 @@ type Theme = "light" | "dark";
 
 const THEME_STORAGE_KEY = "forma:theme";
 const THEME_CHANGE_EVENT = "forma-theme-change";
+const THEME_COLORS: Record<Theme, string> = {
+  light: "#f6f6f3",
+  dark: "#09100c",
+};
 
 function getTheme(): Theme {
   if (typeof document === "undefined") return "light";
@@ -26,6 +30,9 @@ export default function ThemeToggle({ compact = false }: { compact?: boolean }) 
   const toggleTheme = () => {
     const nextTheme: Theme = getTheme() === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = nextTheme;
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute("content", THEME_COLORS[nextTheme]);
     window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
     window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
   };
