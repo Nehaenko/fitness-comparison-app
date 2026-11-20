@@ -22,7 +22,7 @@ export default async function Header() {
     return (
         <header className="sticky top-0 z-30 border-b border-border bg-surface">
             <div
-                className="mx-auto grid h-19 w-full max-w-[120rem] grid-cols-[1fr_auto] items-center px-5 md:grid-cols-[1fr_auto_1fr] md:px-10">
+                className="app-header-bar mx-auto grid w-full max-w-[120rem] grid-cols-[1fr_auto] items-center px-5 md:grid-cols-[1fr_auto_1fr] md:px-10">
                 <Logo src="/forma-logo.svg"/>
 
                 <div className="hidden text-center md:block">
