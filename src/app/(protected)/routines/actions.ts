@@ -5,8 +5,14 @@ import {redirect} from "next/navigation";
 import {auth} from "@/auth";
 import {activateRoutineForUser, createRoutineWithWorkoutsForUser, deleteRoutineForUser, updateRoutineWithWorkoutsForUser,} from "@/db/routines";
 import {getProfileByUserId} from "@/db/profile";
-import type {WeightUnit} from "@/types/profile";
 import {
+    canUserUseExercises,
+    createCustomExerciseForUser,
+} from "@/db/exercises";
+import type {WeightUnit} from "@/types/profile";
+import type {ExerciseOption} from "@/types/routine-builder";
+import {
+    getCustomExerciseValues,
     getRoutineValues,
     getRoutineWorkoutsData,
     validateRoutineId,
@@ -22,6 +28,63 @@ async function requireAuthenticatedUserId() {
     return session.user.id;
 }
 
+function isUniqueConstraintError(error: unknown) {
+    return typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        error.code === "23505";
+}
+
+export async function createCustomExerciseAction(
+    input: unknown,
+): Promise<
+    | {success: true; exercise: ExerciseOption}
+    | {success: false; error: string}
+> {
+    try {
+        const userId = await requireAuthenticatedUserId();
+        const values = getCustomExerciseValues(input);
+        const exercise = await createCustomExerciseForUser(
+            userId,
+            values,
+        );
+
+        if (!exercise) {
+            throw new Error("Unable to create exercise");
+        }
+
+        revalidatePath("/routines");
+        return {success: true, exercise};
+    } catch (error) {
+        if (isUniqueConstraintError(error)) {
+            return {
+                success: false,
+                error: "You already have an exercise with this name",
+            };
+        }
+
+        return {
+            success: false,
+            error: error instanceof Error
+                ? error.message
+                : "Unable to create exercise",
+        };
+    }
+}
+
+async function validateExerciseAccess(
+    userId: string,
+    workouts: ReturnType<typeof getRoutineWorkoutsData>,
+) {
+    const exerciseIds = workouts.flatMap((workout) =>
+        workout.exercises.map((exercise) => exercise.exerciseId),
+    );
+
+    if (!await canUserUseExercises(userId, exerciseIds)) {
+        throw new Error("One or more exercises are unavailable");
+    }
+}
+
 async function getUserWeightUnit(userId: string): Promise<WeightUnit> {
     const profile = await getProfileByUserId(userId);
 
@@ -33,6 +96,7 @@ export async function createRoutineAction(formData: FormData) {
     const weightUnit = await getUserWeightUnit(userId);
     const values = getRoutineValues(formData);
     const workouts = getRoutineWorkoutsData(formData, weightUnit);
+    await validateExerciseAccess(userId, workouts);
 
     const routine = await createRoutineWithWorkoutsForUser(userId, values, workouts);
 
@@ -56,6 +120,7 @@ export async function updateRoutineAction(
     const weightUnit = await getUserWeightUnit(userId);
     const values = getRoutineValues(formData);
     const workouts = getRoutineWorkoutsData(formData, weightUnit);
+    await validateExerciseAccess(userId, workouts);
     const routine = await updateRoutineWithWorkoutsForUser(
         routineId,
         userId,

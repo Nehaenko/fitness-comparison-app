@@ -17,6 +17,7 @@ type SortableWorkoutProps = {
     onRemove: (id: string) => void;
     onRename: (id: string, name: string) => void;
     onAddExercise: (workoutId: string, exercise: ExerciseOption) => void;
+    onExerciseCreated: (exercise: ExerciseOption) => void;
     onReorderExercise: (workoutId: string, from: number, to: number) => void;
     onRemoveExercise: (id: string) => void;
     onUpdateExercise: (id: string, configuredExerciseId: string, changes: ExerciseChanges) => void;
@@ -30,6 +31,7 @@ export default function SortableWorkout({
                                             onRemove,
                                             onRename,
                                             onAddExercise,
+                                            onExerciseCreated,
                                             onReorderExercise,
                                             onRemoveExercise,
                                             onUpdateExercise,
@@ -242,6 +244,7 @@ export default function SortableWorkout({
                                     onAddExercise={(exercise) =>
                                         onAddExercise(workout.id, exercise)
                                     }
+                                    onExerciseCreated={onExerciseCreated}
                                 />
                             )}
                         </div>

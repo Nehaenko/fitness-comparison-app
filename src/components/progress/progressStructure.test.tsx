@@ -31,13 +31,13 @@ const entries: ProgressEntryRecord[] = [
     {
         id: "entry-2",
         recordedOn: "2026-11-10",
-        weight: null,
+        measurement: null,
         photos: [],
     },
     {
         id: "entry-1",
         recordedOn: "2026-11-09",
-        weight: null,
+        measurement: null,
         photos: [],
     },
 ];
@@ -45,6 +45,7 @@ const entries: ProgressEntryRecord[] = [
 const profile = {
     userId: "user-1",
     weightUnit: "kg" as const,
+    measurementUnit: "cm" as const,
 };
 
 describe("ProgressStructure", () => {
@@ -137,7 +138,7 @@ describe("ProgressStructure", () => {
                     {
                         id: "entry-3",
                         recordedOn: "2026-11-11",
-                        weight: null,
+                        measurement: null,
                         photos: [],
                     },
                     ...entries,

@@ -1,3 +1,5 @@
+import type {MeasurementRecord} from "@/types/measurements";
+
 export type ProgressPhotoView = | "front" | "side" | "back";
 
 export type ProgressEntryInputValues = {
@@ -15,9 +17,14 @@ export type ProgressPhotoRecord = {
 export type ProgressEntryRecord = {
     id: string;
     recordedOn: string;
-    weight: number | null;
     photos: ProgressPhotoRecord[];
+    measurement: MeasurementRecord | null;
 }
+
+export type ProgressEntryBaseRecord = Omit<
+    ProgressEntryRecord,
+    "measurement"
+>;
 
 export type ProgressPhotoUpload = {
     view: ProgressPhotoView;

@@ -11,6 +11,15 @@ const MAX_SETS = 100;
 const MAX_TARGET_REPS = 1_000;
 const MAX_REST_SECONDS = 86_400;
 const MAX_TARGET_WEIGHT = 999_999.99;
+const MAX_EXERCISE_NAME_LENGTH = 100;
+const MAX_EXERCISE_DETAIL_LENGTH = 60;
+
+export type CustomExerciseInput = {
+    name: string;
+    type: "strength" | "cardio";
+    muscleGroup: string;
+    equipment: string;
+};
 
 type SubmittedExercise = Omit<
     WorkoutValues["exercises"][number],
@@ -28,6 +37,54 @@ const uuidPattern =
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null;
+}
+
+export function getCustomExerciseValues(input: unknown) {
+    if (!isRecord(input)) {
+        throw new Error("Invalid exercise details");
+    }
+
+    const name = typeof input.name === "string"
+        ? input.name.trim()
+        : "";
+    const type = input.type;
+    const muscleGroup = typeof input.muscleGroup === "string"
+        ? input.muscleGroup.trim()
+        : "";
+    const equipment = typeof input.equipment === "string"
+        ? input.equipment.trim()
+        : "";
+
+    if (
+        name.length === 0 ||
+        name.length > MAX_EXERCISE_NAME_LENGTH
+    ) {
+        throw new Error("Exercise name is required");
+    }
+
+    if (type !== "strength" && type !== "cardio") {
+        throw new Error("Select an exercise type");
+    }
+
+    if (
+        type === "strength" &&
+        (
+            muscleGroup.length === 0 ||
+            muscleGroup.length > MAX_EXERCISE_DETAIL_LENGTH
+        )
+    ) {
+        throw new Error("Muscle group is required");
+    }
+
+    if (equipment.length > MAX_EXERCISE_DETAIL_LENGTH) {
+        throw new Error("Equipment is too long");
+    }
+
+    return {
+        name,
+        muscleGroup: type === "cardio" ? "cardio" : muscleGroup,
+        equipment: equipment.length === 0 ? null : equipment,
+    };
 }
 
 function isIntegerInRange(value: unknown, minimum: number, maximum: number) {

@@ -5,7 +5,7 @@ import {randomUUID} from "node:crypto";
 import {db} from "@/db";
 import {bodyMeasurements, progressEntries, progressPhotos} from "@/db/schema";
 import {and, desc, eq, inArray} from "drizzle-orm";
-import type {ProgressEntryRecord, ProgressPhotoView, SaveProgressEntryValues} from "@/types/progress";
+import type {ProgressEntryBaseRecord, ProgressPhotoView, SaveProgressEntryValues} from "@/types/progress";
 
 export async function createProgressEntryForUser(
     userId: string,
@@ -74,27 +74,13 @@ export async function createProgressEntryForUser(
 
 export async function getProgressEntriesForUser(
     userId: string,
-): Promise<ProgressEntryRecord[]> {
+): Promise<ProgressEntryBaseRecord[]> {
     const entries = await db
         .select({
             id: progressEntries.id,
             recordedOn: progressEntries.recordedOn,
-            weight: bodyMeasurements.weight,
         })
         .from(progressEntries)
-        .leftJoin(
-            bodyMeasurements,
-            and(
-                eq(
-                    bodyMeasurements.userId,
-                    progressEntries.userId,
-                ),
-                eq(
-                    bodyMeasurements.measuredOn,
-                    progressEntries.recordedOn,
-                ),
-            ),
-        )
         .where(eq(progressEntries.userId, userId))
         .orderBy(
             desc(progressEntries.recordedOn),
@@ -128,7 +114,7 @@ export async function getProgressEntriesForUser(
 
     const photosByEntryId = new Map<
         string,
-        ProgressEntryRecord["photos"]
+        ProgressEntryBaseRecord["photos"]
     >();
 
     for (const photo of photoRows) {
@@ -153,10 +139,6 @@ export async function getProgressEntriesForUser(
     return entries.map((entry) => ({
         id: entry.id,
         recordedOn: entry.recordedOn,
-        weight:
-            entry.weight === null
-                ? null
-                : Number(entry.weight),
         photos: (
             photosByEntryId.get(entry.id) ?? []
         ).sort(

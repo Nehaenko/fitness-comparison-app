@@ -4,6 +4,12 @@ import {useState} from "react";
 
 import ComparisonPhoto from "@/components/progress/comparisonPhoto";
 import Icon from "@/components/layout/actionComponents/iconComponent";
+import {
+    formatMeasurementDate,
+    getDisplayValue,
+} from "@/helpers/measurement-conversion";
+import type {MeasurementRecord} from "@/types/measurements";
+import type {MeasurementUnit, WeightUnit} from "@/types/profile";
 import {ProgressEntryRecord, ProgressPhotoView} from "@/types/progress";
 import {formatProgressDate} from "@/validation/progress";
 
@@ -12,12 +18,86 @@ type ProgressComparisonProps = {
     photoViews: {
         view: ProgressPhotoView;
         label: string;
-    }[]
+    }[];
+    weightUnit: WeightUnit;
+    measurementUnit: MeasurementUnit;
+}
+
+const measurementFields = [
+    {field: "weight", label: "Weight"},
+    {field: "waist", label: "Waist"},
+    {field: "chest", label: "Chest"},
+    {field: "hips", label: "Hips"},
+    {field: "thigh", label: "Thigh"},
+    {field: "arm", label: "Arm"},
+] as const;
+
+function MeasurementSummary({
+    measurement,
+    side,
+    weightUnit,
+    measurementUnit,
+}: {
+    measurement: MeasurementRecord | null | undefined;
+    side: "Before" | "After";
+    weightUnit: WeightUnit;
+    measurementUnit: MeasurementUnit;
+}) {
+    return (
+        <section
+            aria-label={`${side} measurement context`}
+            className="min-w-0 rounded-control bg-surface-subtle p-3"
+        >
+            <h3 className="text-small font-semibold text-primary">
+                Measurements
+            </h3>
+            {measurement ? (
+                <>
+                    <p className="mt-0.5 text-xs text-secondary">
+                        From {formatMeasurementDate(measurement.measuredOn)}
+                    </p>
+                    <dl className="mt-3 space-y-1.5">
+                        {measurementFields.map(({field, label}) => {
+                            const value = measurement[field];
+                            const unit = field === "weight"
+                                ? weightUnit
+                                : measurementUnit;
+
+                            return (
+                                <div
+                                    key={field}
+                                    className="flex min-w-0 items-baseline justify-between gap-2 text-xs"
+                                >
+                                    <dt className="truncate text-secondary">
+                                        {label}
+                                    </dt>
+                                    <dd className="shrink-0 font-medium text-primary">
+                                        {value === null
+                                            ? "—"
+                                            : `${getDisplayValue(value, field, {
+                                                weightUnit,
+                                                measurementUnit,
+                                            })} ${unit}`}
+                                    </dd>
+                                </div>
+                            );
+                        })}
+                    </dl>
+                </>
+            ) : (
+                <p className="mt-1 text-xs leading-relaxed text-secondary">
+                    No earlier measurements
+                </p>
+            )}
+        </section>
+    );
 }
 
 export default function ProgressComparison({
                                                entries,
-                                               photoViews
+                                               photoViews,
+                                               weightUnit,
+                                               measurementUnit,
                                            }: ProgressComparisonProps) {
     const [beforeEntryId, setBeforeEntryId] = useState<string>(entries.at(-1)?.id ?? "");
     const [afterEntryId, setAfterEntryId] = useState<string>(entries[0]?.id ?? "")
@@ -85,6 +165,21 @@ export default function ProgressComparison({
                             />
                         </span>
                     </label>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-3 border-t border-divider pt-4 sm:gap-4">
+                    <MeasurementSummary
+                        side="Before"
+                        measurement={beforeEntry?.measurement}
+                        weightUnit={weightUnit}
+                        measurementUnit={measurementUnit}
+                    />
+                    <MeasurementSummary
+                        side="After"
+                        measurement={afterEntry?.measurement}
+                        weightUnit={weightUnit}
+                        measurementUnit={measurementUnit}
+                    />
                 </div>
 
             </section>

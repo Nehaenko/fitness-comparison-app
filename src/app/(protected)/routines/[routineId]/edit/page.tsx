@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getExercises } from "@/db/exercises";
+import { getExercisesForUser } from "@/db/exercises";
 import EditRoutineForm from "@/components/routines/editRoutineForm";
 
 import { getAuthenticatedRoutineWithWorkouts } from "../../data";
@@ -12,8 +12,7 @@ export default async function EditRoutine({
     params: Promise<{ routineId: string }>;
 }) {
     const { routineId } = await params;
-    const [exercises, profile, result] = await Promise.all([
-        getExercises(),
+    const [profile, result] = await Promise.all([
         getAuthenticatedUserProfile(),
         getAuthenticatedRoutineWithWorkouts(routineId),
     ]);
@@ -21,6 +20,8 @@ export default async function EditRoutine({
     if (!result) {
         notFound();
     }
+
+    const exercises = await getExercisesForUser(profile.userId);
 
     const { routine, workouts } = result;
 

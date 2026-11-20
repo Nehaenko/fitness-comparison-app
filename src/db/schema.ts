@@ -277,6 +277,10 @@ export type WorkoutTemplate = typeof workoutTemplates.$inferSelect;
 export const exercises = pgTable("exercises", {
         id: uuid("id").defaultRandom().primaryKey(),
         externalId: text("external_id").unique(),
+        userId: text("user_id")
+            .references(() => users.id, {
+                onDelete: "cascade",
+            }),
         name: text("name").notNull(),
         muscleGroup: text("muscle_group"),
         equipment: text("equipment"),
@@ -295,6 +299,12 @@ export const exercises = pgTable("exercises", {
         index("exercises_equipment_idx").on(table.equipment),
 
         index("exercises_name_idx").on(table.name),
+
+        index("exercises_user_id_idx").on(table.userId),
+
+        uniqueIndex("exercises_user_name_idx")
+            .on(table.userId, sql`lower(${table.name})`)
+            .where(sql`${table.userId} is not null`),
     ],
 );
 
