@@ -219,6 +219,20 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/*
+ * Installed iOS apps can extend beneath the status bar when viewport-fit is
+ * set to cover. Keep interactive header controls below the Dynamic Island and
+ * leave enough room for the home indicator at the bottom of the menu drawer.
+ */
+.app-header-bar {
+  min-height: calc(4.75rem + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.app-menu-footer {
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+}
+
 button,
 input,
 select,

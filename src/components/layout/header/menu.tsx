@@ -70,8 +70,10 @@ export default function Menu({ user, logoutAction }: MenuProps) {
         aria-label="Close menu"
         tabIndex={isOpen ? 0 : -1}
         onClick={() => setIsOpen(false)}
-        className={`fixed inset-0 z-40 bg-backdrop backdrop-blur-[3px] transition-opacity duration-200 ${
-          isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        className={`fixed inset-0 z-40 bg-backdrop transition-opacity duration-200 ${
+          isOpen
+            ? "visible pointer-events-auto opacity-100 backdrop-blur-[3px]"
+            : "invisible pointer-events-none opacity-0 backdrop-blur-none"
         }`}
       />
 
@@ -81,10 +83,10 @@ export default function Menu({ user, logoutAction }: MenuProps) {
         aria-hidden={!isOpen}
         inert={!isOpen}
         className={`fixed inset-y-0 right-0 z-50 flex w-[min(82vw,25rem)] flex-col bg-surface shadow-drawer transition-transform duration-300 ease-out ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+          isOpen ? "visible translate-x-0" : "invisible translate-x-full"
         }`}
       >
-        <div className="flex h-19 shrink-0 items-center justify-between border-b border-divider px-5">
+        <div className="app-header-bar flex shrink-0 items-center justify-between border-b border-divider px-5">
           <Link
             href="/dashboard"
             aria-label="Forma dashboard"
@@ -138,7 +140,7 @@ export default function Menu({ user, logoutAction }: MenuProps) {
           </ul>
         </nav>
 
-        <div className="shrink-0 border-t border-divider px-6 py-5">
+        <div className="app-menu-footer shrink-0 border-t border-divider px-6 pt-5">
           <div className="mb-4 flex items-center gap-4">
             <div className="grid size-12 shrink-0 place-items-center rounded-control bg-brand font-display text-xl text-on-accent">
               {initial}
