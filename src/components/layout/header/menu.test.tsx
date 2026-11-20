@@ -26,16 +26,16 @@ describe("Menu", () => {
         expect(backdrop).toHaveClass(
             "invisible",
             "pointer-events-none",
-            "backdrop-blur-none",
         );
+        expect(backdrop.className).not.toContain("backdrop-blur");
 
         await user.click(screen.getByRole("button", {name: "Open menu"}));
 
         expect(backdrop).toHaveClass(
             "visible",
             "pointer-events-auto",
-            "backdrop-blur-[3px]",
         );
+        expect(backdrop.className).not.toContain("backdrop-blur");
         expect(screen.getByLabelText("Main menu")).toHaveAttribute(
             "aria-hidden",
             "false",

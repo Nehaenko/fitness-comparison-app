@@ -72,8 +72,8 @@ export default function Menu({ user, logoutAction }: MenuProps) {
         onClick={() => setIsOpen(false)}
         className={`fixed inset-0 z-40 bg-backdrop transition-opacity duration-200 ${
           isOpen
-            ? "visible pointer-events-auto opacity-100 backdrop-blur-[3px]"
-            : "invisible pointer-events-none opacity-0 backdrop-blur-none"
+            ? "visible pointer-events-auto opacity-100"
+            : "invisible pointer-events-none opacity-0"
         }`}
       />
 
