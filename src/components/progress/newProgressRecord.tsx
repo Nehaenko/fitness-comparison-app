@@ -8,6 +8,7 @@ import {saveProgressEntryAction} from "@/app/(protected)/progress/actions";
 import Icon from "@/components/layout/actionComponents/iconComponent";
 import ProgressPhotoImage from "@/components/progress/progressPhotoImage";
 import {getLondonDate} from "@/helpers/measurement-conversion";
+import {optimizeProgressPhoto} from "@/helpers/progress-photo-optimization";
 import type {UserProfile} from "@/types/profile";
 import type {ProgressEntryInputValues, ProgressPhotoView} from "@/types/progress";
 import {getProgressEntryValues} from "@/validation/progress";
@@ -142,10 +143,12 @@ export default function NewProgressRecord({
                     async (photo) => {
                         const pathname =
                             `progress-photos/${userId}/${crypto.randomUUID()}-${photo.view}`;
+                        const optimizedFile =
+                            await optimizeProgressPhoto(photo.file);
 
                         const blob = await uploadPresigned(
                             pathname,
-                            photo.file,
+                            optimizedFile,
                             {
                                 access: "private",
                                 handleUploadUrl:

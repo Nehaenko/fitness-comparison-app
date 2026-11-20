@@ -266,7 +266,7 @@ export default function ComparisonPhoto({
         >
             {photo ? (
                 <ProgressPhotoImage
-                    src={photo.imageUrl}
+                    src={`${photo.imageUrl}?width=1200`}
                     alt={`${selectedView} progress photo from ${formattedDate}`}
                     style={{
                         transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${zoom})`,

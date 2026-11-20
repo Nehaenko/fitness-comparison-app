@@ -143,7 +143,7 @@ export default function ProgressGallery({
                                             {photo ? (
                                                 <>
                                                     <ProgressPhotoImage
-                                                        src={photo.imageUrl}
+                                                        src={`${photo.imageUrl}?width=480`}
                                                         alt={`${label} progress photo from ${formatProgressDate(entry.recordedOn)}`}
                                                         sizes="(max-width: 640px) 30vw, 12rem"
                                                         className="object-cover"

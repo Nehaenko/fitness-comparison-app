@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
     onSaved: vi.fn(),
     refresh: vi.fn(),
     revokeObjectURL: vi.fn(),
+    optimizeProgressPhoto: vi.fn(),
     saveProgressEntryAction: vi.fn(),
     uploadPresigned: vi.fn(),
 }));
@@ -44,6 +45,10 @@ vi.mock("@/app/(protected)/progress/actions", () => ({
         mocks.saveProgressEntryAction,
 }));
 
+vi.mock("@/helpers/progress-photo-optimization", () => ({
+    optimizeProgressPhoto: mocks.optimizeProgressPhoto,
+}));
+
 import NewProgressRecord from "@/components/progress/newProgressRecord";
 
 const photoViews = [
@@ -67,6 +72,9 @@ describe("NewProgressRecord", () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mocks.createObjectURL.mockReturnValue("blob:preview");
+        mocks.optimizeProgressPhoto.mockImplementation(
+            async (file: File) => file,
+        );
         mocks.uploadPresigned.mockResolvedValue({
             pathname: "progress-photos/user-1/front.jpg",
         });
@@ -170,6 +178,7 @@ describe("NewProgressRecord", () => {
                 handleUploadUrl: "/api/progress-photos/upload",
             },
         );
+        expect(mocks.optimizeProgressPhoto).toHaveBeenCalledOnce();
         expect(mocks.refresh).toHaveBeenCalled();
         expect(mocks.onSaved).toHaveBeenCalledWith("2026-11-09");
         expect(mocks.revokeObjectURL).toHaveBeenCalledWith(

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: "Forma",
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "black",
   },
   formatDetection: {
     telephone: false,
