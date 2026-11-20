@@ -13,7 +13,10 @@ import ProgressGallery from "@/components/progress/progressGallery";
 import ProgressComparison from "@/components/progress/progressComparison";
 
 type ProgressStructureProps = {
-    profile: Pick<UserProfile, "userId">;
+    profile: Pick<
+        UserProfile,
+        "userId" | "weightUnit" | "measurementUnit"
+    >;
     entries: ProgressEntryRecord[];
 };
 
@@ -129,6 +132,8 @@ export default function ProgressStructure({
                 <ProgressComparison
                     photoViews={photoViews}
                     entries={entries}
+                    weightUnit={profile.weightUnit}
+                    measurementUnit={profile.measurementUnit}
                 />
             ) : null}
 

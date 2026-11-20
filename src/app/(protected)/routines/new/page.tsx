@@ -1,11 +1,10 @@
-import { getExercises } from "@/db/exercises";
+import { getExercisesForUser } from "@/db/exercises";
 import {getAuthenticatedUserProfile} from "@/app/(protected)/profile/data";
 import NewRoutineForm from "@/components/routines/newRoutineForm";
 
 export default async function RoutineNewPage() {
-    const [exercises, profile] = await Promise.all([
-        getExercises(),
-        getAuthenticatedUserProfile(),
-    ]);
+    const profile = await getAuthenticatedUserProfile();
+    const exercises = await getExercisesForUser(profile.userId);
+
     return <NewRoutineForm exercises={exercises} weightUnit={profile.weightUnit}/>;
 }

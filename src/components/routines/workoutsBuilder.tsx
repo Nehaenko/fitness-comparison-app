@@ -1,6 +1,6 @@
 import {DragDropProvider, type DragEndEvent} from "@dnd-kit/react";
 import {isSortableOperation} from "@dnd-kit/react/sortable";
-import type {Dispatch, SetStateAction} from "react";
+import {useState, type Dispatch, type SetStateAction} from "react";
 import {moveExercise, moveWorkout} from "@/helpers/drag-drop-helpers";
 import {isCardioExercise} from "@/helpers/exercise-formatting";
 
@@ -24,6 +24,16 @@ type WorkoutsBuilderProps = {
 export default function WorkoutsBuilder({
                                             workouts, setWorkouts, exercises, weightUnit
                                         }: WorkoutsBuilderProps) {
+    const [availableExercises, setAvailableExercises] = useState(exercises);
+
+    const addAvailableExercise = (exercise: ExerciseOption) => {
+        setAvailableExercises((currentExercises) =>
+            [...currentExercises, exercise].sort((first, second) =>
+                first.name.localeCompare(second.name),
+            ),
+        );
+    };
+
     const addWorkout = () => {
         setWorkouts((currentWorkouts) => {
             if (currentWorkouts.length >= 10) {
@@ -206,7 +216,8 @@ export default function WorkoutsBuilder({
                                 onReorderExercise={reorderExercises}
                                 onRemoveExercise={removeExercise}
                                 onUpdateExercise={updateExercise}
-                                exercises={exercises}
+                                exercises={availableExercises}
+                                onExerciseCreated={addAvailableExercise}
                                 weightUnit={weightUnit}
                             />
                         ))}

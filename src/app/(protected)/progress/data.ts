@@ -2,6 +2,7 @@ import "server-only";
 
 import {auth} from "@/auth";
 import {getProgressEntriesForUser} from "@/db/progress";
+import {getMeasurementsForUser} from "@/db/measurements";
 import type {ProgressEntryRecord} from "@/types/progress";
 
 export async function getAuthenticatedProgressEntries():
@@ -12,7 +13,16 @@ export async function getAuthenticatedProgressEntries():
         throw new Error("Unauthorized");
     }
 
-    return getProgressEntriesForUser(
-        session.user.id,
-    );
+    const [entries, measurements] = await Promise.all([
+        getProgressEntriesForUser(session.user.id),
+        getMeasurementsForUser(session.user.id),
+    ]);
+
+    return entries.map((entry) => ({
+        ...entry,
+        measurement: measurements.find(
+            (measurement) =>
+                measurement.measuredOn <= entry.recordedOn,
+        ) ?? null,
+    }));
 }

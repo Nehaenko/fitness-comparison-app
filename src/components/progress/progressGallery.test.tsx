@@ -25,7 +25,7 @@ import type {ProgressEntryRecord} from "@/types/progress";
 const entry: ProgressEntryRecord = {
     id: "11111111-1111-4111-8111-111111111111",
     recordedOn: "2026-11-09",
-    weight: null,
+    measurement: null,
     photos: [
         {
             id: "photo-1",

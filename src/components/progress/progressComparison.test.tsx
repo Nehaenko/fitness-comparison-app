@@ -25,7 +25,7 @@ const entries: ProgressEntryRecord[] = [
     {
         id: "newest",
         recordedOn: "2026-11-10",
-        weight: null,
+        measurement: null,
         photos: [
             {id: "new-front", view: "front", imageUrl: "/new-front"},
             {id: "new-side", view: "side", imageUrl: "/new-side"},
@@ -34,7 +34,7 @@ const entries: ProgressEntryRecord[] = [
     {
         id: "oldest",
         recordedOn: "2026-11-09",
-        weight: null,
+        measurement: null,
         photos: [
             {id: "old-front", view: "front", imageUrl: "/old-front"},
             {id: "old-side", view: "side", imageUrl: "/old-side"},
@@ -48,6 +48,11 @@ const photoViews = [
     {view: "back" as const, label: "Back"},
 ];
 
+const unitProps = {
+    weightUnit: "kg" as const,
+    measurementUnit: "cm" as const,
+};
+
 describe("ProgressComparison", () => {
     afterEach(cleanup);
 
@@ -56,6 +61,7 @@ describe("ProgressComparison", () => {
             <ProgressComparison
                 entries={entries}
                 photoViews={photoViews}
+                {...unitProps}
             />,
         );
 
@@ -75,6 +81,7 @@ describe("ProgressComparison", () => {
             <ProgressComparison
                 entries={entries}
                 photoViews={photoViews}
+                {...unitProps}
             />,
         );
 
@@ -94,6 +101,7 @@ describe("ProgressComparison", () => {
             <ProgressComparison
                 entries={entries}
                 photoViews={photoViews}
+                {...unitProps}
             />,
         );
 
@@ -106,5 +114,60 @@ describe("ProgressComparison", () => {
         expect(screen.getByTestId("after-photo")).toHaveTextContent(
             "front:old-front",
         );
+    });
+
+    it("shows the matched measurement context for both photos", () => {
+        const measuredEntries: ProgressEntryRecord[] = entries.map(
+            (entry, index) => ({
+                ...entry,
+                measurement: {
+                    id: `measurement-${index}`,
+                    measuredOn: index === 0
+                        ? "2026-11-10"
+                        : "2026-11-08",
+                    weight: index === 0 ? 61.2 : 60,
+                    waist: index === 0 ? 64 : 65,
+                    chest: 92,
+                    hips: 95,
+                    thigh: null,
+                    arm: 31,
+                },
+            }),
+        );
+
+        render(
+            <ProgressComparison
+                entries={measuredEntries}
+                photoViews={photoViews}
+                {...unitProps}
+            />,
+        );
+
+        const beforeContext = screen.getByRole("region", {
+            name: "Before measurement context",
+        });
+        const afterContext = screen.getByRole("region", {
+            name: "After measurement context",
+        });
+
+        expect(beforeContext).toHaveTextContent("From 8 Nov 2026");
+        expect(beforeContext).toHaveTextContent("60 kg");
+        expect(beforeContext).toHaveTextContent("65 cm");
+        expect(beforeContext).toHaveTextContent("Thigh—");
+        expect(afterContext).toHaveTextContent("From 10 Nov 2026");
+        expect(afterContext).toHaveTextContent("61.2 kg");
+        expect(afterContext).toHaveTextContent("64 cm");
+    });
+
+    it("explains when a photo has no earlier measurements", () => {
+        render(
+            <ProgressComparison
+                entries={entries}
+                photoViews={photoViews}
+                {...unitProps}
+            />,
+        );
+
+        expect(screen.getAllByText("No earlier measurements")).toHaveLength(2);
     });
 });

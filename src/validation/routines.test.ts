@@ -1,10 +1,48 @@
 import {describe, expect, it} from "vitest";
 
 import {
+    getCustomExerciseValues,
     getRoutineValues,
     getRoutineWorkoutsData,
     validateRoutineId,
 } from "@/validation/routines";
+
+describe("custom exercise validation", () => {
+    it("normalises strength exercise details", () => {
+        expect(getCustomExerciseValues({
+            name: "  Cable Glute Kickback  ",
+            type: "strength",
+            muscleGroup: "  Glutes ",
+            equipment: " Cable ",
+        })).toEqual({
+            name: "Cable Glute Kickback",
+            muscleGroup: "Glutes",
+            equipment: "Cable",
+        });
+    });
+
+    it("uses the cardio group for cardio exercises", () => {
+        expect(getCustomExerciseValues({
+            name: "Incline Walk",
+            type: "cardio",
+            muscleGroup: "",
+            equipment: "Treadmill",
+        })).toEqual({
+            name: "Incline Walk",
+            muscleGroup: "cardio",
+            equipment: "Treadmill",
+        });
+    });
+
+    it("requires a muscle group for strength exercises", () => {
+        expect(() => getCustomExerciseValues({
+            name: "Custom Lift",
+            type: "strength",
+            muscleGroup: "",
+            equipment: "",
+        })).toThrow("Muscle group is required");
+    });
+});
 
 const workoutId = "11111111-1111-4111-8111-111111111111";
 const configuredExerciseId = "22222222-2222-4222-8222-222222222222";

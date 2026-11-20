@@ -64,6 +64,13 @@
       "when": 1794836257000,
       "tag": "0008_add_requested_exercises",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795184798847,
+      "tag": "0009_jittery_molten_man",
+      "breakpoints": true
     }
   ]
 }
