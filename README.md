@@ -14,22 +14,32 @@ in Vercel Blob.
 ## Features
 
 - Google authentication with database-backed sessions.
-- Five-account private-testing limit with unrestricted access for existing users.
+- Configurable private-testing account limit, defaulting to ten accounts, with
+  unrestricted access for existing users.
 - Public browser-only prototype mode with seeded interactive data.
 - User profiles with configurable weight and body-measurement units.
-- Routine creation, editing, activation, deletion, and drag-and-drop ordering.
+- Routine creation, editing, activation, deletion, drag-and-drop ordering, and
+  user-owned custom exercises.
 - Strength and cardio exercise support.
 - Active workout drafts persisted in browser storage.
+- Session-only exercise replacement without changing the saved workout template.
 - Rest timer, previous exercise performance, and short performance messages.
 - Completed-workout history with exercise and set details.
 - Weight and body-measurement history with trends and charts.
 - Private front, side, and back progress-photo galleries.
-- Side-by-side photo comparison with touch zoom and pan.
+- Side-by-side photo comparison with touch zoom, pan, and measurement context
+  from the photo date or the most recent earlier measurement entry.
+- Responsive photo optimization, authenticated private-image caching, and loading
+  states.
+- Persistent light and dark colour themes.
+- Installable web-app metadata and mobile home-screen icons.
 - Route-level loading skeletons, image loading states, and a styled 404 page.
+- Privacy policy and terms of use pages.
 - Responsive layouts designed primarily for mobile use.
 
-> Forma is not currently configured as an installable PWA. Service-worker support,
-> offline behaviour, and lock-screen timer integration are future work.
+> Forma can be installed to a supported device home screen, but it remains
+> network-dependent. Offline service-worker support and lock-screen timer
+> integration are not currently implemented.
 
 ## Technology stack
 
@@ -123,6 +133,7 @@ fitness-comparison-app/
 │   │   ├── globals.css      Design tokens and global component styles
 │   │   ├── layout.tsx       Root document layout and metadata
 │   │   ├── loading.tsx      Root loading state
+│   │   ├── manifest.ts      Installable web-app manifest
 │   │   └── not-found.tsx    Global 404 page
 │   ├── components/
 │   │   ├── auth/            Authentication screens
@@ -153,6 +164,9 @@ fitness-comparison-app/
 | `/login` | Google sign-in screen |
 | `/create-account` | Account-creation entry point using Google authentication |
 | `/prototype` | Public interactive demo using seeded browser-only data |
+| `/privacy` | Privacy policy and data-handling information |
+| `/terms` | Terms of use and fitness disclaimer |
+| `/manifest.webmanifest` | Generated installable web-app manifest |
 | `/api/auth/[...nextauth]` | Auth.js handlers and OAuth callbacks |
 
 ### Protected routes
@@ -219,6 +233,11 @@ A routine belongs to one user and contains ordered workout templates. Each templ
 contains ordered configured exercises with targets such as sets, reps, weight, and
 rest duration.
 
+The exercise picker combines the shared exercise catalogue with exercises created
+by the signed-in user. Custom exercise names are unique per user and are never
+exposed to other accounts. Server-side access checks ensure a routine can reference
+only shared exercises or exercises owned by that user.
+
 The routine builder is a Client Component because it manages nested editing and
 drag-and-drop state. On submission, the structure is serialized, validated on the
 server, converted to canonical units, and written with ordered database batches.
@@ -235,6 +254,11 @@ exercise, and rest-timer end time.
 The draft is stored under `forma:active-workout:v1` in `localStorage`. Invalid or
 unreadable drafts are removed. The draft is retained when saving fails and removed
 after a successful save or confirmed discard.
+
+Before completing any sets for an exercise, the user may replace it for the current
+session. The draft and eventual history snapshot use the replacement, while the
+saved workout template is left unchanged. Replacement choices use the same
+user-scoped exercise access checks as the routine builder.
 
 Completing a workout sends normalized data to `completeWorkoutAction`. The server
 creates immutable workout, exercise, and set snapshots. History therefore remains
@@ -255,6 +279,10 @@ differences, history, and chart data.
 A progress entry belongs to one user and one date. It may contain one photo for each
 supported view: `front`, `side`, and `back`.
 
+Photo comparison attaches the measurement entry recorded on the photo date, or the
+most recent earlier measurement when no same-day entry exists. Later measurements
+are never shown as historical context for an earlier photo.
+
 Upload flow:
 
 1. The browser requests a signed upload token from the upload API route.
@@ -265,8 +293,15 @@ Upload flow:
 5. Only the storage key and photo metadata are saved in Postgres.
 
 Accepted formats are JPEG, PNG, and WebP, with a maximum size of 10 MB per photo.
+The browser attempts to resize large images to a maximum dimension of 1600 pixels
+and encode them as WebP before upload, while retaining the validated original when
+optimization is unsupported or would increase the file size.
+
 The Blob store is private. Reads go through the photo API route, which verifies the
-photo belongs to the authenticated user before streaming it.
+photo belongs to the authenticated user before streaming it. Gallery and comparison
+requests can ask for optimized 480-pixel or 1200-pixel WebP variants. Private
+responses use ETags and a one-day browser cache while varying by authentication
+cookie.
 
 Deleting a progress entry removes its database record first and then attempts Blob
 cleanup. A Blob cleanup failure is logged without restoring an already deleted user
@@ -306,7 +341,7 @@ erDiagram
 | `body_measurements` | Canonical measurements, unique per user/date |
 | `routines` | User-owned routine metadata and active status |
 | `workout_templates` | Ordered workouts within routines |
-| `exercises` | Searchable exercise catalogue |
+| `exercises` | Shared exercise catalogue and user-owned custom exercises |
 | `workout_template_exercises` | Exercise targets and order within a template |
 | `workout_sessions` | Completed workout snapshots |
 | `workout_session_exercises` | Completed exercise snapshots |
@@ -332,6 +367,22 @@ classes instead of unrelated raw colours or shapes.
 
 Shared controls and icons are in `src/components/layout/actionComponents`. Loading
 skeletons are centralized in `src/components/layout/pageLoadingSkeletons.tsx`.
+
+Light and dark themes use the same semantic tokens. The chosen theme is stored as
+`forma:theme` in `localStorage`; when no choice exists, Forma follows the device
+colour-scheme preference. The root layout applies the theme before hydration to
+avoid a light-theme flash and keeps the browser theme colour synchronized.
+
+## Installable web app
+
+`src/app/manifest.ts` provides the generated manifest, while `src/app/layout.tsx`
+defines Apple web-app metadata and the responsive viewport. App icons and maskable
+icons live under `public/icons`.
+
+On supported devices, visitors can add Forma to the home screen and launch it with
+a standalone app presentation. This is currently an installable, network-dependent
+web app rather than an offline-first PWA: there is no service worker or offline data
+cache, and the workout timer does not integrate with a device lock screen.
 
 ## Local development
 
@@ -502,9 +553,21 @@ Use the existing boundaries consistently:
 - Next.js links prefetch primary navigation destinations.
 - Route-specific Suspense skeletons provide transition feedback.
 - Progress photos have per-image loading and failure states.
-- Private photos are streamed with `Cache-Control: private, no-store`.
+- Selected progress photos are resized and compressed in the browser before upload
+  when doing so reduces their size.
+- Gallery and comparison views request right-sized WebP variants from the private
+  photo endpoint.
+- Authenticated photo responses use private one-day caching, ETags, and conditional
+  requests; already loaded URLs are also remembered during the current client
+  session.
 
 The main future opportunities are request-scoped session/profile deduplication,
-independently streamed dashboard sections, photo thumbnails and compression,
-private browser caching, client-component code splitting, and cursor pagination for
-growing history collections.
+independently streamed dashboard sections, persistent derivative-image storage,
+client-component code splitting, and cursor pagination for growing history
+collections.
+
+## Copyright and licensing
+
+Copyright © 2026 Alla Nekhaienko. No open-source licence is currently granted for
+this repository. The source is publicly viewable, but reuse, modification, or
+distribution requires permission unless applicable law allows it.
