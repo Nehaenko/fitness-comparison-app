@@ -8,8 +8,9 @@ authenticated Server Components, writes use Server Actions, structured data is
 stored in Neon Postgres through Drizzle ORM, and private progress photos are stored
 in Vercel Blob.
 
-![Screenshot 2026-11-24 at 17.38.45.png](../../../Desktop/Screenshot%202026-11-24%20at%2017.38.45.png)
-![Screenshot 2026-11-24 at 17.39.07.png](../../../Desktop/Screenshot%202026-11-24%20at%2017.39.07.png)
+<img width="358" height="640" alt="Screenshot 2026-11-24 at 17 39 07" src="https://github.com/user-attachments/assets/1436949b-aaba-42aa-b45b-1f2c62e4161c" />
+<img width="352" height="580" alt="Screenshot 2026-11-24 at 17 38 45" src="https://github.com/user-attachments/assets/6a0c600a-12c4-4024-9f9b-d69f3cc2400e" />
+
 
 ## Features
 
