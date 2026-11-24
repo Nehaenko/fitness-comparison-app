@@ -3,6 +3,7 @@
 import Link from "next/link";
 import {useEffect, useState} from "react";
 
+import LegalLinks from "@/components/legal/legalLinks";
 import Icon from "@/components/layout/actionComponents/iconComponent";
 import ThemeToggle from "@/components/layout/themeToggle";
 import DecimalInput from "@/components/layout/actionComponents/decimalInput";
@@ -286,6 +287,10 @@ export default function PrototypeApp() {
                     Reset prototype data
                 </button>
             </main>
+
+            <footer className="border-t border-divider bg-surface px-4">
+                <LegalLinks className="mx-auto max-w-5xl py-6" />
+            </footer>
 
             <PrototypeNotice message={notice}/>
         </div>

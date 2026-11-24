@@ -16,6 +16,12 @@ describe("AuthCard", () => {
         expect(
             screen.getByRole("link", {name: "Enter prototype"}),
         ).toHaveAttribute("href", "/prototype");
+        expect(screen.getAllByRole("link", {name: "Privacy policy"})[0])
+            .toHaveAttribute("href", "/privacy");
+        expect(screen.getAllByRole("link", {name: "Terms of use"})[0])
+            .toHaveAttribute("href", "/terms");
+        expect(screen.getByText(/© 2026 Alla Nekhaienko/))
+            .toBeInTheDocument();
     });
 
     it("explains that prototype access remains available after an access error", () => {

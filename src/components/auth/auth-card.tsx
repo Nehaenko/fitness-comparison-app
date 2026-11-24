@@ -81,6 +81,18 @@ export function AuthCard({
         Your fitness data stays private and belongs to you.
       </p>
 
+      <p className="mt-3 text-center text-xs leading-5 text-secondary">
+        By continuing, you agree to the{" "}
+        <Link href="/terms" className="underline underline-offset-2 hover:text-primary">
+          Terms of use
+        </Link>{" "}
+        and acknowledge the{" "}
+        <Link href="/privacy" className="underline underline-offset-2 hover:text-primary">
+          Privacy policy
+        </Link>
+        .
+      </p>
+
       <p className="mt-7 text-center text-sm text-secondary">
         {content.question}{" "}
         <Link
@@ -89,6 +101,10 @@ export function AuthCard({
         >
           {content.linkLabel}
         </Link>
+      </p>
+
+      <p className="mt-7 border-t border-divider pt-5 text-center text-xs text-secondary">
+        © 2026 Alla Nekhaienko. All rights reserved.
       </p>
     </section>
   );

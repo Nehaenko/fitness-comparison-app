@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   applicationName: "Forma",
   title: "Forma — Private fitness companion",
   description: "Plan workouts, track progress, and compare your results.",
+  creator: "Alla Nekhaienko",
+  publisher: "Alla Nekhaienko",
   appleWebApp: {
     capable: true,
     title: "Forma",

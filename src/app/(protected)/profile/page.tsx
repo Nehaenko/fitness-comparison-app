@@ -4,6 +4,7 @@ import Preferences from "@/app/(protected)/profile/preferences";
 import { auth } from "@/auth";
 import { logoutAction } from "@/helpers/authActions";
 import PrimaryButton from "@/components/layout/actionComponents/primaryButton";
+import LegalLinks from "@/components/legal/legalLinks";
 
 export default async function ProfilePage() {
     const session = await auth();
@@ -108,6 +109,13 @@ export default async function ProfilePage() {
                                 />
                             </form>
                         </div>
+                    </section>
+
+                    <section className="overflow-hidden rounded-card border border-border bg-surface shadow-card">
+                        <h2 className="border-b border-divider px-7 py-6 text-lg font-semibold">
+                            Legal
+                        </h2>
+                        <LegalLinks className="px-7 py-6 md:px-8" />
                     </section>
                 </div>
             </div>
