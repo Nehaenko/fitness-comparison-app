@@ -8,6 +8,9 @@ authenticated Server Components, writes use Server Actions, structured data is
 stored in Neon Postgres through Drizzle ORM, and private progress photos are stored
 in Vercel Blob.
 
+![Screenshot 2026-11-24 at 17.38.45.png](../../../Desktop/Screenshot%202026-11-24%20at%2017.38.45.png)
+![Screenshot 2026-11-24 at 17.39.07.png](../../../Desktop/Screenshot%202026-11-24%20at%2017.39.07.png)
+
 ## Features
 
 - Google authentication with database-backed sessions.
