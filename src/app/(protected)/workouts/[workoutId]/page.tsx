@@ -16,7 +16,9 @@ export default async function ActiveWorkoutPage({params}: {
         notFound();
     }
 
-    return <InteractiveWorkout workout={result.workout} previousPerformanceByExerciseId={
-        result.previousPerformanceByExerciseId
-    }/>
+    return <InteractiveWorkout
+        workout={result.workout}
+        exercises={result.exercises}
+        previousPerformanceByExerciseId={result.previousPerformanceByExerciseId}
+    />
 }

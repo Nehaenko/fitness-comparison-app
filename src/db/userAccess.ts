@@ -5,7 +5,7 @@ import {count, eq} from "drizzle-orm";
 import {db} from "@/db";
 import {users} from "@/db/schema";
 
-const DEFAULT_ACCOUNT_LIMIT = 5;
+const DEFAULT_ACCOUNT_LIMIT = 10;
 
 function getAccountLimit() {
     const configuredLimit = Number.parseInt(

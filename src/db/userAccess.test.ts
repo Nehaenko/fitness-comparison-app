@@ -45,9 +45,9 @@ describe("canSignInWithEmail", () => {
         expect(selectMock).toHaveBeenCalledTimes(1);
     });
 
-    it("permits a new account while fewer than five accounts exist", async () => {
+    it("permits a new account while fewer than ten accounts exist", async () => {
         mockExistingUser(undefined);
-        mockAccountCount(4);
+        mockAccountCount(9);
 
         await expect(
             canSignInWithEmail("new@example.com"),
@@ -56,10 +56,20 @@ describe("canSignInWithEmail", () => {
 
     it("rejects a new account once the account limit is reached", async () => {
         mockExistingUser(undefined);
-        mockAccountCount(5);
+        mockAccountCount(10);
 
         await expect(
             canSignInWithEmail("new@example.com"),
         ).resolves.toBe(false);
+    });
+
+    it("uses a configured account limit when provided", async () => {
+        process.env.AUTH_ACCOUNT_LIMIT = "12";
+        mockExistingUser(undefined);
+        mockAccountCount(10);
+
+        await expect(
+            canSignInWithEmail("new@example.com"),
+        ).resolves.toBe(true);
     });
 });

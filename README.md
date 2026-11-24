@@ -187,7 +187,7 @@ and automatic profile creation for new users.
 Before Auth.js creates a new user, `src/db/userAccess.ts` checks the number of user
 records. Existing users are always permitted to return. New users are rejected when
 the configured account limit has been reached and are directed to prototype mode.
-The default limit is five accounts.
+The default limit is ten accounts.
 
 The protected layout redirects unauthenticated requests to `/`. Authenticated
 queries and actions also check `session.user.id`; the layout alone is not treated
@@ -359,7 +359,7 @@ Secrets belong in `.env.local` and must not be committed.
 | `AUTH_SECRET` | Auth.js signing/encryption secret |
 | `AUTH_GOOGLE_ID` | Google OAuth client ID |
 | `AUTH_GOOGLE_SECRET` | Google OAuth client secret |
-| `AUTH_ACCOUNT_LIMIT` | Optional maximum account count; defaults to `5` |
+| `AUTH_ACCOUNT_LIMIT` | Optional maximum account count; defaults to `10` |
 | `BLOB_STORE_ID` | Connected private Vercel Blob store |
 | `BLOB_READ_WRITE_TOKEN` | Local Blob access for token-based development |
 

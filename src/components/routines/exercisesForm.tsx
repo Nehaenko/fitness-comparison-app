@@ -11,6 +11,7 @@ type ExercisesFormData = {
     handleExerciseModalVisibility: () => void;
     onAddExercise: (exercise: ExerciseOption) => void;
     onExerciseCreated: (exercise: ExerciseOption) => void;
+    purpose?: "add" | "replace";
 };
 
 const initialCustomExercise: CustomExerciseInput = {
@@ -25,6 +26,7 @@ export default function ExercisesForm({
                                           handleExerciseModalVisibility,
                                           onAddExercise,
                                           onExerciseCreated,
+                                          purpose = "add",
                                       }: ExercisesFormData) {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
@@ -95,7 +97,11 @@ export default function ExercisesForm({
                             </button>
                         ) : null}
                         <h2 id="exercise-modal-title" className="font-semibold text-primary">
-                            {view === "create" ? "Create exercise" : "Add exercise"}
+                            {view === "create"
+                                ? "Create exercise"
+                                : purpose === "replace"
+                                    ? "Replace exercise"
+                                    : "Add exercise"}
                         </h2>
                     </div>
 
@@ -112,6 +118,11 @@ export default function ExercisesForm({
                 {view === "browse" ? (
                     <>
                         <div className="space-y-3 border-b border-divider px-4 py-4">
+                            {purpose === "replace" ? (
+                                <p className="text-small text-secondary">
+                                    This changes only the workout in progress. Your saved routine stays the same.
+                                </p>
+                            ) : null}
                             <label htmlFor="exercises-search" className="sr-only">
                                 Search exercises
                             </label>
@@ -274,7 +285,11 @@ export default function ExercisesForm({
                                 disabled={isCreating}
                                 className="h-12 w-full rounded-control bg-surface-inverse px-5 text-small font-semibold text-inverse transition hover:bg-surface-inverse-control disabled:cursor-wait disabled:opacity-60"
                             >
-                                {isCreating ? "Creating exercise..." : "Create and add exercise"}
+                                {isCreating
+                                    ? "Creating exercise..."
+                                    : purpose === "replace"
+                                        ? "Create and use exercise"
+                                        : "Create and add exercise"}
                             </button>
                         </div>
                     </div>

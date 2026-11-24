@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
     auth: vi.fn(),
     getPreviousExercisePerformanceForUser: vi.fn(),
     getWorkoutWithExercisesForUser: vi.fn(),
+    getExercisesForUser: vi.fn(),
 }));
 
 vi.mock("server-only", () => ({}));
@@ -20,6 +21,10 @@ vi.mock("@/db/workoutHistory", () => ({
 vi.mock("@/db/workoutTemplates", () => ({
     getWorkoutWithExercisesForUser:
         mocks.getWorkoutWithExercisesForUser,
+}));
+
+vi.mock("@/db/exercises", () => ({
+    getExercisesForUser: mocks.getExercisesForUser,
 }));
 
 import {getAuthenticatedWorkoutWithPreviousPerformance} from "@/app/(protected)/workouts/data";
@@ -52,6 +57,7 @@ describe("active workout history data", () => {
         expect(
             mocks.getPreviousExercisePerformanceForUser,
         ).not.toHaveBeenCalled();
+        expect(mocks.getExercisesForUser).not.toHaveBeenCalled();
     });
 
     it("loads previous values for every exercise in the workout", async () => {
@@ -74,11 +80,17 @@ describe("active workout history data", () => {
         mocks.getPreviousExercisePerformanceForUser.mockResolvedValue(
             previousPerformanceByExerciseId,
         );
+        const exercises = [
+            {id: "exercise-1", name: "Squat"},
+            {id: "exercise-2", name: "Bench press"},
+        ];
+        mocks.getExercisesForUser.mockResolvedValue(exercises);
 
         await expect(
             getAuthenticatedWorkoutWithPreviousPerformance("workout-1"),
         ).resolves.toEqual({
             workout,
+            exercises,
             previousPerformanceByExerciseId,
         });
         expect(
@@ -87,5 +99,6 @@ describe("active workout history data", () => {
         expect(
             mocks.getPreviousExercisePerformanceForUser,
         ).toHaveBeenCalledWith(userId, ["exercise-1", "exercise-2"]);
+        expect(mocks.getExercisesForUser).toHaveBeenCalledWith(userId);
     });
 });

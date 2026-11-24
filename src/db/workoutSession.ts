@@ -1,6 +1,6 @@
 import "server-only"
 
-import {and, eq, inArray} from "drizzle-orm";
+import {and, eq, inArray, isNull, or} from "drizzle-orm";
 import {randomUUID} from "node:crypto";
 import {db} from "@/db";
 
@@ -59,17 +59,8 @@ export async function createWorkoutSessionForUser(
     const configuredExercises = await db
         .select({
             id: workoutTemplateExercises.id,
-            exerciseId: workoutTemplateExercises.exerciseId,
-            exerciseName: exercises.name,
         })
         .from(workoutTemplateExercises)
-        .innerJoin(
-            exercises,
-            eq(
-                workoutTemplateExercises.exerciseId,
-                exercises.id,
-            ),
-        )
         .where(
             and(
                 eq(
@@ -89,6 +80,30 @@ export async function createWorkoutSessionForUser(
             exercise
         ])
     )
+
+    const completedExerciseIds = [
+        ...new Set(
+            values.exercises.map((exercise) => exercise.exerciseId),
+        ),
+    ];
+    const allowedExercises = await db
+        .select({
+            id: exercises.id,
+            name: exercises.name,
+        })
+        .from(exercises)
+        .where(
+            and(
+                inArray(exercises.id, completedExerciseIds),
+                or(
+                    isNull(exercises.userId),
+                    eq(exercises.userId, userId),
+                ),
+            ),
+        );
+    const allowedExercisesById = new Map(
+        allowedExercises.map((exercise) => [exercise.id, exercise]),
+    );
 
     const workoutSessionId = randomUUID();
 
@@ -116,9 +131,11 @@ export async function createWorkoutSessionForUser(
         const configuredExercise = configuredExercisesById.get(
             completedExercise.workoutTemplateExerciseId,
         );
+        const completedExerciseDetails = allowedExercisesById.get(
+            completedExercise.exerciseId,
+        );
 
-        if (!configuredExercise ||
-            configuredExercise.exerciseId !== completedExercise.exerciseId) {
+        if (!configuredExercise || !completedExerciseDetails) {
             throw new Error("Incorrect workout exercise");
         }
 
@@ -128,8 +145,8 @@ export async function createWorkoutSessionForUser(
             id: sessionExerciseId,
             workoutSessionId,
             workoutTemplateExerciseId: configuredExercise.id,
-            exerciseId: configuredExercise.exerciseId,
-            exerciseName: configuredExercise.exerciseName,
+            exerciseId: completedExerciseDetails.id,
+            exerciseName: completedExerciseDetails.name,
             position: completedExercise.position,
         });
 

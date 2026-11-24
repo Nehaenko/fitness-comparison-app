@@ -12,6 +12,8 @@ type ExerciseFrameProps = {
     onStartRest: (seconds: number) => void;
     onSetsChange: (sets: WorkoutSetDraft[]) => void;
     previousPerformance?: PreviousExercisePerformance;
+    onReplaceExercise?: () => void;
+    canReplaceExercise?: boolean;
 };
 
 type WorkoutSetChanges = Partial<
@@ -24,6 +26,8 @@ export default function ExerciseFrame({
                                           previousPerformance,
                                           onStartRest,
                                           onSetsChange,
+                                          onReplaceExercise,
+                                          canReplaceExercise = true,
                                       }: ExerciseFrameProps) {
     const [performanceMessage, setPerformanceMessage] = useState<string | null>(null);
 
@@ -141,9 +145,19 @@ export default function ExerciseFrame({
         return (
             <section>
                 <header>
-                    <h1 className="font-display text-heading font-bold">
-                        {selectedExercise.name}
-                    </h1>
+                    <div className="flex items-start justify-between gap-4">
+                        <h1 className="font-display text-heading font-bold">
+                            {selectedExercise.name}
+                        </h1>
+                        <button
+                            type="button"
+                            onClick={onReplaceExercise}
+                            disabled={!canReplaceExercise}
+                            className="shrink-0 rounded-control border border-border px-3 py-2 text-small font-semibold text-primary transition hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            Replace exercise
+                        </button>
+                    </div>
                     <p className="mt-1 text-sm text-secondary">
                         {isCompleted ? "Exercise complete" : "Cardio exercise"}
                     </p>
@@ -183,13 +197,28 @@ export default function ExerciseFrame({
             ) : null}
 
             <header>
-                <h1 className="font-display text-heading font-bold">
-                    {selectedExercise.name}
-                </h1>
+                <div className="flex items-start justify-between gap-4">
+                    <h1 className="font-display text-heading font-bold">
+                        {selectedExercise.name}
+                    </h1>
+                    <button
+                        type="button"
+                        onClick={onReplaceExercise}
+                        disabled={!canReplaceExercise}
+                        className="shrink-0 rounded-control border border-border px-3 py-2 text-small font-semibold text-primary transition hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        Replace exercise
+                    </button>
+                </div>
                 <p className="mt-1 text-sm text-secondary">
                     {completedCount} / {sets.length} sets done ·{" "}
                     {selectedExercise.restSeconds}s rest
                 </p>
+                {!canReplaceExercise ? (
+                    <p className="mt-1 text-small text-secondary">
+                        An exercise cannot be replaced after a set is completed.
+                    </p>
+                ) : null}
             </header>
 
             <div className="mt-6">

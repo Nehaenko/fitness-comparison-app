@@ -3,6 +3,7 @@ import "server-only";
 import {auth} from "@/auth";
 import {getWorkoutWithExercisesForUser} from "@/db/workoutTemplates";
 import {getPreviousExercisePerformanceForUser} from "@/db/workoutHistory";
+import {getExercisesForUser} from "@/db/exercises";
 
 export async function getAuthenticatedWorkoutWithPreviousPerformance(
     workoutId: string,
@@ -31,6 +32,7 @@ export async function getAuthenticatedWorkoutWithPreviousPerformance(
             session.user.id,
             exerciseIds,
         );
+    const exercises = await getExercisesForUser(session.user.id);
 
-    return {workout, previousPerformanceByExerciseId};
+    return {workout, exercises, previousPerformanceByExerciseId};
 }

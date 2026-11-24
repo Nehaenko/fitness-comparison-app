@@ -105,4 +105,19 @@ describe("ExercisesForm", () => {
         expect(onAddExercise).toHaveBeenCalledWith(exercise);
         expect(closeModal).toHaveBeenCalled();
     });
+
+    it("uses replacement wording during an active workout", () => {
+        render(
+            <ExercisesForm
+                purpose="replace"
+                exercises={[]}
+                handleExerciseModalVisibility={vi.fn()}
+                onAddExercise={vi.fn()}
+                onExerciseCreated={vi.fn()}
+            />,
+        );
+
+        expect(screen.getByRole("heading", {name: "Replace exercise"}))
+            .toBeInTheDocument();
+    });
 });

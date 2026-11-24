@@ -4,13 +4,20 @@ import {useCallback, useEffect, useRef, useState} from "react";
 import {useRouter} from "next/navigation";
 
 import Icon from "@/components/layout/actionComponents/iconComponent";
+import ExercisesForm from "@/components/routines/exercisesForm";
 import ExerciseFrame from "@/components/workouts/exerciseFrame";
 import RestTimer from "@/components/workouts/restTimer";
 import WorkoutTimer from "@/components/workouts/workoutTimer";
-import type {ConfiguredExercise, Workout} from "@/types/routine-builder";
+import type {ConfiguredExercise, ExerciseOption, Workout} from "@/types/routine-builder";
 import type {WorkoutSessionDraft, WorkoutSetDraft} from "@/types/workout-session";
-import {createWorkoutSessionDraft} from "@/helpers/workout-session";
-import {completeWorkoutAction} from "@/app/(protected)/workouts/actions";
+import {
+    createWorkoutSessionDraft,
+    replaceExerciseForSession,
+} from "@/helpers/workout-session";
+import {
+    completeWorkoutAction,
+    getReplacementExerciseHistoryAction,
+} from "@/app/(protected)/workouts/actions";
 import {
     loadActiveWorkout,
     removeActiveWorkout,
@@ -22,10 +29,15 @@ import type {
 
 type InteractiveWorkoutProps = {
     workout: Workout;
+    exercises: ExerciseOption[];
     previousPerformanceByExerciseId: PreviousExercisePerformanceByExerciseId;
 };
 
-export default function InteractiveWorkout({workout, previousPerformanceByExerciseId}: InteractiveWorkoutProps) {
+export default function InteractiveWorkout({
+    workout,
+    exercises,
+    previousPerformanceByExerciseId,
+}: InteractiveWorkoutProps) {
     const router = useRouter();
     const [activeWorkout, setActiveWorkout] =
         useState<Workout>(workout);
@@ -34,14 +46,17 @@ export default function InteractiveWorkout({workout, previousPerformanceByExerci
             activeWorkout.exercises[0] ?? null,
         );
 
-    const previousPerformance = selectedExercise
-        ? previousPerformanceByExerciseId[
-            selectedExercise.exerciseId
-            ]
-        : undefined;
-
     const [showDiscardDialog, setShowDiscardDialog] = useState(false);
     const [restEndsAt, setRestEndsAt] = useState<number | null>(null);
+    const [exerciseOptions, setExerciseOptions] =
+        useState<ExerciseOption[]>(exercises);
+    const [showExercisePicker, setShowExercisePicker] = useState(false);
+    const [previousPerformanceById, setPreviousPerformanceById] =
+        useState(previousPerformanceByExerciseId);
+
+    const previousPerformance = selectedExercise
+        ? previousPerformanceById[selectedExercise.exerciseId]
+        : undefined;
 
     const [
         hasRestoredActiveWorkout,
@@ -145,6 +160,39 @@ export default function InteractiveWorkout({workout, previousPerformanceByExerci
         setSelectedExercise(exercise);
     };
 
+    const replaceSelectedExercise = (replacement: ExerciseOption) => {
+        if (!selectedExercise || !selectedExerciseDraft) {
+            return;
+        }
+
+        const result = replaceExerciseForSession({
+            workout: activeWorkout,
+            session: workoutSession,
+            workoutTemplateExerciseId: selectedExercise.id,
+            replacement,
+        });
+
+        setActiveWorkout(result.workout);
+        setWorkoutSession(result.session);
+        setSelectedExercise(result.replacementExercise);
+        stopRest();
+
+        if (!previousPerformanceById[replacement.id]) {
+            void getReplacementExerciseHistoryAction(replacement.id)
+                .then((history) => {
+                    if (!history) return;
+
+                    setPreviousPerformanceById((current) => ({
+                        ...current,
+                        [replacement.id]: history,
+                    }));
+                })
+                .catch(() => {
+                    // The replacement remains usable if history cannot load.
+                });
+        }
+    };
+
     useEffect(() => {
         const savedWorkout = loadActiveWorkout();
 
@@ -160,8 +208,13 @@ export default function InteractiveWorkout({workout, previousPerformanceByExerci
         if (canRestore) {
             setActiveWorkout(savedWorkout.workout);
             setWorkoutSession(savedWorkout.session);
-
-            // Existing selected exercise and rest timer restoration
+            setSelectedExercise(
+                savedWorkout.workout.exercises.find(
+                    (exercise) =>
+                        exercise.id === savedWorkout.selectedExerciseId,
+                ) ?? savedWorkout.workout.exercises[0] ?? null,
+            );
+            setRestEndsAt(savedWorkout.restEndsAt);
         }
 
         setHasRestoredActiveWorkout(true);
@@ -271,6 +324,14 @@ export default function InteractiveWorkout({workout, previousPerformanceByExerci
                                 selectedExercise={selectedExercise}
                                 sets={selectedExerciseDraft.sets}
                                 previousPerformance={previousPerformance}
+                                canReplaceExercise={
+                                    !selectedExerciseDraft.sets.some(
+                                        (set) => set.completed,
+                                    )
+                                }
+                                onReplaceExercise={() =>
+                                    setShowExercisePicker(true)
+                                }
                                 onStartRest={startRest}
                                 onSetsChange={(updatedSets) =>
                                     updateExerciseSets(
@@ -357,6 +418,26 @@ export default function InteractiveWorkout({workout, previousPerformanceByExerci
                     onSkip={stopRest}
                 />
             )}
+
+            {showExercisePicker && selectedExercise ? (
+                <ExercisesForm
+                    purpose="replace"
+                    exercises={exerciseOptions.filter(
+                        (exercise) =>
+                            exercise.id !== selectedExercise.exerciseId,
+                    )}
+                    handleExerciseModalVisibility={() =>
+                        setShowExercisePicker(false)
+                    }
+                    onAddExercise={replaceSelectedExercise}
+                    onExerciseCreated={(exercise) =>
+                        setExerciseOptions((current) => [
+                            ...current,
+                            exercise,
+                        ])
+                    }
+                />
+            ) : null}
         </main>
     );
 }
